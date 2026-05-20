@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>状态栏制作场 V2.9 顶部导航彻底修复版</title>
+<style>
+  :root{
+    --bg:#f3efe6;
+    --paper:#fffaf0;
+    --paper-2:#f7efd9;
+    --ink:#2c261f;
+    --ink-soft:#6f6458;
+    --muted:#968879;
+    --line:#d9cab5;
+    --line-dark:#b59f82;
+    --accent:#7f5539;
+    --accent-2:#b4875f;
+    --accent-soft:#ead8c0;
+    --danger:#9d3b32;
+    --ok:#44725d;
+    --shadow:0 18px 55px rgba(63,45,28,.16);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --serif: "Songti SC", "Noto Serif SC", "STSong", serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;width:100%;min-height:100%;font-family:var(--sans);color:var(--ink);background:
+    radial-gradient(circle at 12% 5%, rgba(255,255,255,.75), transparent 28%),
+    radial-gradient(circle at 85% 8%, rgba(188,153,113,.2), transparent 30%),
+    linear-gradient(135deg,#eee2cd 0%,#f8f1e5 46%,#e6d7c2 100%);}
+  body{overflow-x:hidden}
+  button,input,textarea,select{font:inherit;color:inherit}
+  button{border:0;cursor:pointer}
+  .app{width:min(1220px,94vw);margin:10px auto 36px;display:grid;gap:10px}
+  .top-intro{border:1px solid rgba(127,85,57,.18);background:rgba(255,250,240,.82);backdrop-filter:blur(12px);box-shadow:0 8px 28px rgba(63,45,28,.10);padding:7px 10px;display:flex;gap:10px;align-items:center;justify-content:space-between;min-height:38px}
+  .brand{min-width:0;display:flex;align-items:center;gap:9px;padding:0;border:0;background:transparent}
+  .brand h1{font-family:var(--serif);font-size:16px;letter-spacing:.08em;margin:0;white-space:nowrap;line-height:1.2}
+  .brand p{font-size:11px;color:var(--ink-soft);line-height:1.3;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav-sticky{position:sticky;top:0;z-index:80;border:1px solid rgba(127,85,57,.2);background:rgba(255,250,240,.86);backdrop-filter:blur(14px);box-shadow:0 12px 36px rgba(63,45,28,.14);padding:9px 10px}
+  .nav-sticky:before,.nav-sticky:after{content:"";position:absolute;top:0;bottom:0;width:26px;pointer-events:none;z-index:2}
+  .nav-sticky:before{left:0;background:linear-gradient(90deg,rgba(255,250,240,.94),rgba(255,250,240,0))}
+  .nav-sticky:after{right:0;background:linear-gradient(270deg,rgba(255,250,240,.94),rgba(255,250,240,0))}
+  .nav{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:1px 18px 4px;scrollbar-width:thin;scrollbar-color:rgba(127,85,57,.35) transparent}
+  .nav::-webkit-scrollbar{height:4px}
+  .nav::-webkit-scrollbar-track{background:transparent}
+  .nav::-webkit-scrollbar-thumb{background:rgba(127,85,57,.28)}
+  .nav button{flex:0 0 auto;min-width:92px;text-align:center;padding:10px 13px;background:rgba(255,255,255,.52);border:1px solid transparent;color:var(--ink-soft);transition:.18s ease;display:inline-flex;align-items:center;justify-content:center;gap:7px;scroll-snap-align:start}
+  .nav button:hover{border-color:rgba(127,85,57,.22);background:rgba(255,255,255,.78);color:var(--ink)}
+  .nav button.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 8px 18px rgba(44,38,31,.18)}
+  .nav small{opacity:.72;font-size:11px}
+  .status-card{font-size:11px;color:var(--ink-soft);line-height:1.35;text-align:right;max-width:52%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .status-card b{color:var(--accent);font-weight:700}
+  .main{min-width:0;display:grid;gap:16px}
+  .page{display:none;animation:fade .22s ease both}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .hero,.panel{border:1px solid rgba(127,85,57,.22);background:rgba(255,250,240,.82);box-shadow:var(--shadow);padding:18px}
+  .hero{min-height:180px;display:grid;gap:14px;align-content:center;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:10px;border:1px solid rgba(127,85,57,.13);pointer-events:none}
+  .hero h2{font-family:var(--serif);font-size:34px;margin:0;letter-spacing:.06em;position:relative}
+  .hero p{font-size:14px;line-height:1.9;color:var(--ink-soft);max-width:780px;margin:0;position:relative}
+  .grid{display:grid;gap:14px}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  .card{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.52);padding:14px;min-width:0}
+  .card h3{margin:0 0 9px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .card p,.tip p{margin:0;color:var(--ink-soft);font-size:13px;line-height:1.75}
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;align-items:stretch}
+  .flow .step{padding:12px;background:rgba(255,255,255,.55);border:1px solid rgba(127,85,57,.18);position:relative;min-height:110px}
+  .flow .step b{display:block;font-size:13px;margin-bottom:7px}
+  .flow .step span{font-size:12px;color:var(--ink-soft);line-height:1.55;display:block}
+  .btn-row{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+  .btn{padding:10px 14px;border:1px solid rgba(127,85,57,.28);background:#fffaf0;color:var(--accent);transition:.16s ease;display:inline-flex;align-items:center;gap:7px;justify-content:center;min-height:40px}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(63,45,28,.11)}
+  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.ghost{background:transparent;color:var(--ink-soft)}
+  .btn.danger{background:#fff4f1;color:var(--danger);border-color:rgba(157,59,50,.28)}
+  .btn.small{padding:7px 10px;min-height:32px;font-size:12px}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+  label{font-size:13px;color:var(--ink-soft);display:block;margin-bottom:7px}
+  input,select,textarea{width:100%;border:1px solid rgba(127,85,57,.24);background:rgba(255,255,255,.72);padding:11px 12px;outline:none;transition:.16s ease}
+  textarea{min-height:160px;resize:vertical;line-height:1.65;font-family:var(--sans)}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(127,85,57,.1)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid .full{grid-column:1/-1}
+  .hint{font-size:12px;color:var(--muted);line-height:1.65;margin-top:7px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 16px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s ease;z-index:99;max-width:min(620px,90vw);font-size:13px;line-height:1.5}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .tab{padding:9px 12px;border:1px solid rgba(127,85,57,.22);background:rgba(255,255,255,.52);font-size:13px;color:var(--ink-soft)}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .code-wrap{display:grid;gap:10px}
+  .code-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .code-head h3{margin:0;font-size:16px}
+  .code-head p{margin:6px 0 0;color:var(--ink-soft);font-size:13px;line-height:1.65;max-width:780px}
+  .codebox{width:100%;min-height:320px;font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre;overflow:auto;background:#27231f;color:#fff9ea;border:1px solid rgba(0,0,0,.25);padding:14px}
+  .mini-code{font-family:var(--mono);font-size:12px;background:rgba(44,38,31,.06);padding:2px 5px;border:1px solid rgba(44,38,31,.08)}
+  .mapping{width:100%;border-collapse:collapse;font-size:13px;overflow:hidden;background:rgba(255,255,255,.52)}
+  .mapping th,.mapping td{border:1px solid rgba(127,85,57,.18);padding:10px;text-align:left;vertical-align:top}
+  .mapping th{background:rgba(234,216,192,.52);font-weight:700;color:var(--ink)}
+  .notice{border:1px solid rgba(127,85,57,.22);background:rgba(234,216,192,.35);padding:12px;color:var(--ink-soft);font-size:13px;line-height:1.75}
+  .notice.ok{border-color:rgba(68,114,93,.32);background:rgba(68,114,93,.09);color:#315944}
+  .notice.bad{border-color:rgba(157,59,50,.34);background:rgba(157,59,50,.08);color:#74302b}
+  .preview-shell{display:grid;grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);gap:14px}
+  .preview-frame{width:100%;height:560px;background:#fff;border:1px solid rgba(127,85,57,.25)}
+  .capture-list{display:grid;gap:8px;max-height:300px;overflow:auto;padding-right:4px}
+  .capture-item{border:1px solid rgba(127,85,57,.16);background:rgba(255,255,255,.55);padding:9px;font-size:12px;line-height:1.55}
+  .capture-item b{font-family:var(--mono);margin-right:7px;color:var(--accent)}
+  .capture-item span{color:var(--ink-soft)}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .history-list{display:grid;gap:10px}
+  .history-item{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.55);padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .history-item h3{margin:0 0 7px;font-size:15px}
+  .history-item p{margin:0;color:var(--ink-soft);font-size:12px;line-height:1.6}
+  details.help{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.52);padding:0}
+  details.help summary{cursor:pointer;padding:13px 14px;font-weight:700;color:var(--ink)}
+  details.help .inner{border-top:1px solid rgba(127,85,57,.15);padding:13px 14px;color:var(--ink-soft);font-size:13px;line-height:1.8}
+  .loader{display:none;align-items:center;gap:9px;color:var(--ink-soft);font-size:13px}
+  .loader.show{display:flex}
+  .spin{width:16px;height:16px;border:2px solid rgba(127,85,57,.22);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+  .badge{display:inline-flex;padding:3px 8px;border:1px solid rgba(127,85,57,.2);background:rgba(255,255,255,.45);font-size:11px;color:var(--ink-soft);align-items:center;gap:5px}
+  .empty{padding:18px;border:1px dashed rgba(127,85,57,.3);color:var(--muted);font-size:13px;text-align:center;background:rgba(255,255,255,.34)}
+  .quick-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{font-size:12px;padding:7px 9px;border:1px solid rgba(127,85,57,.22);background:rgba(255,255,255,.55);color:var(--ink-soft);cursor:pointer}
+  .chip:hover{color:var(--ink);background:#fff}
+  .danger-text{color:var(--danger)}
+  .ok-text{color:var(--ok)}
+
+  .codebox{user-select:text;-webkit-user-select:text}
+  .codebox:focus{outline:2px solid rgba(180,135,95,.45);outline-offset:2px}
+  .code-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:flex-end}
+  .code-actions .btn{background:#fff3dc;color:#3f2d21;border-color:rgba(63,45,28,.34);font-weight:700}
+  .code-actions .btn:hover{background:#fffaf0;border-color:rgba(63,45,28,.48)}
+  .code-actions .btn.accent{background:#7f5539;color:#fff;border-color:#7f5539}
+  .relationship-tip{border:1px dashed rgba(127,85,57,.25);background:rgba(255,255,255,.42);padding:10px 12px;color:var(--ink-soft);font-size:12px;line-height:1.75}
+  .modal-mask{position:fixed;inset:0;background:rgba(31,25,20,.48);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:160;padding:14px}
+  .modal-mask.show{display:flex}
+  .modal-card{width:min(1100px,96vw);max-height:92vh;display:grid;grid-template-rows:auto minmax(0,1fr);border:1px solid rgba(127,85,57,.32);background:#fffaf0;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+  .modal-card.code-wide{width:min(1320px,98vw);max-height:94vh}
+  .modal-card.full{width:98vw;height:96vh;max-height:96vh}
+  .modal-head{padding:10px 12px;border-bottom:1px solid rgba(127,85,57,.18);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(234,216,192,.55)}
+  .modal-head h3{margin:0;font-size:15px;font-family:var(--serif);letter-spacing:.04em}
+  .modal-head .btn{background:#fff1d8;color:#3a291d;border-color:rgba(58,41,29,.42);font-weight:800}
+  .modal-head .btn:hover{background:#fffaf0;color:#231a13;border-color:rgba(58,41,29,.65)}
+  .modal-head .btn.primary{background:#2c261f;color:#fff;border-color:#2c261f}
+  .modal-head .btn.ghost{background:#3b3028;color:#fff;border-color:#3b3028}
+  .modal-head .btn.analysis-cta{background:#7f5539;color:#fff;border-color:#7f5539}
+  .modal-body{min-height:0;padding:12px;display:grid;gap:10px;overflow:auto}
+  .modal-body.code-modal-body{grid-template-rows:auto minmax(260px,43vh) auto minmax(260px,1fr)}
+  .modal-code{width:100%;height:43vh;min-height:260px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre;overflow:auto;background:#27231f;color:#fff9ea;border:1px solid rgba(0,0,0,.25);padding:14px;resize:vertical}
+  .selection-how{border:1px solid rgba(68,114,93,.26);background:rgba(68,114,93,.08);padding:11px 12px;color:#315944;font-size:13px;line-height:1.8}
+  .selected-snippet{display:none;border:1px dashed rgba(127,85,57,.36);background:#fff6e8;color:#3f2d21;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:auto}
+  .selected-snippet.show{display:block}
+  .analysis-box{border:1px solid rgba(127,85,57,.3);background:#fffdf7;padding:14px 15px;color:#3f342a;font-size:14px;line-height:1.9;min-height:280px;max-height:46vh;overflow:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+  .fullscreen-frame{width:100%;height:100%;border:0;background:#fff}
+  .fullscreen-body{padding:0;height:100%;overflow:hidden}
+  @media (max-width:920px){
+    .app{margin-top:10px;width:min(760px,94vw)}
+    .top-intro{padding:7px 8px;gap:8px}
+    .brand h1{font-size:15px}.brand p{display:none}
+    .status-card{max-width:58%;font-size:10px}
+    .nav-sticky{top:0;padding:8px 6px;margin-left:calc((100vw - 100%)/-2);margin-right:calc((100vw - 100%)/-2);border-left:0;border-right:0}
+    .nav{gap:7px;padding-left:18px;padding-right:18px}
+    .nav button{font-size:12px;min-width:78px;padding:9px 11px}.nav small{display:none}
+    .flow{grid-template-columns:1fr}.grid.two,.grid.three,.form-grid,.preview-shell,.split{grid-template-columns:1fr}
+    .hero h2{font-size:28px}.preview-frame{height:460px}
+  }
+
+  /* V1.3 自适应修复：电脑/平板/手机自动变换，任何区域都不再把页面撑宽 */
+  html,body{max-width:100vw;overflow-x:hidden}
+  .app{width:100%;max-width:1220px;margin:10px auto 36px;padding:0 12px;overflow:hidden}
+  .top-intro,.nav-sticky,.main,.page,.hero,.panel,.card,.flow .step,.notice,.code-wrap,.code-head,.preview-shell,.split,.history-item,.modal-card,.modal-body,.tabs,.btn-row{max-width:100%;min-width:0}
+  .nav-sticky{width:100%;max-width:100%;overflow:hidden}
+  .nav{max-width:100%}
+  img,svg,video,canvas,iframe{max-width:100%}
+  input,select,textarea,.codebox,.modal-code,.preview-frame,.fullscreen-frame{max-width:100%;min-width:0}
+  .codebox,.modal-code{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .mapping{table-layout:fixed;max-width:100%}
+  .mapping th,.mapping td{word-break:break-word;overflow-wrap:anywhere}
+  .capture-item{min-width:0;overflow-wrap:anywhere}
+
+  @media (max-width:760px){
+    .app{width:100%;max-width:none;margin:0 auto 24px;padding:8px;gap:8px;overflow:hidden}
+    .top-intro{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:6px 8px;min-height:auto}
+    .brand{width:100%;min-width:0;gap:6px}.brand h1{font-size:14px;letter-spacing:.04em}.brand p{display:none}
+    .status-card{max-width:100%;width:100%;text-align:left;font-size:10px;line-height:1.4}
+    .nav-sticky{position:sticky;top:0;margin-left:0;margin-right:0;border-left:1px solid rgba(127,85,57,.2);border-right:1px solid rgba(127,85,57,.2);padding:7px 6px}
+    .nav-sticky:before,.nav-sticky:after{width:18px}
+    .nav{gap:6px;padding:1px 8px 4px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+    .nav button{min-width:auto;flex:0 0 auto;font-size:12px;padding:8px 10px;gap:4px}.nav small{display:none}
+    .hero,.panel{padding:12px;box-shadow:0 10px 28px rgba(63,45,28,.11)}
+    .hero{min-height:auto}.hero:before{inset:6px}.hero h2{font-size:22px;line-height:1.35}.hero p{font-size:13px;line-height:1.75}
+    .grid,.grid.two,.grid.three,.form-grid,.preview-shell,.split,.flow{grid-template-columns:minmax(0,1fr)!important}
+    .flow .step{min-height:auto;padding:10px}.card{padding:12px}.card h3{font-size:14px}.card p,.tip p,.notice,details.help .inner{font-size:12.5px;line-height:1.75}
+    .btn-row{gap:7px}.btn{padding:9px 10px;min-height:36px;font-size:12px;white-space:normal;text-align:center}.btn-row .btn{flex:1 1 auto}.btn.small{flex:0 0 auto;padding:7px 9px}
+    input,select,textarea{font-size:13px;padding:10px}.hint{font-size:11.5px}
+    .tabs{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;font-size:12px;padding:8px 10px}
+    .code-head{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.code-head p{font-size:12.5px;max-width:100%}.code-actions{justify-content:flex-start;width:100%}
+    .codebox{min-height:240px;font-size:11px;line-height:1.55;padding:10px;white-space:pre;overflow:auto}
+    .preview-frame{height:420px}.capture-list{max-height:220px}.history-item{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}.history-item .btn-row{justify-content:flex-start}
+    .mapping{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}.mapping th,.mapping td{min-width:92px;padding:8px;font-size:12px}
+    .modal-mask{padding:8px}.modal-card,.modal-card.code-wide{width:100%;max-width:100%;max-height:95vh}.modal-card.full{width:100%;height:94vh;max-height:94vh}.modal-head{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}.modal-head h3{font-size:14px}.modal-head .btn-row{justify-content:flex-start}.modal-body{padding:8px}.modal-body.code-modal-body{grid-template-rows:auto minmax(240px,38vh) auto minmax(280px,1fr)}.modal-code{height:38vh;min-height:240px;font-size:11px;padding:10px}.analysis-box{min-height:280px;max-height:38vh;font-size:13.2px}.selected-snippet{max-height:120px;font-size:11px}
+  }
+
+  @media (max-width:390px){
+    .app{padding:6px}.hero,.panel{padding:10px}.hero h2{font-size:20px}.nav button{font-size:11.5px;padding:7px 9px}.btn{font-size:11.5px}.codebox,.modal-code{font-size:10.5px}.preview-frame{height:380px}
+  }
+
+
+  /* V1.5 修复：sticky 导航、选区可读、荧光定位、清爽解释 */
+  .app{overflow:visible!important}
+  .nav-sticky{position:sticky!important;top:0!important;z-index:999!important;isolation:isolate}
+  .codebox::selection,.modal-code::selection,textarea::selection,pre::selection{background:#fff064!important;color:#1f160e!important;text-shadow:none!important}
+  .codebox::-moz-selection,.modal-code::-moz-selection,textarea::-moz-selection,pre::-moz-selection{background:#fff064!important;color:#1f160e!important;text-shadow:none!important}
+  .code-actions .btn,.modal-head .btn{background:#3a2b20!important;color:#fffaf0!important;border-color:#3a2b20!important;font-weight:800!important}
+  .code-actions .btn:hover,.modal-head .btn:hover{background:#5b3c29!important;color:#fff!important;border-color:#5b3c29!important}
+  .code-actions .btn.accent,.modal-head .btn.analysis-cta{background:#0f5f4b!important;color:#fff!important;border-color:#0f5f4b!important}
+  .modal-head .btn.primary{background:#1f1812!important;color:#fff!important;border-color:#1f1812!important}
+  .modal-head .btn.ghost{background:#6b6258!important;color:#fff!important;border-color:#6b6258!important}
+  .highlight-preview{display:none;margin:0;border:1px solid rgba(235,190,40,.65);background:#2b251f;color:#fff8db;padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .highlight-preview.show{display:block}
+  .highlight-preview:before{content:"荧光定位预览：";display:block;font-family:var(--sans);font-weight:800;color:#ffe869;margin-bottom:8px;letter-spacing:.02em}
+  .highlight-preview mark{background:#fff064;color:#1f160e;padding:1px 2px;border-radius:2px;box-shadow:0 0 0 2px rgba(255,240,100,.25)}
+  .selected-snippet{background:#2b251f!important;color:#fff8db!important;border-color:rgba(255,224,90,.45)!important}
+  .selection-how{background:#f6f0df!important;color:#3a2d20!important;border-color:rgba(127,85,57,.24)!important;line-height:1.65!important}
+  .analysis-box{background:#fffaf0!important;color:#2c261f!important;line-height:1.72!important;font-size:13.5px!important}
+  .analysis-clean{display:grid;gap:10px}
+  .analysis-section{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.54);padding:10px 12px}
+  .analysis-section b{display:block;margin-bottom:5px;color:#4a3324;font-size:13px}
+  .analysis-section p{margin:0;color:#5f5145;font-size:13px;line-height:1.7;white-space:pre-wrap}
+  .clean-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}.clean-list li{border:1px solid rgba(127,85,57,.16);background:rgba(255,255,255,.52);padding:9px 10px;color:var(--ink-soft);line-height:1.65;font-size:13px}
+  .clean-text{white-space:pre-wrap;line-height:1.72;color:var(--ink-soft)}
+  @media (max-width:760px){.highlight-preview{font-size:11px;max-height:180px}.selection-how{font-size:12px}.analysis-box{font-size:12.8px!important}.nav-sticky{position:sticky!important;top:0!important}}
+
+
+  /* V1.6 硬修复：导航改 fixed，彻底避开 sticky 失效；选区取消黄字；帮助分类；正则整段分析 */
+  .app{padding-top:66px!important;overflow:visible!important}
+  .nav-sticky{
+    position:fixed!important;
+    top:0!important;
+    left:0!important;
+    right:0!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    margin:0!important;
+    z-index:99999!important;
+    border-left:0!important;
+    border-right:0!important;
+    border-top:0!important;
+    border-bottom:1px solid rgba(127,85,57,.24)!important;
+    background:rgba(255,250,240,.96)!important;
+    backdrop-filter:blur(16px)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    box-shadow:0 10px 30px rgba(63,45,28,.16)!important;
+    padding:8px 0 7px!important;
+    overflow:hidden!important;
+  }
+  .nav-sticky:before{left:0!important;background:linear-gradient(90deg,rgba(255,250,240,1),rgba(255,250,240,0))!important}
+  .nav-sticky:after{right:0!important;background:linear-gradient(270deg,rgba(255,250,240,1),rgba(255,250,240,0))!important}
+  .nav-sticky .nav{width:min(1220px,100vw)!important;margin:0 auto!important;padding:1px 30px 4px!important;max-width:100vw!important}
+  ::selection{background:#201812!important;color:#fffaf0!important;text-shadow:none!important}
+  ::-moz-selection{background:#201812!important;color:#fffaf0!important;text-shadow:none!important}
+  textarea::selection,input::selection,.codebox::selection,.modal-code::selection,pre::selection{background:#201812!important;color:#fffaf0!important;text-shadow:none!important}
+  textarea::-moz-selection,input::-moz-selection,.codebox::-moz-selection,.modal-code::-moz-selection,pre::-moz-selection{background:#201812!important;color:#fffaf0!important;text-shadow:none!important}
+  .codebox,.modal-code{caret-color:#fffaf0;user-select:text;-webkit-user-select:text}
+  .regex-analysis-entry{border:1px solid rgba(15,95,75,.26);background:rgba(15,95,75,.08);padding:11px 12px;display:grid;gap:8px}
+  .regex-analysis-entry p{margin:0;color:#315944;font-size:12.5px;line-height:1.7}
+  .help-group{display:grid;gap:10px;border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.34);padding:12px}
+  .help-group h3{margin:0;font-size:15px;font-family:var(--serif);letter-spacing:.04em;color:#3a2d20}
+  .help-group>p{margin:0;color:var(--ink-soft);font-size:12.5px;line-height:1.7}
+  .help-grid{display:grid;gap:10px}
+  .help-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:3px 7px;border:1px solid rgba(127,85,57,.18);background:rgba(234,216,192,.38);color:#6f4a32;margin-right:6px}
+  details.help summary{line-height:1.5;list-style:none}
+  details.help summary::-webkit-details-marker{display:none}
+  details.help summary:before{content:'＋';display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;margin-right:6px;background:#3a2b20;color:#fffaf0;font-size:12px;vertical-align:middle}
+  details.help[open] summary:before{content:'－'}
+  details.help .inner{color:#4d4035!important;line-height:1.85!important}
+  details.help .inner b{color:#2c261f}
+  details.help .inner .mini{display:block;margin-top:8px;color:#7b6d60;font-size:12px;line-height:1.75}
+  @media (max-width:760px){
+    .app{padding-top:56px!important}
+    .nav-sticky{position:fixed!important;top:0!important;left:0!important;right:0!important;padding:7px 0 6px!important}
+    .nav-sticky .nav{padding:1px 22px 4px!important}
+    .nav button{font-size:12px!important;padding:8px 10px!important;min-height:34px!important}
+    .help-group{padding:10px;gap:8px}.help-group h3{font-size:14px}
+  }
+
+
+  /* V1.7 返工：低层级悬浮导航，不遮放大弹窗；代码框白底深字，选区深底白字；帮助页默认收起 */
+  .app{padding-top:58px!important;overflow:visible!important}
+  .nav-sticky{position:fixed!important;top:0!important;left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;margin:0!important;z-index:40!important;border-top:0!important;border-left:0!important;border-right:0!important;border-bottom:1px solid rgba(127,85,57,.20)!important;background:rgba(255,250,240,.94)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;box-shadow:0 5px 16px rgba(63,45,28,.12)!important;padding:7px 0 6px!important;overflow:hidden!important}
+  .nav-sticky .nav{width:min(1220px,100vw)!important;margin:0 auto!important;padding:1px 28px 4px!important;max-width:100vw!important}
+  .nav button{min-height:34px!important;padding:8px 12px!important;border-radius:0!important}
+  .modal-mask{z-index:3000!important}.modal-card{z-index:3001!important;position:relative!important}.toast{z-index:3500!important}
+  .codebox,.modal-code{background:#fffef9!important;color:#19130e!important;border:1px solid rgba(63,45,28,.38)!important;caret-color:#19130e!important;text-shadow:none!important}
+  .codebox:focus,.modal-code:focus,textarea:focus,input:focus{outline:2px solid rgba(63,45,28,.26)!important;outline-offset:2px!important;box-shadow:0 0 0 3px rgba(127,85,57,.10)!important}
+  ::selection{background:#1f1812!important;color:#fffdf7!important;text-shadow:none!important}::-moz-selection{background:#1f1812!important;color:#fffdf7!important;text-shadow:none!important}
+  textarea::selection,input::selection,.codebox::selection,.modal-code::selection,pre::selection{background:#1f1812!important;color:#fffdf7!important;text-shadow:none!important}
+  textarea::-moz-selection,input::-moz-selection,.codebox::-moz-selection,.modal-code::-moz-selection,pre::-moz-selection{background:#1f1812!important;color:#fffdf7!important;text-shadow:none!important}
+  .modal-head .btn,.code-actions .btn{background:#2d2118!important;color:#fffaf0!important;border-color:#2d2118!important;font-weight:800!important}
+  .modal-head .btn:hover,.code-actions .btn:hover{background:#4a3324!important;color:#fff!important;border-color:#4a3324!important}.modal-head .btn.analysis-cta,.code-actions .btn.accent{background:#0f5f4b!important;color:#fff!important;border-color:#0f5f4b!important}
+  .highlight-preview,.selected-snippet{background:#fffef9!important;color:#19130e!important;border-color:rgba(63,45,28,.30)!important;box-shadow:inset 0 0 0 1px rgba(127,85,57,.08)!important}.highlight-preview:before{color:#59402d!important}.highlight-preview mark{background:#fff064!important;color:#1f160e!important;padding:1px 2px!important;border-radius:2px!important}
+  .help-group{gap:12px!important;padding:14px!important}.help-group h3{font-size:16px!important;line-height:1.45!important}.help-group>p{font-size:13px!important;line-height:1.8!important}
+  details.help{background:rgba(255,255,255,.58)!important;border-color:rgba(127,85,57,.20)!important}details.help summary{padding:13px 14px!important;line-height:1.55!important}details.help .inner{padding:14px!important;line-height:1.82!important;color:#473a30!important;background:rgba(255,253,247,.72)!important}
+  .help-answer{display:grid;gap:9px}.help-answer p{margin:0!important;line-height:1.82!important;color:#473a30!important;font-size:13px!important}.help-answer b{color:#241b14!important}.help-answer .fix{border-left:3px solid rgba(15,95,75,.45);background:rgba(15,95,75,.06);padding:9px 10px}.help-answer .warn{border-left:3px solid rgba(157,59,50,.42);background:rgba(157,59,50,.06);padding:9px 10px}.help-answer .where{border-left:3px solid rgba(127,85,57,.42);background:rgba(127,85,57,.06);padding:9px 10px}
+  @media (max-width:760px){.app{padding-top:54px!important}.nav-sticky{z-index:40!important;padding:6px 0 5px!important}.nav-sticky .nav{padding:1px 18px 4px!important}.nav button{font-size:12px!important;padding:8px 10px!important;min-height:32px!important}.modal-mask{z-index:3000!important;padding:8px!important}.codebox,.modal-code{font-size:11px!important}.help-group{padding:11px!important}.help-group h3{font-size:14px!important}details.help summary{font-size:13px!important;padding:12px!important}details.help .inner{font-size:12.5px!important;padding:12px!important}.help-answer p{font-size:12.5px!important}}
+
+
+  /* V1.8 当前制作管理：放弃、归档、新建，避免误删 */
+  .project-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+  .project-state{border:1px dashed rgba(127,85,57,.35);background:rgba(255,255,255,.48);padding:10px 12px;color:#5f5145;font-size:13px;line-height:1.7}
+  .project-state b{color:#2c261f}
+  .danger-zone{border:1px solid rgba(157,59,50,.24);background:rgba(157,59,50,.06);padding:12px;display:grid;gap:9px}
+  .choice-list{display:grid;gap:10px}
+  .choice-card{border:1px solid rgba(127,85,57,.20);background:#fffef9;padding:12px;display:grid;gap:7px}
+  .choice-card h4{margin:0;font-size:14px;color:#2c261f}
+  .choice-card p{margin:0;font-size:12.5px;line-height:1.75;color:#6f6458}
+  .choice-card .btn-row{justify-content:flex-start}
+  .modal-card.project{max-width:min(720px,94vw);height:auto;max-height:86vh}
+  @media (max-width:760px){.project-actions{justify-content:flex-start}.modal-card.project{max-width:96vw}.choice-card{padding:10px}.project-state{font-size:12.5px}}
+
+
+  /* V1.9 修复：清空当前、分析反馈、三边对应、弹窗内部滚动锁定 */
+  body.modal-open{position:fixed!important;width:100%!important;overflow:hidden!important;left:0!important;right:0!important}
+  .modal-mask{overscroll-behavior:contain!important;touch-action:auto!important}
+  .modal-card{max-height:calc(100dvh - 18px)!important;overflow:hidden!important}
+  .modal-card.code-wide{height:calc(100dvh - 18px)!important;max-height:calc(100dvh - 18px)!important}
+  .modal-body{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;min-height:0!important}
+  .modal-body.code-modal-body{grid-template-rows:auto minmax(240px,42dvh) auto minmax(260px,1fr)!important;overflow:auto!important}
+  .modal-code{background:#fff!important;color:#111!important;caret-color:#111!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+  .codebox{background:#fff!important;color:#111!important;caret-color:#111!important}
+  textarea::selection,input::selection,.codebox::selection,.modal-code::selection,pre::selection{background:#111!important;color:#fff!important;text-shadow:none!important}
+  textarea::-moz-selection,input::-moz-selection,.codebox::-moz-selection,.modal-code::-moz-selection,pre::-moz-selection{background:#111!important;color:#fff!important;text-shadow:none!important}
+  .analysis-progress{display:grid;gap:10px;border:1px solid rgba(15,95,75,.28);background:linear-gradient(180deg,rgba(15,95,75,.08),rgba(255,255,255,.76));padding:12px;color:#23493b}
+  .analysis-progress .row{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.55}
+  .analysis-progress .dots{display:inline-flex;gap:4px;align-items:center}
+  .analysis-progress .dots i{width:6px;height:6px;border-radius:50%;background:#0f5f4b;opacity:.35;animation:dotPulse 1.05s infinite ease-in-out}
+  .analysis-progress .dots i:nth-child(2){animation-delay:.15s}.analysis-progress .dots i:nth-child(3){animation-delay:.3s}
+  @keyframes dotPulse{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  .crosslink-panel{display:grid;gap:10px;border:1px solid rgba(127,85,57,.20);background:#fffdf7;padding:12px;margin-bottom:10px;color:#34281e}
+  .crosslink-panel h4{margin:0;font-size:13px;color:#2c261f;display:flex;align-items:center;gap:8px}
+  .crosslink-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .crosslink-item{border:1px solid rgba(127,85,57,.16);background:rgba(234,216,192,.18);padding:9px;min-width:0}
+  .crosslink-item b{display:block;font-size:12px;color:#513927;margin-bottom:5px}
+  .crosslink-item p{margin:0;font-size:12px;line-height:1.65;color:#5b4e43;white-space:pre-wrap;overflow-wrap:anywhere}
+  .analysis-box{scrollbar-width:thin;overscroll-behavior:contain!important}
+  @media(max-width:760px){.modal-card.code-wide{height:calc(100dvh - 12px)!important}.modal-body.code-modal-body{grid-template-rows:auto minmax(220px,38dvh) auto minmax(280px,1fr)!important}.crosslink-grid{grid-template-columns:1fr}.analysis-progress .row{font-size:12.5px}}
+
+
+  .scope-note{border-color:rgba(15,95,75,.24)!important;background:linear-gradient(180deg,rgba(15,95,75,.08),rgba(255,250,240,.86))!important}
+  .scope-note b{color:#0f5f4b}
+  .scope-note .mini-line{display:block;margin-top:5px;color:#6f6458;font-size:12.5px;line-height:1.6}
+  .crosslink-panel .full-related{grid-column:1/-1;border:1px solid rgba(15,95,75,.22);background:#fffdf7;padding:10px 12px;display:grid;gap:9px}
+  .full-related h5{margin:0;color:#0f5f4b;font-size:13px}
+  .full-related pre{margin:0;white-space:pre-wrap;overflow:auto;max-height:220px;padding:10px;background:#fff;color:#2c261f;border:1px solid rgba(127,85,57,.18);font-size:12px;line-height:1.55}
+  .manual-check-note{border:1px solid rgba(127,85,57,.22);background:rgba(255,255,255,.5);padding:10px 12px;color:#5f5145;font-size:12.5px;line-height:1.7}
+
+
+
+  /* V2.3 顶部导航点击修复：导航可点，弹窗不被遮，代码选区保持高对比 */
+  .nav-sticky{z-index:70!important;pointer-events:none!important;}
+  .nav-sticky .nav,.nav-sticky .nav *{pointer-events:auto!important;}
+  #nav button{touch-action:manipulation!important;position:relative!important;z-index:2!important;}
+  .modal-mask{z-index:3000!important;}
+  body.modal-open .nav-sticky{pointer-events:none!important;}
+  textarea::selection,input::selection,.codebox::selection,.modal-code::selection,pre::selection{background:#111!important;color:#fff!important;text-shadow:none!important;}
+  textarea::-moz-selection,input::-moz-selection,.codebox::-moz-selection,.modal-code::-moz-selection,pre::-moz-selection{background:#111!important;color:#fff!important;text-shadow:none!important;}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top-intro">
+    <section class="brand">
+      <h1>状态栏制作场</h1>
+      <p>AI 生成世界书 / 正则 / HTML，并在站内试用。</p>
+    </section>
+    <div class="project-actions">
+      <div class="status-card" id="statusCard"><b>状态</b>：未连接 API</div>
+      <button class="btn small ghost" onclick="openProjectModal()">当前制作</button>
+    </div>
+  </header>
+
+  <div class="nav-sticky" aria-label="页面跳转导航">
+    <nav class="nav" id="nav">
+      <button type="button" data-page="home" class="active" onclick="goPageSafe('home')">首页 <small>说明</small></button>
+      <button type="button" data-page="api" onclick="goPageSafe('api')">API <small>连接模型</small></button>
+      <button type="button" data-page="generate" onclick="goPageSafe('generate')">生成 <small>写想法</small></button>
+      <button type="button" data-page="result" onclick="goPageSafe('result')">结果 <small>三件套</small></button>
+      <button type="button" data-page="preview" onclick="goPageSafe('preview')">预览 <small>试跑</small></button>
+      <button type="button" data-page="history" onclick="goPageSafe('history')">历史 <small>存档</small></button>
+      <button type="button" data-page="help" onclick="goPageSafe('help')">帮助 <small>定位问题</small></button>
+    </nav>
+  </div>
+
+  <script>
+  // V2.9 顶部导航独立兜底：这段脚本放在主逻辑前面。
+  // 就算后面的 AI/正则代码出现错误，首页/API/生成/结果/预览/历史/帮助 也能继续点击。
+  (function(){
+    function navTo(page){
+      if(!page) return;
+      var id='page-'+page;
+      var found=false;
+      document.querySelectorAll('.page').forEach(function(p){
+        var on=p.id===id;
+        p.classList.toggle('active', on);
+        if(on) found=true;
+      });
+      document.querySelectorAll('#nav [data-page]').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-page')===page);
+      });
+      if(found){
+        try{ localStorage.setItem('st_workshop_last_page', page); }catch(e){}
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+    }
+    window.goPageSafe = navTo;
+    window.goPage = navTo;
+    document.addEventListener('click', function(e){
+      var btn=e.target && e.target.closest ? e.target.closest('#nav [data-page]') : null;
+      if(!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      navTo(btn.getAttribute('data-page'));
+    }, true);
+    window.addEventListener('DOMContentLoaded', function(){
+      var last='';
+      try{ last=localStorage.getItem('st_workshop_last_page')||''; }catch(e){}
+      if(last && document.getElementById('page-'+last)) navTo(last);
+    });
+  })();
+  </script>
+
+  <main class="main">
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <h2>把一句想法，变成酒馆美化三件套。</h2>
+        <p>这个工具不让用户选死模板，而是让 AI 按你的美化规范生成完整的世界书、正则、HTML、示例输出和字段对应表。生成后可以直接在网页里模拟正则替换，看到最终效果。</p>
+        <div class="btn-row">
+          <button class="btn primary" onclick="goPage('api')">先连接 API</button>
+          <button class="btn accent" onclick="goPage('generate')">直接写想法</button>
+          <button class="btn" onclick="goPage('help')">我想先看关系说明</button>
+        </div>
+      </div>
+
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>当前制作管理</h3>
+            <p>如果现在这个不想做了，不要直接清空历史。先决定是“以后再说”还是“彻底不要”。</p>
+          </div>
+          <button class="btn small" onclick="openProjectModal()">放弃 / 归档 / 新建</button>
+        </div>
+        <div class="project-state" id="homeProjectState">当前还没有三件套。</div>
+      </div>
+
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>三件套关系：世界书 → 正则 → HTML</h3>
+            <p>这个关系会贯穿每一步，不只在首页说一次。后面生成、预览、修改都会提示用户该改哪一块。</p>
+          </div>
+          <span class="badge">新手解释模式：已内置</span>
+        </div>
+        <div class="flow">
+          <div class="step"><b>① 世界书</b><span>规定 AI 必须输出哪些标签，例如 &lt;时间&gt;、&lt;心理活动&gt;。它负责“让 AI 写得规整”。</span></div>
+          <div class="step"><b>② AI 原始输出</b><span>AI 按世界书吐出结构化文本。用户正常不想看这一坨，但正则需要它。</span></div>
+          <div class="step"><b>③ 正则</b><span>从标签里抓内容。第一个捕获组是 $1，第二个是 $2，顺序不能乱。</span></div>
+          <div class="step"><b>④ 美化 HTML</b><span>决定最终长相。颜色、背景、排版、展开栏都在这里。$1-$n 会被替换成抓到的内容。</span></div>
+          <div class="step"><b>⑤ 预览试用</b><span>网页模拟酒馆替换流程：匹配示例输出 → 填充 HTML → 渲染预览。</span></div>
+        </div>
+      </div>
+
+      <div class="grid three">
+        <div class="card"><h3>没有模板限制</h3><p>用户可以直接说“古风双人”“手机聊天”“阴暗日记本”“论坛体番外”，AI 自己按想法生成结构。</p></div>
+        <div class="card"><h3>每一步都解释</h3><p>生成结果旁边会告诉用户：这一块干嘛、什么时候该改、改错会发生什么。</p></div>
+        <div class="card"><h3>可以继续改稿</h3><p>用户说“字太黑”“背景没铺满”“char 页跑 user 页”，AI 会基于当前三件套返回完整新版。</p></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-api">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>API 设置</h3>
+            <p>这里负责连接 AI。网站会调用 OpenAI 兼容接口：<span class="mini-code">/models</span> 自动找模型，<span class="mini-code">/chat/completions</span> 生成三件套。所有设置只保存在当前浏览器 localStorage。</p>
+          </div>
+          <span class="badge">如果找模型失败，也可以手填模型名</span>
+        </div>
+        <div class="form-grid">
+          <div class="full">
+            <label>API Base URL</label>
+            <input id="apiBase" placeholder="例如：https://api.openai.com/v1 或你的第三方 /v1 地址" />
+            <div class="hint">不要写到 /chat/completions，填到 /v1 这一层就行。</div>
+          </div>
+          <div class="full">
+            <label>API Key</label>
+            <input id="apiKey" type="password" placeholder="sk-..." />
+            <div class="hint">前端直连会把 Key 保存在浏览器本地；自己用可以，公开部署时建议加后端代理。</div>
+          </div>
+          <div>
+            <label>模型</label>
+            <input id="modelName" placeholder="自动寻找后会填入，也可以手动输入" />
+          </div>
+          <div>
+            <label>生成温度</label>
+            <input id="temperature" type="number" min="0" max="2" step="0.1" value="0.7" />
+          </div>
+          <div>
+            <label>最大输出 tokens</label>
+            <input id="maxTokens" type="number" min="1000" step="500" value="6000" />
+          </div>
+          <div>
+            <label>模型列表</label>
+            <select id="modelSelect"><option value="">还没有读取模型</option></select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="saveSettings()">保存设置</button>
+          <button class="btn" onclick="findModels()">自动寻找模型</button>
+          <button class="btn" onclick="testConnection()">测试连接</button>
+          <button class="btn ghost" onclick="clearSettings()">清空本地 API</button>
+        </div>
+        <div class="loader" id="apiLoader"><span class="spin"></span><span>正在连接 API...</span></div>
+        <div class="notice">
+          <b>这一页在流程里的作用：</b><br>
+          API 只负责让 AI 生成三件套；它不会把内容自动装进 SillyTavern。最终你还是复制世界书、正则、HTML 到酒馆对应位置。
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-generate">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>写你的美化想法</h3>
+            <p>不要选模板，直接描述你想要什么。AI 会自己拆成世界书、正则、HTML、示例输出和对应说明。</p>
+          </div>
+          <span class="badge">要求越具体，三件套越稳</span>
+        </div>
+        <div>
+          <label>用户需求</label>
+          <textarea id="userIdea" placeholder="例如：做一个古风双人状态栏。折叠栏是一行字，打开后出现漂亮古风背景，中间有 char1 和 char2 两个人可以选择。点击角色后进入各自状态栏，两个人字段不同。不要圆角，字体古风，展开详情字用白色，整体阴暗但高级。"></textarea>
+          <div class="quick-examples">
+            <span class="chip" onclick="insertExample(0)">古风双人状态栏</span>
+            <span class="chip" onclick="insertExample(1)">阴暗校园日记本</span>
+            <span class="chip" onclick="insertExample(2)">手机聊天界面</span>
+            <span class="chip" onclick="insertExample(3)">论坛体番外</span>
+          </div>
+        </div>
+        <div class="split">
+          <div class="notice">
+            <b>AI 会这样拆：</b><br>
+            世界书：让 AI 以后按标签输出内容。<br>
+            正则：把标签里的内容抓成 $1、$2、$3。<br>
+            HTML：把 $1-$n 放进漂亮界面里。
+          </div>
+          <div class="notice">
+            <b>写需求时可以补这些：</b><br>
+            风格、结构、字段、交互、禁止事项、背景、字体、颜色、是否需要酒馆助手插件。
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="generatePack()">AI 生成完整三件套</button>
+          <button class="btn" onclick="loadDemoPack()">加载内置演示包</button>
+          <button class="btn ghost" onclick="goPage('result')">查看结果页</button>
+          <button class="btn danger" onclick="openProjectModal()">不想做当前这个了</button>
+        </div>
+        <div class="loader" id="genLoader"><span class="spin"></span><span>AI 正在生成世界书、正则、HTML 和说明...</span></div>
+        <div class="notice warn" id="genDiag" style="display:none"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-result">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3 id="packTitle">还没有三件套</h3>
+            <p id="packDesc">先去“生成”页输入想法，或者加载内置演示包。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="saveCurrentToHistory()">手动保存</button>
+            <button class="btn small" onclick="exportTxt()">导出 TXT</button>
+            <button class="btn small" onclick="copyAll()">复制全部</button>
+            <button class="btn small danger" onclick="openProjectModal()">放弃/归档当前</button>
+          </div>
+        </div>
+        <div class="notice" id="resultOverview">
+          世界书负责输出格式，正则负责抓字段，HTML 负责最终显示。生成后请先去预览页测试一次。
+        </div>
+        <div class="tabs" id="resultTabs">
+          <button class="tab active" data-tab="worldbook" onclick="switchResultTab('worldbook')">① 世界书</button>
+          <button class="tab" data-tab="regex" onclick="switchResultTab('regex')">② 正则</button>
+          <button class="tab" data-tab="html" onclick="switchResultTab('html')">③ HTML</button>
+          <button class="tab" data-tab="demo" onclick="switchResultTab('demo')">④ 示例输出</button>
+          <button class="tab" data-tab="mapping" onclick="switchResultTab('mapping')">字段对应</button>
+          <button class="tab" data-tab="explain" onclick="switchResultTab('explain')">详细说明</button>
+        </div>
+        <div id="resultContent"></div>
+      </div>
+
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>继续修改</h3>
+            <p>用户试用后可以直接说哪里不好。系统会先判断修改范围：能只改一个部分就只改一个部分；只有字段、标签、正则、世界书结构变化时才联动整套。</p>
+          </div>
+        </div>
+        <div class="notice scope-note" id="reviseScope">当前主改区域：会根据你停留的结果页自动判断。</div>
+        <div class="notice" id="reviseModeHint">写下修改意见后，我会判断：这次是只改 HTML / 只改示例 / 只补说明，还是必须联动世界书、正则、HTML 整套。</div>
+        <textarea id="reviseIdea" oninput="updateReviseModeHint()" placeholder="例如：展开后的详情文字都改成白色；背景铺满；不要圆角；char1 的内容不要跑到 char2 页；保留原来的所有功能。"></textarea>
+        <div class="btn-row">
+          <button class="btn primary" onclick="revisePack()">AI 智能判断范围并修改</button>
+          <button class="btn" onclick="repairPack()">AI 修复匹配/错位问题</button>
+          <button class="btn" onclick="manualFormatCheck()">手动改后：AI 检查格式不改内容</button>
+        </div>
+        <div class="notice" id="reviseDiag" style="display:none"></div>
+        <div class="loader" id="reviseLoader"><span class="spin"></span><span id="reviseLoaderText">AI 正在判断修改范围...</span></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-preview">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>站内预览试用</h3>
+            <p>这里模拟 SillyTavern 的正则替换流程：用正则匹配原始输出，抓出 $1-$n，再填进 HTML 预览。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="runPreview()">重新匹配</button>
+            <button class="btn small" onclick="openPreviewFullscreen()">全屏预览</button>
+            <button class="btn small" onclick="goPage('result')">回结果页修改</button>
+          </div>
+        </div>
+        <div class="preview-shell">
+          <div class="grid">
+            <div>
+              <label>原始 AI 输出 / 示例输出</label>
+              <textarea id="previewSource"></textarea>
+              <div class="hint">这是 AI 在酒馆消息里真正会吐出的标签内容。正常情况下它会被正则替换成美化界面。</div>
+            </div>
+            <div id="matchNotice" class="notice">还没有匹配结果。</div>
+            <div>
+              <h3 style="font-size:15px;margin:0 0 8px">正则捕获结果</h3>
+              <div class="capture-list" id="captures"></div>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="notice">
+              <b>美化后预览：</b>如果内容显示正常但不好看，改 HTML；如果根本匹配失败，先检查世界书/示例输出/正则的标签是否一致。
+            </div>
+            <iframe class="preview-frame" id="previewFrame" sandbox=""></iframe>
+            <div class="btn-row" style="justify-content:flex-end">
+              <button class="btn primary" onclick="openPreviewFullscreen()">全屏查看预览</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-history">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>历史记录</h3>
+            <p>保存过、自动保存过、归档过的三件套都会存在当前浏览器 localStorage。当前不想做了，也可以先归档，以后从这里点“使用”恢复。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="renderHistory()">刷新</button>
+            <button class="btn small danger" onclick="clearHistory()">清空历史</button>
+          </div>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>导入旧三件套 JSON</h3>
+            <p>可以把之前导出的 JSON 粘进来继续修改。TXT 里如果包含 JSON，也会尝试自动提取。</p>
+          </div>
+        </div>
+        <textarea id="importText" placeholder="粘贴 JSON 或导出的 TXT 内容"></textarea>
+        <div class="btn-row">
+          <button class="btn primary" onclick="importPack()">导入并使用</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-help">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>帮助中心：按问题分类找原因</h3>
+            <p>先看分类，再看问题。别一上来乱改三件套：输出不稳定看世界书，匹配失败看正则，不好看或点不动看 HTML；内容错位看正则捕获顺序和字段对应表。</p>
+          </div>
+          <span class="badge">分类版帮助</span>
+        </div>
+
+        <div class="help-group">
+          <h3>先看这个：一分钟判断该改哪里</h3>
+          <p>遇到问题时先不要乱改。按现象判断负责区域：AI 没输出，改世界书；抓不到，改正则；显示丑，改 HTML；内容错位，看字段对应表。</p>
+          <div class="help-grid">
+            <details class="help"><summary>AI 根本没有输出标签，或者输出不完整</summary><div class="inner"><div class="help-answer"><p><b>问题表现：</b>回复里没有 &lt;状态栏&gt;、没有某个字段，或者字段有时出现有时消失。</p><p><b>原因：</b>世界书的强制规则不够硬，AI 把格式当成可选内容。</p><p class="where"><b>该改哪里：</b>世界书。</p><p class="fix"><b>怎么处理：</b>写明“每次回复结尾必须输出；字段为空也必须保留空标签；禁止 Markdown；禁止解释标签；禁止改标签名和顺序”。</p></div></div></details>
+            <details class="help"><summary>示例输出有标签，但预览匹配失败</summary><div class="inner"><div class="help-answer"><p><b>问题表现：</b>示例输出看起来有内容，但捕获结果为空。</p><p><b>原因：</b>正则里的标签名、顺序、根标签、结束标签或跨行匹配与示例输出不一致。</p><p class="where"><b>该改哪里：</b>正则和示例输出；如果真实 AI 输出也不稳定，再改世界书。</p><p class="fix"><b>怎么处理：</b>点正则区“分析整个正则每一块”；核对每个标签名是否一字不差；跨行字段用 [\s\S]*?；不要乱加普通括号。</p></div></div></details>
+            <details class="help"><summary>能显示，但内容跑错位置</summary><div class="inner"><div class="help-answer"><p><b>问题表现：</b>地点显示成心理活动，好感显示成日记，char1 内容跑进 char2。</p><p><b>原因：</b>正则捕获组顺序和 HTML 的 $1-$n 位置不一致，或者 mapping 写错。</p><p class="where"><b>该改哪里：</b>字段对应表、正则捕获顺序、HTML 占位符位置。</p><p class="fix"><b>怎么处理：</b>先看 $1 到底是什么，再看 HTML 把 $1 放在哪里。不要只盯着颜色和样式改。</p></div></div></details>
+            <details class="help"><summary>内容没错，但不好看、看不清、宽度怪</summary><div class="inner"><div class="help-answer"><p><b>问题表现：</b>白底黄字、按钮看不清、背景没铺满、手机端横向撑开。</p><p><b>原因：</b>CSS 视觉层出问题，不是数据层出问题。</p><p class="where"><b>该改哪里：</b>HTML/CSS。</p><p class="fix"><b>怎么处理：</b>改 color、background、opacity、width、max-width、overflow。世界书和正则通常不用动。</p></div></div></details>
+            <details class="help"><summary>点击、切换、展开在网站能用，进酒馆不能用</summary><div class="inner"><div class="help-answer"><p><b>问题表现：</b>预览页能点，SillyTavern 里没反应。</p><p><b>原因：</b>普通正则替换环境不一定执行 JS。</p><p class="where"><b>该改哪里：</b>HTML 交互方案，必要时生成酒馆助手插件版本。</p><p class="fix"><b>怎么处理：</b>优先用 details/summary、checkbox/radio + label、CSS :checked；必须 JS 时明确要求“酒馆助手插件完整页面版本”。</p></div></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>一、基础关系：先搞懂三件套怎么连</h3>
+          <p>这组问题解释世界书、正则、HTML、示例输出、字段对应表分别负责什么。</p>
+          <div class="help-grid">
+            <details class="help"><summary>三件套到底怎么连起来？</summary><div class="inner"><b>世界书</b>规定 AI 怎么输出标签；<b>AI 原始输出</b>是实际吐出的标签文本；<b>正则</b>把标签里的内容抓成 $1、$2、$3；<b>HTML</b>把这些 $n 放进漂亮界面。<span class="mini">例子：世界书要求输出 &lt;时间&gt;晚上&lt;/时间&gt;，正则抓到“晚上”成为 $1，HTML 里写“时间：$1”，最终显示“时间：晚上”。</span></div></details>
+            <details class="help"><summary>世界书、正则、HTML 谁最重要？</summary><div class="inner">三个都重要，但负责的事不一样。世界书管“AI 有没有输出这个字段”；正则管“能不能抓到这个字段”；HTML 管“抓到后长什么样”。<span class="mini">所以不是哪里坏了都改 HTML。比如 AI 根本没输出“阴暗值”，你在 HTML 写再多 $9 也没用。</span></div></details>
+            <details class="help"><summary>$1、$2、$3 是从哪里来的？</summary><div class="inner">它们来自正则里的捕获组，也就是括号。第一个能抓内容的括号是 $1，第二个是 $2，以此类推。<span class="mini">如果你在正则前面多加了一个括号，后面的 $n 可能全部顺序变化，内容就会错位。</span></div></details>
+            <details class="help"><summary>字段对应表有什么用？</summary><div class="inner">字段对应表是“翻译表”，告诉用户 $1 是时间、$2 是地点、$3 是心理活动。内容跑错位置时，先看这里。<span class="mini">如果表里写 $4=好感，但 HTML 把 $4 放到天气位置，就要改 HTML；如果表本身就错了，要改正则或 mapping。</span></div></details>
+            <details class="help"><summary>示例输出是不是最终效果？</summary><div class="inner">不是。示例输出是 AI 原始标签文本，用来测试正则能不能抓到内容。最终效果是正则替换 HTML 后的预览。<span class="mini">示例输出越接近酒馆里 AI 真实会吐出的内容，测试越准。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>二、生成与 API：生成前后的问题</h3>
+          <p>这组问题处理 API、模型、JSON、自动保存、继续修改。</p>
+          <div class="help-grid">
+            <details class="help"><summary>自动寻找模型失败，是不是 Key 错？</summary><div class="inner">不一定。可能是 Key 错，也可能是 Base URL 不支持 /models，或者网页直连被 CORS 拦截。<span class="mini">解决：手动填模型名；检查 Base URL 是否以 /v1 结尾；换支持网页请求的中转；或以后做后端代理。</span></div></details>
+            <details class="help"><summary>AI 返回“不可解析 JSON”怎么办？</summary><div class="inner">说明 AI 没按网站要求只返回 JSON，可能在 JSON 外面写了解释文字，或者代码里有没转义的引号。<span class="mini">解决：让 AI 重新生成，并明确说“只返回严格 JSON，不要 Markdown，不要代码块”。</span></div></details>
+            <details class="help"><summary>为什么每次生成/修改都要自动保存？</summary><div class="inner">因为 AI 改稿有时会越改越偏，自动保存能保留每个可用版本。<span class="mini">如果新版崩了，去历史记录找上一版；这比只留当前版安全很多。</span></div></details>
+            <details class="help"><summary>继续修改时为什么要带完整三件套？</summary><div class="inner">因为用户一句“详情字改白色”只该改 HTML；但一句“新增占有欲字段”要改世界书、正则、HTML 和 mapping。AI 必须看到完整上下文，才知道该动哪几处。<span class="mini">这也是防止它改一个地方删掉原功能。</span></div></details>
+            <details class="help"><summary>继续修改时怎么判断“只改一块”还是“整套联动”？</summary><div class="inner"><div class="help-answer"><p><b>只改一块：</b>颜色、字体、背景、宽度、翻页动画、展开样式、按钮位置这类外观问题，通常只改 HTML。</p><p><b>整套联动：</b>新增字段、删除字段、改标签名、改输出格式、改正则捕获组、$1-$n 错位、示例输出匹配失败，必须检查世界书、正则、HTML、示例输出和字段表。</p><p class="where"><b>该怎么选：</b>停在哪个页签就以哪个页签为主；网站会根据修改意见自动判断范围。</p><p class="fix"><b>重点：</b>返回时仍然是完整 JSON，方便保存；但没有关系的部分会要求 AI 原样保留，不再乱重写。</p></div></div></details>
+            <details class="help"><summary>AI 生成太长被截断怎么办？</summary><div class="inner">调大 max_tokens，或者让它先生成简单版，再逐步增强。<span class="mini">三件套里 HTML 最容易长；如果样式特别复杂，可以要求“保留功能，减少装饰代码”。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>三、世界书问题：AI 不按格式时看这里</h3>
+          <p>只要问题是“AI 没吐对标签、缺字段、乱输出说明”，优先查世界书。</p>
+          <div class="help-grid">
+            <details class="help"><summary>AI 不按格式输出 / 标签缺失 / 有时有有时没有</summary><div class="inner">优先改世界书。把“必须、严格、每次、字段为空也要输出空标签、禁止 Markdown、禁止解释标签”写清楚。<span class="mini">如果是触发型美化，比如“查看论坛内容”才输出，要写清触发条件。</span></div></details>
+            <details class="help"><summary>AI 把标签写成中文句子了怎么办？</summary><div class="inner">世界书要给固定格式示例，并要求“严格维持标签，不要改标签名”。<span class="mini">比如必须写 &lt;mind&gt;...&lt;/mind&gt;，不要写“心理活动：……”。</span></div></details>
+            <details class="help"><summary>AI 在标签外多写了一大段解释怎么办？</summary><div class="inner">世界书里加“除标签结构外，不要输出任何额外解释、标题、Markdown、代码块”。正则也可以适当允许前后有空白，但不要靠正则硬吃所有废话。<span class="mini">根源还是让 AI 稳定输出。</span></div></details>
+            <details class="help"><summary>想新增字段，比如占有欲/课程表/偷藏物</summary><div class="inner">三件套都要改。世界书新增标签和生成规则；正则新增捕获组；HTML 新增 $n 展示位置；mapping 新增字段说明。<span class="mini">只改 HTML 不够，因为 AI 不知道要输出新字段。</span></div></details>
+            <details class="help"><summary>想删除字段</summary><div class="inner">也要三件套一起删。世界书删输出要求，正则删捕获组，HTML 删对应 $n，mapping 删对应行。<span class="mini">否则 $7 可能变成 $6，后面全部错位。</span></div></details>
+            <details class="help"><summary>双人状态栏 char1/char2 混在一起怎么办？</summary><div class="inner">世界书要把 char1 和 char2 的标签层级分开，比如 &lt;char1_status&gt; 和 &lt;char2_status&gt;，不要共用一堆模糊字段。<span class="mini">正则和 HTML 也要分两组接收，避免 char1 的 $n 放进 char2 页面。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>四、正则问题：匹配失败、错位、抓不到看这里</h3>
+          <p>只要问题是“有标签但预览失败、内容跑错位置、$n 对不上”，优先查正则。</p>
+          <div class="help-grid">
+            <details class="help"><summary>预览匹配失败 / 明明有标签但抓不到</summary><div class="inner">检查根标签是否一致、子标签名是否一致、顺序是否一致、结束标签有没有闭合。跨行内容建议用 [\s\S]*?。<span class="mini">最常见：世界书写 &lt;心理活动&gt;，正则写 &lt;心理&gt;，一个字不同都抓不到。</span></div></details>
+            <details class="help"><summary>内容错位：心理活动跑到地点、char 页跑到 user 页</summary><div class="inner">看正则捕获顺序和字段对应表。第一个捕获组永远是 $1，第二个是 $2。<span class="mini">如果正则先抓心理再抓地点，但 HTML 以为 $1 是地点，就会错位。</span></div></details>
+            <details class="help"><summary>为什么要用 [\s\S]*?，不用 .*?</summary><div class="inner">很多 JavaScript 正则里，点号默认不匹配换行。AI 输出常常有换行，所以用 [\s\S]*? 更稳。<span class="mini">如果正则写了 /.../s，也可以让点号跨行，但为了兼容，生成器常用 [\s\S]*?。</span></div></details>
+            <details class="help"><summary>正则里的括号可以随便加吗？</summary><div class="inner">不可以。普通括号会增加捕获组，影响 $1-$n 顺序。如果只是为了分组但不想占编号，用非捕获组 (?:...)。<span class="mini">这就是为什么正则区新增了“分析整个正则每一块”按钮。</span></div></details>
+            <details class="help"><summary>根标签要不要写进正则？</summary><div class="inner">建议写。根标签能限定这一整段属于某个美化组件，避免误抓正文里的同名标签。<span class="mini">比如 &lt;status_card&gt;...&lt;/status_card&gt; 包住所有字段，正则更稳。</span></div></details>
+            <details class="help"><summary>正则可以只抓一大段回复区域吗？</summary><div class="inner">可以。论坛体、聊天记录、楼层列表这种可变数量内容，常把整个回复区域作为一个捕获组，然后 HTML 里整体放 $3。<span class="mini">但如果要给每条回复单独美化，普通正则替换会更复杂，可能需要酒馆助手插件或固定条数。</span></div></details>
+            <details class="help"><summary>改了标签名后必须改哪些地方？</summary><div class="inner">世界书、正则、示例输出都要同步。HTML 不一定要改，除非字段顺序或 $n 变了。<span class="mini">改名不改正则，预览会直接匹配失败。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>五、HTML 与预览问题：不好看、点不动、撑宽看这里</h3>
+          <p>只要内容已经显示出来，但样式不对，主要查 HTML/CSS。</p>
+          <div class="help-grid">
+            <details class="help"><summary>颜色丑、字看不清、背景没铺满、宽度变细长</summary><div class="inner">改 HTML/CSS。文字颜色看 color，背景看 background/background-size，宽度看 width/max-width，溢出看 overflow/max-height。<span class="mini">世界书和正则通常不用动，因为它们不管视觉。</span></div></details>
+            <details class="help"><summary>为什么进酒馆后宽度变细长？</summary><div class="inner">SillyTavern 消息楼层本身有宽度限制，HTML 里的 width:100vw 或固定大宽度可能导致缩放异常。<span class="mini">建议最外层用 width:94%; max-width:420px; margin:auto; 手机和电脑都稳。</span></div></details>
+            <details class="help"><summary>展开按钮点不动 / 切换页没反应</summary><div class="inner">普通正则替换里的 JS 不一定执行。优先用 details/summary、checkbox/radio + label、CSS :checked。<span class="mini">如果必须 JS，就要生成“酒馆助手插件版本”，包含完整 html/head/body。</span></div></details>
+            <details class="help"><summary>为什么预览页能动，进酒馆不能动？</summary><div class="inner">网站预览 iframe 允许更多普通网页行为，但 SillyTavern 正则替换环境可能限制脚本。<span class="mini">所以交互组件要按酒馆环境设计，别只看浏览器预览。</span></div></details>
+            <details class="help"><summary>HTML 里的 $1 可以删掉吗？</summary><div class="inner">删掉就不会显示这个字段了。可以移动 $1 的位置，也可以在周围加标题，但别把 $1 改成中文。<span class="mini">想隐藏字段可以不放 $n，但正则仍然可能在抓它。</span></div></details>
+            <details class="help"><summary>背景图片不显示怎么办？</summary><div class="inner">检查图片链接是否能公开访问，URL 是否完整，CSS 是否写成 background-image:url('链接')。<span class="mini">如果被遮罩盖住，调低遮罩 opacity 或检查背景是否放在正确容器上。</span></div></details>
+            <details class="help"><summary>手机端被撑宽怎么办？</summary><div class="inner">最外层避免固定大宽度，代码块和长文本加 overflow:auto，表格加横向滚动，图片 iframe 设 max-width:100%。<span class="mini">这类问题改 HTML/CSS，不改世界书和正则。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>六、选中分析、放大查看、荧光标记</h3>
+          <p>这组问题解释“AI 怎么知道你选中了哪一段”，以及怎么用荧光标记找范围。</p>
+          <div class="help-grid">
+            <details class="help"><summary>AI 到底怎么看出我选中了哪一段？</summary><div class="inner">你在文本框里拖动选中后，网页会读取 selectionStart 和 selectionEnd，也就是选区起点和终点。点击分析时，网页把选中片段、所属区域、完整三件套、字段对应表一起发给 AI。<span class="mini">AI 不是猜，它是根据“选中片段 + 上下文”判断这段和另外两件套的关系。</span></div></details>
+            <details class="help"><summary>为什么要加“➕ 荧光标记”？</summary><div class="inner">选中文本时，手机和浏览器的原生选区不稳定，容易看不清。荧光标记会把你选中的片段复制到下面，并用荧光背景标出，方便确认范围。<span class="mini">它不会修改原代码，只是定位预览。</span></div></details>
+            <details class="help"><summary>分析选中段为什么还要带完整三件套？</summary><div class="inner">单看一小段经常判断不了。例如 HTML 里的 $5 必须结合正则第五个捕获组和世界书对应标签，才能知道 $5 是什么。<span class="mini">所以选中分析会带世界书、正则、HTML、示例输出和 mapping。</span></div></details>
+            <details class="help"><summary>我选中一段后提示没有选中怎么办？</summary><div class="inner">需要在代码框内部真正拖动选择文字，不是点一下。手机上可以长按文字后拖动选择范围，再点分析。<span class="mini">如果打开了放大窗口，请在放大窗口的大文本框里重新选。</span></div></details>
+            <details class="help"><summary>什么时候用“分析整个正则”？</summary><div class="inner">当你完全看不懂正则、字段错位、匹配失败、括号太多不知道哪个是 $几时，用它。<span class="mini">它只在正则区出现，会逐段解释每个标签、捕获组和 $1-$n 对应关系。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>七、导出、导入、历史记录</h3>
+          <p>这组问题处理版本保存和迁移。</p>
+          <div class="help-grid">
+            <details class="help"><summary>导出 TXT 里应该包含什么？</summary><div class="inner">应该包含 JSON 原始包、世界书、正则、HTML、示例输出、字段对应表和使用说明。<span class="mini">这样以后导入或手动复制到酒馆都方便。</span></div></details>
+            <details class="help"><summary>导入旧三件套后能继续改吗？</summary><div class="inner">可以，只要导入内容能解析成 JSON 包。导入后可以继续预览、让 AI 修复、让 AI 根据意见改新版。<span class="mini">如果只是散装世界书/正则/HTML，需要先整理成网站支持的 JSON 格式。</span></div></details>
+            <details class="help"><summary>历史记录太多怎么办？</summary><div class="inner">可以保留关键版本，删除不需要的版本。建议每次大改前手动保存一个“能跑版”。<span class="mini">比如：能匹配版、样式满意版、最终导出版。</span></div></details>
+          </div>
+        </div>
+
+        <div class="help-group">
+          <h3>八、进阶：酒馆助手插件与复杂交互</h3>
+          <p>这组问题处理 JS、iframe、triggerSlash、变量读写等复杂玩法。</p>
+          <div class="help-grid">
+            <details class="help"><summary>什么时候需要酒馆助手插件版本？</summary><div class="inner">当你需要执行 JavaScript、点击按钮触发 Slash、读取/设置变量、做复杂动态界面时，需要插件版本。<span class="mini">普通正则替换 HTML 更适合静态展示和 CSS 交互。</span></div></details>
+            <details class="help"><summary>插件版本和普通 HTML 片段有什么区别？</summary><div class="inner">普通美化 HTML 是片段，不包含完整 html/head/body；插件版本通常要完整页面结构，并通过 iframe 执行脚本。<span class="mini">所以生成时必须让 AI 标明“这是酒馆助手插件版本”。</span></div></details>
+            <details class="help"><summary>triggerSlash 是做什么的？</summary><div class="inner">它可以在插件 iframe 里触发 SillyTavern 的 Slash 命令，比如执行 /echo 或 Quick Reply。<span class="mini">这属于进阶能力，不是普通状态栏必须要用的。</span></div></details>
+            <details class="help"><summary>getVariables/setVariables 是做什么的？</summary><div class="inner">它们用于读取和设置当前聊天的局部变量，可以让界面记住状态。<span class="mini">如果只是展示状态栏，不需要它；如果要做可持久化小工具，才考虑用。</span></div></details>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-mask" id="codeModal">
+  <div class="modal-card code-wide">
+    <div class="modal-head">
+      <h3 id="codeModalTitle">放大查看</h3>
+      <div class="btn-row">
+        <button class="btn small" onmousedown="event.preventDefault()" onclick="copyModalCode()">复制</button>
+        <button class="btn small" onmousedown="event.preventDefault()" onclick="markModalSelection()">➕ 荧光标记</button>
+        <button class="btn small analysis-cta" onmousedown="event.preventDefault()" onclick="analyzeModalSelection()">AI 分析选中段</button>
+        <button class="btn small primary" onmousedown="event.preventDefault()" onclick="saveModalCode()">保存修改</button>
+        <button class="btn small ghost" onclick="closeCodeModal()">关闭</button>
+      </div>
+    </div>
+    <div class="modal-body code-modal-body">
+      <div class="selection-how">
+        <b>AI 怎么知道你选中了哪段：</b>你在下面文本框里拖动选中后，网站会读取选区起点/终点，拿到这段原文；点击分析时，会把“选中片段 + 当前所在块 + 完整世界书/正则/HTML/示例输出 + 字段对应表”一起发给 AI，所以它能判断这段和三件套其他部分的关系。
+      </div>
+      <textarea class="modal-code" id="modalCodeText" onmouseup="rememberModalSelection()" onkeyup="rememberModalSelection()" onselect="rememberModalSelection()"></textarea>
+      <pre class="highlight-preview" id="highlightPreview"></pre>
+      <pre class="selected-snippet" id="selectedSnippetBox"></pre>
+      <div class="analysis-box" id="selectionAnalysis">还没有分析。选中一段后，可以先点“➕ 荧光标记”确认范围，再点 AI 分析。</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="previewModal">
+  <div class="modal-card full">
+    <div class="modal-head">
+      <h3>全屏预览</h3>
+      <div class="btn-row">
+        <button class="btn small" onclick="requestPreviewBrowserFullscreen()">浏览器全屏</button>
+        <button class="btn small" onclick="runPreview();openPreviewFullscreen()">重新渲染</button>
+        <button class="btn small ghost" onclick="closePreviewFullscreen()">关闭</button>
+      </div>
+    </div>
+    <div class="modal-body fullscreen-body">
+      <iframe class="fullscreen-frame" id="fullPreviewFrame" sandbox=""></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="projectModal">
+  <div class="modal-card project">
+    <div class="modal-head">
+      <h3>当前制作怎么办？</h3>
+      <div class="btn-row">
+        <button class="btn small ghost" onclick="closeProjectModal()">关闭</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="project-state" id="projectModalState">正在读取当前制作。</div>
+      <div class="choice-list">
+        <div class="choice-card">
+          <h4>以后可能还要：归档并清空工作台</h4>
+          <p>先把当前三件套保存到历史记录，保存原因标为“暂时不做了”，然后清空当前工作台。适合半成品、灵感版、以后可能继续改的东西。</p>
+          <div class="btn-row"><button class="btn accent" onclick="archiveAndClearCurrent()">归档并清空</button></div>
+        </div>
+        <div class="choice-card">
+          <h4>想换一个新想法：保存并新建</h4>
+          <p>把当前版本先存进历史，然后跳到生成页，需求输入框清空，方便你直接开始下一个。</p>
+          <div class="btn-row"><button class="btn primary" onclick="saveAndStartNew()">保存并新建</button></div>
+        </div>
+        <div class="choice-card danger-zone">
+          <h4>确定不要了：只清空当前</h4>
+          <p>只删除当前工作台，不主动保存这一版。历史记录不会被清空。这个适合刚生成出来就完全不想要的废稿。</p>
+          <div class="btn-row"><button class="btn danger" onclick="discardCurrentOnly()">直接清空当前</button></div>
+        </div>
+        <div class="choice-card">
+          <h4>只是暂时离开：什么都不做</h4>
+          <p>关闭窗口即可。当前制作会继续保存在浏览器本地，下次打开还在。</p>
+          <div class="btn-row"><button class="btn" onclick="closeProjectModal()">继续保留当前</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// V2.8 顶部导航兜底：即使后续脚本某处出错，顶部按钮也尽量能切页
+function goPageSafe(page){
+  try{ if(typeof goPage==='function'){ goPage(page); return false; } }catch(e){}
+  try{
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    var target=document.getElementById('page-'+page);
+    if(target){ target.classList.add('active'); }
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
+    if(target){ window.scrollTo({top:0,behavior:'smooth'}); }
+  }catch(e){ location.hash='page-'+page; }
+  return false;
+}
+document.addEventListener('click',function(e){
+  var btn=e.target && e.target.closest ? e.target.closest('#nav button[data-page]') : null;
+  if(btn){ e.preventDefault(); e.stopPropagation(); goPageSafe(btn.dataset.page); }
+}, true);
+
+const LS_SETTINGS = 'stbw_settings_v1';
+const LS_CURRENT = 'stbw_current_pack_v1';
+const LS_HISTORY = 'stbw_history_v1';
+
+const SPEC_SUMMARY = `
+SillyTavern 美化输出机制要求：
+1. 世界书条目用于定义结构化数据源，告诉 AI 必须使用类似 XML 的标签格式输出内容，并说明每个字段应该如何生成。
+2. 美化代码是 HTML 片段，通常内嵌 CSS，用 $1、$2、$3 等占位符接收正则捕获内容。除非用户明确要求酒馆助手插件版本，否则不要输出完整 html/head/body。
+3. 正则表达式负责连接结构化原始数据和 HTML 模板。它通过捕获组提取字段；第一个捕获组对应 $1，第二个对应 $2，以此类推。捕获组数量必须与 HTML 中使用的占位符一致。
+4. 协同流程：世界书规定 AI 输出格式 → AI 生成标签内容 → 正则匹配并提取捕获组 → HTML 用 $1-$n 填充并呈现。
+5. 若需要复杂 JavaScript、triggerSlash、getVariables、setVariables 等交互，应说明这是酒馆助手插件版本，需要完整 html/head/body，并提醒普通正则替换 HTML 不一定执行 JS。
+6. 生成任何三件套时，必须同时给出示例 AI 输出、字段对应表、每块作用说明、修改定位建议。
+`;
+
+const REQUIRED_JSON_SCHEMA = `
+只允许输出严格 JSON，不要 Markdown，不要代码围栏，不要 JSON 外说明。JSON 字段如下：
+{
+  "title": "作品标题",
+  "description": "一句话说明用途",
+  "worldbook": "完整世界书内容",
+  "regex": "完整正则表达式，可以是 /pattern/s 或纯 pattern",
+  "html": "完整 HTML 美化代码片段，使用 $1-$n 占位符",
+  "demo_output": "一段能被 regex 匹配的模拟 AI 原始输出",
+  "mapping": [
+    {"placeholder":"$1", "field":"字段名", "source_tag":"<标签名>", "meaning":"这个字段在界面中的含义"}
+  ],
+  "explanation": {
+    "overview": "总览：世界书、正则、HTML 怎么对应",
+    "worldbook_explanation": "解释世界书每一块负责什么，用户什么时候改它",
+    "regex_explanation": "解释正则捕获了哪些内容，$1-$n 顺序怎么来",
+    "html_explanation": "解释 HTML 哪些区域控制样式、哪些位置放了占位符",
+    "demo_explanation": "解释示例输出如何测试三件套",
+    "how_to_modify": ["用户想改颜色/布局/字段/匹配失败时分别应该改哪里"]
+  },
+  "change_summary": ["本次生成或修改改了哪些部分"],
+  "diagnosis_tips": ["常见问题与定位建议"]
+}
+特别注意：demo_output 绝对不能留空。demo_output 不是捕获组说明，而是“模拟 AI 原始输出”，必须包含世界书要求的根标签和所有字段标签，并且必须能被 regex 直接匹配。捕获组只存在于 regex 里；预览页会根据 regex 从 demo_output 里抓出 $1-$n。
+每个 explanation 字段都要写得具体：说明它和另外两件套的对应关系、用户应该改哪里、常见错误是什么。regex_explanation 必须说清捕获顺序；html_explanation 必须说明 $1-$n 放在哪里；worldbook_explanation 必须说明标签规则如何影响正则。
+`;
+
+let currentPack = null;
+let currentTab = 'worldbook';
+let modalField = '';
+let activeCodeField = '';
+let lastPreviewDoc = '';
+let suppressAutoSave = false;
+let modalScrollY = 0;
+
+
+const examples = [
+`做一个古风双人状态栏。折叠栏是一行字，打开后是漂亮但偏阴暗的古风背景，中间有 char1 和 char2 两个选择。点击 char1 后显示 char1 的状态栏，点击 char2 后显示 char2 的状态栏，两个人字段不一样。不要圆角，边框要直角细线，字体古风，展开详情里的文字都用白色。必须给世界书、正则、HTML、示例输出和字段对应说明。`,
+`做一个阴暗校园日记本状态栏。正面是轻松校园信息：时间、地点、好感、课表、表面状态。背面是阴暗内心：阴暗值、占有欲、偷藏物、日记内容。整体像旧作业本和日记纸，不要太花，手机端不要挤爆。`,
+`做一个手机聊天界面美化。AI 输出当前时间、聊天对象、最近三条消息、未读提示、输入框状态。HTML 要像真实手机聊天页，但不要完整网页，只要可嵌入酒馆消息的片段。`,
+`做一个论坛体番外美化。AI 输出帖子标题、发帖人内容、5-8 条回复、特殊匿名回复、删除原因。正则要能把回复区域整体抓出来，HTML 要像一个论坛帖子列表。`
+];
+
+function $(id){return document.getElementById(id)}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function esc(s){return String(s ?? '').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function cleanMarkdownText(text){
+  return String(text||'')
+    .replace(/\*\*/g,'')
+    .replace(/^\s{0,3}[#>*-]+\s?/gm,'')
+    .replace(/^\s*[-•]\s*/gm,'')
+    .replace(/\n{3,}/g,'\n\n')
+    .trim();
+}
+function cleanArray(arr){return (Array.isArray(arr)?arr:[]).map(x=>cleanMarkdownText(x)).filter(Boolean)}
+function formatClearAnalysis(text){
+  const cleaned=cleanMarkdownText(text);
+  if(!cleaned)return '<div class="analysis-clean"><div class="analysis-section"><b>没有可显示的分析</b><p>AI 没有返回有效内容。</p></div></div>';
+  const labels=['这段是什么','属于哪一环','对应世界书部分','对应正则部分','对应 HTML 部分','对应HTML部分','对应示例输出部分','对应字段','对应关系','改了会影响什么','怎么改','常见错误'];
+  let sections=[];
+  let current=null;
+  cleaned.split(/\n+/).forEach(raw=>{
+    let line=raw.trim();
+    if(!line)return;
+    line=line.replace(/^\d+[\.、)]\s*/,'');
+    const hit=labels.find(l=>line.startsWith(l));
+    if(hit){
+      if(current)sections.push(current);
+      current={title:hit,body:line.slice(hit.length).replace(/^[:：\s]+/,'').trim()};
+    }else{
+      if(!current)current={title:'说明',body:''};
+      current.body+=(current.body?'\n':'')+line;
+    }
+  });
+  if(current)sections.push(current);
+  if(!sections.length)sections=[{title:'说明',body:cleaned}];
+  return '<div class="analysis-clean">'+sections.map(sec=>`<div class="analysis-section"><b>${esc(sec.title)}</b><p>${esc(sec.body||'无')}</p></div>`).join('')+'</div>';
+}
+function renderHighlightedSelection(text,start,end){
+  const a=Math.max(0,Math.min(start,end));
+  const b=Math.max(0,Math.max(start,end));
+  return esc(text.slice(0,a))+'<mark>'+esc(text.slice(a,b))+'</mark>'+esc(text.slice(b));
+}
+
+function lockModalScroll(){
+  if(!document.body.classList.contains('modal-open')){
+    modalScrollY=window.scrollY||document.documentElement.scrollTop||0;
+    document.body.style.top='-'+modalScrollY+'px';
+    document.body.classList.add('modal-open');
+  }
+}
+function unlockModalScroll(){
+  const anyOpen=[...document.querySelectorAll('.modal-mask')].some(m=>m.classList.contains('show'));
+  if(!anyOpen && document.body.classList.contains('modal-open')){
+    document.body.classList.remove('modal-open');
+    document.body.style.top='';
+    window.scrollTo(0,modalScrollY||0);
+  }
+}
+function showAnalysisLoading(title='正在分析',detail='正在把选中段、世界书、正则、HTML、示例输出和字段对应表一起交给 AI。'){
+  const box=$('selectionAnalysis');
+  if(!box)return;
+  box.innerHTML=`<div class="analysis-progress"><div class="row"><strong>${esc(title)}</strong><span class="dots"><i></i><i></i><i></i></span></div><div class="row">${esc(detail)}</div><div class="row">分析完成后这里会自动替换成结果，不用反复点按钮。</div></div>`;
+}
+function uniq(arr){return [...new Set(arr.filter(Boolean))]}
+function fieldKeyForDisplay(field){return ({worldbook:'世界书',regex:'正则',html:'HTML',demo_output:'示例输出'}[field]||field)}
+function extractPlaceholders(text){return uniq([...(String(text||'').matchAll(/\$(\d+)(?!\d)/g))].map(m=>'$'+m[1]))}
+function extractTags(text){return uniq([...(String(text||'').matchAll(/<\/?([A-Za-z0-9_\-\u4e00-\u9fa5]+)[^>]*>/g))].map(m=>m[1]))}
+function htmlAroundPlaceholder(ph){
+  const html=String(currentPack?.html||'');
+  const idx=html.indexOf(ph);
+  if(idx<0)return '';
+  return html.slice(Math.max(0,idx-90),Math.min(html.length,idx+90)).trim();
+}
+function regexAroundPlaceholder(ph){
+  const n=Number(String(ph).replace('$',''));
+  if(!n || !currentPack?.regex)return '';
+  const re=String(currentPack.regex||'');
+  let idx=-1, count=0, escp=false, inClass=false;
+  for(let i=0;i<re.length;i++){
+    const ch=re[i],next=re[i+1];
+    if(escp){escp=false;continue}
+    if(ch==='\\'){escp=true;continue}
+    if(ch==='['){inClass=true;continue}
+    if(ch===']'){inClass=false;continue}
+    if(!inClass && ch==='(' && next!=='?'){count++; if(count===n){idx=i;break}}
+  }
+  if(idx<0)return '';
+  return re.slice(Math.max(0,idx-90),Math.min(re.length,idx+120)).trim();
+}
+function worldbookAroundTag(tag){
+  const wb=String(currentPack?.worldbook||'');
+  if(!tag)return '';
+  let idx=wb.indexOf('<'+tag);
+  if(idx<0)idx=wb.indexOf(tag);
+  if(idx<0)return '';
+  return wb.slice(Math.max(0,idx-120),Math.min(wb.length,idx+160)).trim();
+}
+function demoAroundTag(tag){
+  const demo=String(currentPack?.demo_output||'');
+  if(!tag)return '';
+  let idx=demo.indexOf('<'+tag);
+  if(idx<0)idx=demo.indexOf(tag);
+  if(idx<0)return '';
+  return demo.slice(Math.max(0,idx-90),Math.min(demo.length,idx+130)).trim();
+}
+function inferSelectionLinks(field,snippet){
+  const placeholders=extractPlaceholders(snippet);
+  const tags=extractTags(snippet);
+  if(field==='regex'){
+    const re=String(currentPack?.regex||'');
+    const idx=re.indexOf(snippet);
+    if(idx>=0){
+      const before=re.slice(0,idx);
+      const start=countCapturingGroups(before)+1;
+      const inside=countCapturingGroups(snippet);
+      for(let i=0;i<inside;i++)placeholders.push('$'+(start+i));
+    }
+  }
+  const mapping=currentPack?.mapping||[];
+  const related=[];
+  const add=(m)=>{if(m && !related.some(x=>String(x.placeholder)===String(m.placeholder)))related.push(m)};
+  uniq(placeholders).forEach(ph=>add(mapping.find(m=>String(m.placeholder)===ph)));
+  tags.forEach(t=>{
+    mapping.forEach(m=>{
+      const src=String(m.source_tag||'');
+      const fld=String(m.field||'');
+      if(src.includes(t)||fld.includes(t))add(m);
+    });
+  });
+  return {placeholders:uniq(placeholders),tags,related};
+}
+function fullTagBlockFromText(text,tag){
+  const src=String(text||'');
+  const clean=cleanTagName(tag);
+  if(!clean)return '';
+  const direct=new RegExp('<'+clean+'(?:\\s[^>]*)?>[\\s\\S]*?<\\/'+clean+'>','i');
+  const m=src.match(direct);
+  if(m)return m[0].trim();
+  const escaped=new RegExp('<'+clean+'(?:\\s[^>]*)?>[\\s\\S]*?<\\\\/'+clean+'>','i');
+  const m2=src.match(escaped);
+  if(m2)return m2[0].trim();
+  const idx=src.indexOf('<'+clean)>=0?src.indexOf('<'+clean):src.indexOf(clean);
+  if(idx<0)return '';
+  return src.slice(Math.max(0,idx-260),Math.min(src.length,idx+420)).trim();
+}
+function completeRegexPieceForMapping(m){
+  const re=String(currentPack?.regex||'');
+  const tag=cleanTagName(m?.source_tag||m?.field||'');
+  const byTag=fullTagBlockFromText(re,tag);
+  if(byTag)return byTag;
+  const ph=m?.placeholder||'';
+  return regexAroundPlaceholder(ph)||'';
+}
+function completeHtmlPieceForPlaceholder(ph){
+  const html=String(currentPack?.html||'');
+  const idx=html.indexOf(ph);
+  if(idx<0)return '';
+  const beforeDiv=html.lastIndexOf('<div',idx);
+  const beforeSpan=html.lastIndexOf('<span',idx);
+  const beforeP=html.lastIndexOf('<p',idx);
+  const start=Math.max(beforeDiv,beforeSpan,beforeP,html.lastIndexOf('\n',idx-1));
+  const afterDiv=html.indexOf('</div>',idx);
+  const afterSpan=html.indexOf('</span>',idx);
+  const afterP=html.indexOf('</p>',idx);
+  const candidates=[afterDiv>idx?afterDiv+6:0,afterSpan>idx?afterSpan+7:0,afterP>idx?afterP+4:0].filter(Boolean);
+  const end=candidates.length?Math.min(...candidates):Math.min(html.length,idx+520);
+  const a=start>=0?start:Math.max(0,idx-260);
+  return html.slice(a,Math.min(html.length,end+180)).trim();
+}
+function relatedFullParts(field,snippet){
+  const links=inferSelectionLinks(field,snippet);
+  const rel=links.related||[];
+  const phs=links.placeholders.length?links.placeholders:rel.map(m=>m.placeholder).filter(Boolean);
+  const tags=uniq([...links.tags,...rel.map(m=>cleanTagName(m.source_tag||''))]);
+  const firstTag=tags[0]||'';
+  const wb=(tags.map(t=>fullTagBlockFromText(currentPack?.worldbook,t)).filter(Boolean).join('\n\n---\n\n')) || (field==='worldbook'?snippet:worldbookAroundTag(firstTag));
+  const demo=(tags.map(t=>fullTagBlockFromText(currentPack?.demo_output,t)).filter(Boolean).join('\n\n---\n\n')) || (field==='demo_output'?snippet:demoAroundTag(firstTag));
+  const regex=(rel.map(m=>completeRegexPieceForMapping(m)).filter(Boolean).join('\n\n---\n\n')) || (phs.map(ph=>regexAroundPlaceholder(ph)).filter(Boolean).join('\n\n---\n\n')) || (field==='regex'?snippet:'');
+  const html=(phs.map(ph=>completeHtmlPieceForPlaceholder(ph)).filter(Boolean).join('\n\n---\n\n')) || (field==='html'?snippet:'');
+  return {wb,regex,html,demo,links,phs,tags};
+}
+function renderFullRelatedBlock(parts){
+  const one=(title,txt)=>`<div><h5>${esc(title)}</h5><pre>${esc(txt||'未定位到完整关联片段。可能是字段表缺少来源标签，或这段只是纯样式/结构。')}</pre></div>`;
+  return `<div class="full-related"><h5>完整关联片段</h5>${one('世界书中相关完整部分',parts.wb)}${one('正则中相关完整部分',parts.regex)}${one('HTML 中相关完整部分',parts.html)}${one('示例输出中相关完整部分',parts.demo)}</div>`;
+}
+function renderCrossLinkPanel(field,snippet){
+  const parts=relatedFullParts(field,snippet);
+  const links=parts.links;
+  const rel=links.related;
+  const relText=rel.length?rel.map(m=>`${m.placeholder||''} = ${m.field||'未命名'}${m.source_tag?'，来源 '+m.source_tag:''}${m.meaning?'，含义：'+m.meaning:''}`).join('\n'):'暂时没从字段表里匹配到。可以看下面“完整关联片段”，或让 AI 进一步判断。';
+  const phs=parts.phs;
+  const tag=parts.tags[0] || (rel[0]?.source_tag||'').replace(/[<>/]/g,'');
+  const htmlCtx=phs.map(ph=>`${ph} 完整相关：\n${completeHtmlPieceForPlaceholder(ph)||'HTML 中没有直接找到这个占位符。'}`).join('\n\n') || (field==='html'?snippet:'没有在选中段里识别到 $1-$n。');
+  const regexCtx=rel.map(m=>completeRegexPieceForMapping(m)).filter(Boolean).join('\n\n') || phs.map(ph=>regexAroundPlaceholder(ph)).filter(Boolean).join('\n\n') || (field==='regex'?snippet:'没有识别到明确捕获组。');
+  const wbCtx=parts.wb || '没有定位到明显世界书片段，可能是字段表缺少 source_tag，或这段是纯样式/结构。';
+  const demoCtx=parts.demo || '没有定位到明显示例输出片段，可能需要看完整 demo_output。';
+  return `<div class="crosslink-panel"><h4>三件套对应速查</h4><div class="crosslink-grid"><div class="crosslink-item"><b>当前选中区域</b><p>${esc(fieldKeyForDisplay(field))}</p></div><div class="crosslink-item"><b>可能对应字段</b><p>${esc(relText)}</p></div><div class="crosslink-item"><b>对应世界书部分</b><p>${esc(wbCtx)}</p></div><div class="crosslink-item"><b>对应正则部分</b><p>${esc(regexCtx)}</p></div><div class="crosslink-item"><b>对应 HTML 部分</b><p>${esc(htmlCtx)}</p></div><div class="crosslink-item"><b>对应示例输出</b><p>${esc(demoCtx)}</p></div>${renderFullRelatedBlock(parts)}</div></div>`;
+}
+function buildCrossLinkPlain(field,snippet){
+  const parts=relatedFullParts(field,snippet);
+  const links=parts.links;
+  const rel=links.related.map(m=>`${m.placeholder||''} = ${m.field||'未命名'} ${m.source_tag||''} ${m.meaning||''}`).join('\n') || '未匹配到字段表。';
+  return `本地三边对应速查：\n选中区域：${fieldKeyForDisplay(field)}\n识别到的标签：${links.tags.join('、')||'无'}\n识别到的占位符：${parts.phs.join('、')||'无'}\n可能字段：\n${rel}\n\n完整关联世界书部分：\n${parts.wb||'未定位'}\n\n完整关联正则部分：\n${parts.regex||'未定位'}\n\n完整关联 HTML 部分：\n${parts.html||'未定位'}\n\n完整关联示例输出部分：\n${parts.demo||'未定位'}`;
+}
+function goPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=$('page-'+page); if(target) target.classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  if(page==='history') renderHistory();
+  if(page==='preview') syncPreviewSource();
+  renderProjectState();
+  renderReviseScope();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.page)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCodeModal();closePreviewFullscreen();closeProjectModal();}});
+document.querySelectorAll('.modal-body,.modal-code,.analysis-box').forEach(el=>{el.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});el.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});});
+$('modelSelect').addEventListener('change',()=>{ if($('modelSelect').value) $('modelName').value=$('modelSelect').value; saveSettings(false); });
+
+function getSettings(){
+  return {
+    base:$('apiBase').value.trim().replace(/\/+$/,''),
+    key:$('apiKey').value.trim(),
+    model:$('modelName').value.trim(),
+    temperature:Number($('temperature').value || 0.7),
+    max_tokens:Number($('maxTokens').value || 6000)
+  };
+}
+function saveSettings(show=true){localStorage.setItem(LS_SETTINGS,JSON.stringify(getSettings()));updateStatus();if(show) toast('API 设置已保存')}
+function loadSettings(){
+  try{const s=JSON.parse(localStorage.getItem(LS_SETTINGS)||'{}');
+    $('apiBase').value=s.base||'';$('apiKey').value=s.key||'';$('modelName').value=s.model||'';
+    $('temperature').value=s.temperature??0.7;$('maxTokens').value=s.max_tokens??6000;
+  }catch(e){}
+}
+function clearSettings(){localStorage.removeItem(LS_SETTINGS);$('apiBase').value='';$('apiKey').value='';$('modelName').value='';updateStatus();toast('已清空本地 API 设置')}
+function updateStatus(){
+  const s=getSettings();
+  const has=s.base && s.key && s.model;
+  const modelTxt=has?`模型：${esc(s.model)}`:'未连接 API';
+  const packTxt=currentPack?`当前：${esc(currentPack.title||'未命名')}`:'暂无三件套';
+  $('statusCard').innerHTML = `<b>状态</b>：${modelTxt} ｜ ${packTxt} ｜ 自动保存开启`;
+}
+function setLoading(id,on){$(id).classList.toggle('show',!!on)}
+function apiUrl(path){const base=getSettings().base;return base.replace(/\/+$/,'')+path}
+function authHeaders(){const key=getSettings().key;return {'Content-Type':'application/json','Authorization':'Bearer '+key}}
+async function findModels(){
+  saveSettings(false);
+  const s=getSettings();
+  if(!s.base || !s.key){toast('先填 API Base URL 和 Key');return}
+  setLoading('apiLoader',true);
+  try{
+    const res=await fetch(apiUrl('/models'),{headers:{'Authorization':'Bearer '+s.key}});
+    if(!res.ok) throw new Error('HTTP '+res.status+'：'+await res.text());
+    const data=await res.json();
+    const list=Array.isArray(data.data)?data.data:(Array.isArray(data.models)?data.models:[]);
+    if(!list.length) throw new Error('接口返回了数据，但没有找到模型列表');
+    const sel=$('modelSelect'); sel.innerHTML='<option value="">选择一个模型</option>';
+    list.map(m=>m.id||m.name||m.model||String(m)).filter(Boolean).forEach(id=>{
+      const opt=document.createElement('option');opt.value=id;opt.textContent=id;sel.appendChild(opt);
+    });
+    $('modelName').value=list[0].id||list[0].name||list[0].model||'';
+    saveSettings(false);updateStatus();toast('找到 '+list.length+' 个模型，已填入第一个')
+  }catch(err){console.error(err);toast('自动找模型失败：'+err.message)}
+  finally{setLoading('apiLoader',false)}
+}
+async function testConnection(){
+  const s=getSettings();
+  if(!s.base || !s.key || !s.model){toast('先填完整 API、Key、模型');return}
+  setLoading('apiLoader',true);
+  try{
+    const text=await callChat([{role:'user',content:'只回复：连接成功'}],600);
+    toast('连接测试返回：'+text.slice(0,40));
+  }catch(err){toast('连接测试失败：'+err.message)}
+  finally{setLoading('apiLoader',false)}
+}
+async function callChat(messages,maxOverride,opts={}){
+  const s=getSettings();
+  if(!s.base || !s.key || !s.model) throw new Error('API 设置不完整');
+  const baseBody={model:s.model,messages,temperature:s.temperature,max_tokens:maxOverride||s.max_tokens};
+  if(opts.json) baseBody.response_format={type:'json_object'};
+  try{
+    return await callChatBody(baseBody,opts);
+  }catch(err){
+    const msg=String(err.message||'');
+    const unsupported=opts.json && /response_format|json_object|unsupported|not support|不支持|400|422/i.test(msg);
+    if(unsupported){
+      const retryBody={...baseBody};
+      delete retryBody.response_format;
+      return await callChatBody(retryBody,{...opts,json:false});
+    }
+    throw err;
+  }
+}
+async function callChatBody(body,opts={}){
+  let res,raw='';
+  try{
+    res=await fetch(apiUrl('/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
+    raw=await res.text();
+  }catch(err){
+    throw new Error('网络或浏览器拦截：'+err.message+'。如果是 Failed to fetch，常见原因是 API 不允许网页直连/CORS，被浏览器拦了；可以换支持网页直连的中转接口，或以后做后端代理。');
+  }
+  if(!res.ok){
+    throw new Error('HTTP '+res.status+'：'+raw.slice(0,900));
+  }
+  let data;
+  try{data=JSON.parse(raw)}catch(e){return raw}
+  const content=data?.choices?.[0]?.message?.content ?? data?.choices?.[0]?.text ?? data?.content ?? raw;
+  return typeof content==='string'?content:JSON.stringify(content);
+}
+
+function buildSystemPrompt(){
+  return `你是“状态栏制作场”的 SillyTavern 美化三件套生成器。\n\n${SPEC_SUMMARY}\n\n你的任务：根据用户想法生成完整世界书、正则、HTML 美化代码、示例输出、字段对应表、详细解释。\n\n硬性规则：\n- 不允许使用固定模板敷衍，要根据用户想法自行设计。\n- 初次生成时必须返回完整三件套。修改时可以“局部优先”：如果只是颜色、动画、布局、字体、背景、按钮样式等 HTML 外观问题，只改 html 字段，worldbook/regex/demo_output/mapping 必须原样保留；如果涉及字段增删、标签名、输出格式、捕获组、$1-$n、正则、世界书，则必须联动修改完整三件套。\n- 世界书、正则、HTML、示例输出必须互相匹配。\n- regex 必须能匹配 demo_output。\n- HTML 里的 $1-$n 必须和 regex 捕获组一一对应。\n- 如果用户要求“点开/切换/按钮”，优先使用不用 JS 的 details/summary、checkbox、radio+label、CSS 交互；若必须 JS，必须说明需要酒馆助手插件版本。\n- 必须解释每一块是干嘛的，以及用户想修改时该改哪一块。\n- 输出必须是严格 JSON。\n\n${REQUIRED_JSON_SCHEMA}`;
+}
+function buildUserPrompt(idea){
+  return `用户想法：\n${idea}\n\n请生成完整 SillyTavern 美化三件套。要求详细解释世界书、正则、HTML、示例输出如何对应。尤其要告诉用户：想加字段、改样式、修匹配失败、修内容错位时应该改哪一块。`;
+}
+function insertExample(i){$('userIdea').value=examples[i]||examples[0]}
+async function generatePack(){
+  const idea=$('userIdea').value.trim();
+  if(!idea){toast('先写你想要什么美化效果');return}
+  saveSettings(false);
+  showGenDiag('正在请求 AI。生成失败时会自动尝试修复 JSON，并把具体原因显示在这里。','info');
+  setLoading('genLoader',true);
+  try{
+    const messages=[{role:'system',content:buildSystemPrompt()},{role:'user',content:buildUserPrompt(idea)}];
+    const pack=await callPackAI(messages,'生成三件套');
+    pack.source_idea=idea;
+    setCurrentPack(pack,{autoSave:true,reason:'AI 生成完成'});
+    showGenDiag('生成成功。已经通过 JSON 解析，并自动补齐/校验了示例输出、字段表和基础结构。','ok');
+    toast('三件套生成完成，已自动保存');goPage('result');
+  }catch(err){
+    console.error(err);
+    showGenDiag(buildFailureHelp(err),'bad');
+    toast('生成失败：'+String(err.message||err).slice(0,80));
+  }
+  finally{setLoading('genLoader',false)}
+}
+function parsePack(text){
+  const cleaned=extractJsonText(text);
+  let obj;
+  try{obj=JSON.parse(cleaned)}catch(e){
+    const loose=looseParsePack(text);
+    if(loose && (loose.worldbook||loose.regex||loose.html||loose.demo_output)) return normalizePack(loose);
+    throw new Error('AI 没有返回可解析 JSON。解析错误：'+e.message+'。原文前 300 字：'+String(text).slice(0,300));
+  }
+  return normalizePack(obj);
+}
+async function callPackAI(messages,taskName){
+  let raw='';
+  let firstErr=null;
+  try{
+    raw=await callChat(messages,null,{json:true});
+    return parsePack(raw);
+  }catch(err){
+    firstErr=err;
+    const msg=String(err.message||'');
+    if(/API 设置不完整|网络或浏览器拦截|HTTP 401|HTTP 403|HTTP 404|HTTP 429|quota|余额|insufficient|invalid api key|模型|model/i.test(msg)){
+      throw err;
+    }
+  }
+  try{
+    showGenDiag('第一次返回不是标准 JSON，正在自动请求 AI 修复成严格 JSON。','info');
+    const repaired=await repairJsonWithAI(raw,firstErr?.message||'未知解析错误');
+    return parsePack(repaired);
+  }catch(repairErr){
+    const loose=looseParsePack(raw);
+    if(loose && (loose.worldbook||loose.regex||loose.html||loose.demo_output)){
+      const p=normalizePack(loose);
+      p.change_summary=[...(p.change_summary||[]),'AI 没有返回标准 JSON，网页已用宽松解析抢救出主要内容。建议点“手改后查格式”让 AI 再检查一次。'];
+      return p;
+    }
+    throw new Error((taskName||'生成')+'失败。第一次错误：'+(firstErr?.message||'未知')+'。自动修复也失败：'+(repairErr?.message||repairErr));
+  }
+}
+async function repairJsonWithAI(raw,errorMsg){
+  const repairPrompt=`下面是另一个 AI 返回的内容，但它无法被网页解析成 JSON。请你只做格式修复，不要改内容含义。
+
+解析错误：${errorMsg}
+
+必须输出严格 JSON，不要 Markdown，不要代码围栏，不要 JSON 外说明。必须包含这些字段：title, description, worldbook, regex, html, demo_output, mapping, explanation, change_summary, diagnosis_tips。demo_output 不能为空。
+
+原始内容：
+${String(raw||'').slice(0,26000)}`;
+  return await callChat([{role:'system',content:'你是 JSON 修复器。只输出严格 JSON。不要 Markdown。不要解释。'},{role:'user',content:repairPrompt}],null,{json:true});
+}
+function looseParsePack(text){
+  const t=String(text||'');
+  if(!t.trim()) return null;
+  const pick=(names,nextNames)=>{
+    for(const n of names){
+      const startRe=new RegExp('(?:^|\\n)\\s*(?:#{1,6}\\s*)?(?:[①②③④⑤⑥⑦⑧⑨⑩]?\\s*)?'+escapeRegExp(n)+'\\s*[:：]?\\s*\\n','i');
+      const m=startRe.exec(t);
+      if(m){
+        const rest=t.slice(m.index+m[0].length);
+        const endRe=new RegExp('\\n\\s*(?:#{1,6}\\s*)?(?:[①②③④⑤⑥⑦⑧⑨⑩]?\\s*)?(?:'+nextNames.map(x=>escapeRegExp(x)).join('|')+')\\s*[:：]?\\s*\\n','i');
+        const end=endRe.exec(rest);
+        return stripCodeFence((end?rest.slice(0,end.index):rest).trim());
+      }
+    }
+    return '';
+  };
+  const title=(t.match(/"title"\s*:\s*"([^"]+)"/)||t.match(/标题[:：]\s*([^\n]+)/)||[])[1]||'AI 返回宽松解析包';
+  const worldbook=pick(['世界书','Worldbook','World Book','worldbook','lorebook'],['正则','Regex','HTML','美化代码','示例输出','字段对应','说明']);
+  const regex=pick(['正则','正则表达式','Regex','regexp'],['HTML','美化代码','示例输出','Demo','字段对应','说明']);
+  const html=pick(['HTML','美化代码','美化HTML','Beautification Code'],['示例输出','Demo','字段对应','Mapping','说明','解释']);
+  const demo=pick(['示例输出','模拟输出','Demo','demo_output','example_output'],['字段对应','Mapping','说明','解释','change_summary']);
+  if(!(worldbook||regex||html||demo)) return null;
+  return {title,description:'AI 未返回标准 JSON，网页用宽松解析提取主要内容。',worldbook,regex,html,demo_output:demo,mapping:[],explanation:{overview:'这是宽松解析结果。建议先预览测试，再使用“手改后查格式”。'},change_summary:['AI 返回格式不标准，已尝试宽松解析。'],diagnosis_tips:['如果内容缺失，请重新生成，或降低需求复杂度后再试。']};
+}
+function stripCodeFence(s){
+  return String(s||'').replace(/^```(?:html|json|regex|regexp|text)?\s*/i,'').replace(/```$/,'').trim();
+}
+function escapeRegExp(s){
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+}
+function showGenDiag(msg,type='info'){
+  const el=$('genDiag'); if(!el)return;
+  el.style.display='block';
+  el.className='notice '+(type==='bad'?'bad':type==='ok'?'ok':type==='warn'?'warn':'');
+  el.innerHTML=String(msg||'').replace(/\n/g,'<br>');
+}
+function buildFailureHelp(err){
+  const msg=String(err?.message||err||'未知错误');
+  let reason='';
+  if(/API 设置不完整/.test(msg)) reason='API 地址、Key 或模型名没有填完整。';
+  else if(/网络或浏览器拦截|Failed to fetch|CORS/i.test(msg)) reason='浏览器无法直接请求这个 API，常见是 CORS 拦截。不是你的需求写错。';
+  else if(/401|403|invalid api key|Unauthorized/i.test(msg)) reason='Key 可能无效、权限不够，或者 Base URL 填错。';
+  else if(/404|not found/i.test(msg)) reason='接口路径可能不兼容。一般 Base URL 应该填到 /v1，例如 https://xxx.com/v1。';
+  else if(/429|quota|余额|insufficient/i.test(msg)) reason='额度、频率或余额问题。';
+  else if(/model/i.test(msg)) reason='模型名可能不对，先去 API 页自动寻找模型，或者手动复制准确模型名。';
+  else if(/JSON|解析|Unexpected|unterminated|结尾/i.test(msg)) reason='AI 回答没有按严格 JSON 返回，或者回答太长被截断。网页已经尝试自动修复，仍失败。';
+  else reason='接口返回异常，下面是原始错误。';
+  return `<b>生成失败原因判断：</b><br>${esc(reason)}<br><br><b>原始错误：</b><br>${esc(msg)}<br><br><b>你可以这样试：</b><br>1. 先点“测试连接”，确认模型能回复。<br>2. 如果是 JSON/截断问题，把最大输出调到 8000 或 12000。<br>3. 如果是 CORS/Failed to fetch，换支持网页直连的 API 地址，或后面改成后端代理。<br>4. 如果模型总是不听 JSON，换更稳的模型，或者先生成简单一点的需求。`;
+}
+function extractJsonText(text){
+  let t=String(text||'').trim();
+  t=t.replace(/^```(?:json)?\s*/i,'').replace(/```$/,'').trim();
+  const start=t.indexOf('{'); const end=t.lastIndexOf('}');
+  if(start!==-1 && end!==-1 && end>start) t=t.slice(start,end+1);
+  return t;
+}
+function firstText(){
+  for(const v of arguments){
+    if(v===0) return '0';
+    if(v!==undefined && v!==null && String(v).trim()) return String(v);
+  }
+  return '';
+}
+function normalizePack(obj){
+  obj=obj||{};
+  const p={
+    title:firstText(obj.title,obj.name,obj['标题'],'未命名三件套'),
+    description:firstText(obj.description,obj.desc,obj['说明'],obj['用途'],''),
+    worldbook:firstText(obj.worldbook,obj.lorebook,obj.world_info,obj.worldInfo,obj.lore,obj['世界书'],obj['世界书条目'],''),
+    regex:firstText(obj.regex,obj.regexp,obj.regular_expression,obj.pattern,obj['正则'],obj['正则表达式'],''),
+    html:firstText(obj.html,obj.beautification_html,obj.beautify_html,obj.template,obj['HTML'],obj['html'],obj['美化代码'],obj['美化HTML'],''),
+    demo_output:firstText(obj.demo_output,obj.demo,obj.example_output,obj.sample_output,obj.test_output,obj.raw_output,obj.ai_output,obj.preview_source,obj['示例输出'],obj['模拟输出'],obj['测试输出'],obj['AI原始输出'],''),
+    mapping:Array.isArray(obj.mapping)?obj.mapping:(Array.isArray(obj.field_mapping)?obj.field_mapping:(Array.isArray(obj['字段对应'])?obj['字段对应']:[])),
+    explanation:obj.explanation||obj['说明解释']||{},
+    change_summary:Array.isArray(obj.change_summary)?obj.change_summary:(Array.isArray(obj['改动说明'])?obj['改动说明']:[]),
+    diagnosis_tips:Array.isArray(obj.diagnosis_tips)?obj.diagnosis_tips:(Array.isArray(obj['诊断建议'])?obj['诊断建议']:[]),
+    created_at:obj.created_at||new Date().toISOString(),
+    source_idea:obj.source_idea||''
+  };
+  if(!p.mapping.length) p.mapping=inferMappingFromHtml(p.html,p.regex,p.worldbook);
+  p.mapping=normalizeMapping(p.mapping,p.regex,p.worldbook);
+  if(!p.demo_output.trim()){
+    p.demo_output=buildFallbackDemoOutput(p);
+    p.demo_generated_fallback=true;
+  }else{
+    p.demo_generated_fallback=!!obj.demo_generated_fallback;
+  }
+  return p;
+}
+function normalizeMapping(mapping,regex,worldbook){
+  const arr=Array.isArray(mapping)?mapping:[];
+  const tags=extractFieldTags(regex,worldbook);
+  return arr.map((m,i)=>{
+    if(typeof m==='string') m={field:m};
+    const ph=m.placeholder||m.place_holder||m.key||('$'+(i+1));
+    let tag=firstText(m.source_tag,m.tag,m.sourceTag,m['来源标签'],'');
+    if(tag && !/^<.*>$/.test(tag)) tag='<'+tag.replace(/[<>/]/g,'')+'>';
+    if(!tag && tags[i]) tag='<'+tags[i]+'>';
+    return {placeholder:ph,field:firstText(m.field,m.name,m.label,m['字段名'],'未说明字段'),source_tag:tag,meaning:firstText(m.meaning,m.desc,m.description,m['含义'],'')};
+  });
+}
+function inferMappingFromHtml(html,regex='',worldbook=''){
+  const nums=[...new Set((String(html).match(/\$\d+/g)||[]))].sort((a,b)=>Number(a.slice(1))-Number(b.slice(1)));
+  const tags=extractFieldTags(regex,worldbook);
+  return nums.map((n,i)=>({placeholder:n,field:tags[i]||'未说明字段',source_tag:tags[i]?'<'+tags[i]+'>':'',meaning:'AI 未提供 mapping，已根据正则/HTML 自动推断，需人工检查'}));
+}
+function extractTagNamesSafe(text){
+  const t=String(text||'');
+  const names=[];
+  const add=(name)=>{
+    name=cleanTagName(name);
+    if(name && !names.includes(name)) names.push(name);
+  };
+  // 普通标签：<Tag>、</Tag>
+  t.replace(/<\/?([A-Za-z0-9_\u4e00-\u9fa5-]+)>/g,(m,name)=>add(name));
+  // 正则字符串里常见的转义闭合标签：<\/Tag>
+  t.replace(/<\\\/([A-Za-z0-9_\u4e00-\u9fa5-]+)>/g,(m,name)=>add(name));
+  return names;
+}
+function cleanTagName(raw){return String(raw||'').replace(/[<>\/]/g,'').trim()}
+function extractFieldTags(regex,worldbook){
+  let tags=extractTagNamesSafe(regex);
+  if(tags.length<2) tags=extractTagNamesSafe(worldbook);
+  if(tags.length>1) tags=tags.slice(1);
+  const seen=[];
+  tags.forEach(t=>{if(t && !seen.includes(t)) seen.push(t)});
+  return seen;
+}
+function extractRootTag(regex,worldbook){
+  const a=extractTagNamesSafe(regex); if(a.length) return a[0];
+  const b=extractTagNamesSafe(worldbook); if(b.length) return b[0];
+  return 'status_pack';
+}
+function placeholderNumber(ph){const m=String(ph||'').match(/\$(\d+)/);return m?Number(m[1]):9999}
+function valueForDemoField(name,i){
+  const n=String(name||'字段'+(i+1));
+  if(/time|时间|日期|时刻/i.test(n)) return '周五 17:40';
+  if(/place|地点|位置|场景/i.test(n)) return '教学楼后门';
+  if(/favor|好感/i.test(n)) return '72';
+  if(/dark|阴暗|黑化/i.test(n)) return '46';
+  if(/possess|占有|嫉妒/i.test(n)) return '68';
+  if(/mind|心理|内心|想法/i.test(n)) return '他把那句话在心里重复了一遍，却没有真的说出口。';
+  if(/diary|日记/i.test(n)) return '今天的事被他偷偷写进了旧本子里，字迹压得很深。';
+  if(/status|状态|表面/i.test(n)) return '表面平静，指尖却一直捏着衣角。';
+  return '示例内容：'+n;
+}
+function buildFallbackDemoOutput(pack){
+  const p=pack||currentPack||{};
+  const root=extractRootTag(p.regex,p.worldbook);
+  let fields=[];
+  if(Array.isArray(p.mapping)&&p.mapping.length){
+    fields=p.mapping.slice().sort((a,b)=>placeholderNumber(a.placeholder)-placeholderNumber(b.placeholder)).map((m,i)=>({tag:cleanTagName(m.source_tag)||cleanTagName(m.tag)||('field_'+(i+1)),field:m.field||('字段'+(i+1))}));
+  }else{
+    const tags=extractFieldTags(p.regex,p.worldbook);
+    fields=tags.map((t,i)=>({tag:t,field:t||('字段'+(i+1))}));
+  }
+  fields=fields.filter(x=>x.tag && x.tag!==root);
+  if(!fields.length){fields=[{tag:'time',field:'时间'},{tag:'place',field:'地点'},{tag:'status',field:'状态'}];}
+  const lines=['<'+root+'>'];
+  fields.forEach((f,i)=>lines.push('  <'+f.tag+'>'+valueForDemoField(f.field,i)+'</'+f.tag+'>'));
+  lines.push('</'+root+'>');
+  return lines.join('\n');
+}
+function fillDemoFromCurrent(){
+  if(!currentPack)return toast('没有三件套');
+  currentPack.demo_output=buildFallbackDemoOutput(currentPack);
+  currentPack.demo_generated_fallback=true;
+  if($('previewSource')) $('previewSource').value=currentPack.demo_output;
+  setCurrentPack(currentPack,{autoSave:true,reason:'自动补全示例输出'});
+  toast('已根据当前三件套补了示例输出');
+  goPage('result');
+  currentTab='demo';
+  switchResultTab('demo');
+}
+function setCurrentPack(pack, opts={}){
+  currentPack=normalizePack(pack);
+  localStorage.setItem(LS_CURRENT,JSON.stringify(currentPack));
+  renderResult(); syncPreviewSource(); updateStatus(); renderProjectState();
+  if(opts.autoSave && !suppressAutoSave) autoSaveCurrent(opts.reason||'自动保存');
+}
+function loadCurrentPack(){
+  try{const p=JSON.parse(localStorage.getItem(LS_CURRENT)||'null'); if(p) currentPack=normalizePack(p)}catch(e){}
+}
+function switchResultTab(tab){currentTab=tab;document.querySelectorAll('#resultTabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));renderResultContent();renderReviseScope()}
+function getScopeInfo(tabOrKey){
+  const raw=tabOrKey||currentTab||'worldbook';
+  const normalized={demo:'demo_output',demo_output:'demo_output',worldbook:'worldbook',regex:'regex',html:'html',mapping:'mapping',explain:'explain'}[raw]||raw;
+  const data={
+    worldbook:{key:'worldbook',label:'世界书',main:'主要让 AI 检查输出标签、字段规则、触发条件和内容规范。',linked:'如果字段增删或标签改名，会同步检查正则、HTML、示例输出和字段表。'},
+    regex:{key:'regex',label:'正则',main:'主要让 AI 检查标签匹配、捕获组数量、$1-$n 顺序和跨行匹配。',linked:'如果捕获组变化，会同步检查世界书标签、HTML 占位符、示例输出和字段表。'},
+    html:{key:'html',label:'HTML 美化',main:'主要让 AI 检查样式、布局、颜色、宽度、展开/切换结构和 $1-$n 放置位置。',linked:'如果发现 $n 对应错，会同步检查正则和字段表；如果只是外观问题，不乱改世界书。'},
+    demo_output:{key:'demo_output',label:'示例输出',main:'主要让 AI 检查示例原始标签是否完整、能否被正则匹配、是否覆盖所有字段。',linked:'如果示例缺字段，会同步检查世界书和正则是否一致。'},
+    mapping:{key:'mapping',label:'字段对应表',main:'主要让 AI 检查 $1-$n、字段名、来源标签、含义是否一一对应。',linked:'如果字段表错，会同步检查正则捕获顺序和 HTML 占位符位置。'},
+    explain:{key:'explain',label:'说明解释',main:'主要让 AI 补清楚每块作用、改哪里、常见问题。',linked:'原则上不改三件套内容，只补说明；除非发现格式硬错误。'}
+  };
+  return data[normalized]||data.worldbook;
+}
+function renderReviseScope(){
+  const el=$('reviseScope'); if(!el)return;
+  const sc=getScopeInfo(currentTab);
+  el.innerHTML=`<b>当前主改区域：${esc(sc.label)}</b><span class="mini-line">${esc(sc.main)}</span><span class="mini-line">主次规则：你停在这个页签，AI 会以这里为主；但不是每次都重做整套。能只改当前块就只改当前块，只有字段/标签/捕获组变化才联动整套。</span>`;
+  updateReviseModeHint();
+}
+function renderResult(){
+  $('packTitle').textContent=currentPack?.title||'还没有三件套';
+  $('packDesc').textContent=currentPack?.description||'先去“生成”页输入想法，或者加载内置演示包。';
+  $('resultOverview').innerHTML=currentPack?.explanation?.overview?esc(currentPack.explanation.overview).replace(/\n/g,'<br>'):'世界书负责输出格式，正则负责抓字段，HTML 负责最终显示。生成后请先去预览页测试一次。';
+  renderResultContent();
+  renderReviseScope();
+}
+function sectionExplain(kind){
+  const ex=currentPack?.explanation||{};
+  const fallback={
+    worldbook:'这一块放进 SillyTavern 世界书里。它不负责美化外观，而是规定 AI 以后要输出哪些标签、标签顺序是什么、每个字段应该写什么。正则会按这里的标签名去抓内容，所以你改了标签名，正则也必须改。想增加字段、删除字段、让 AI 输出更稳定，通常先改世界书。',
+    regex:'这一块放进 SillyTavern 正则替换里。它负责扫描 AI 原始输出，并用捕获组抓内容。第一个括号捕获到的是 $1，第二个是 $2，顺序会直接影响 HTML 里显示的位置。标签变了、字段增删了、内容错位了，正则和 mapping 都要一起检查。',
+    html:'这一块决定最终长什么样。颜色、背景、字体、边框、布局、展开栏、按钮、滚动区域都在这里。HTML 中的 $1-$n 会被正则捕获内容替换。如果只是丑、字看不清、背景没铺满、宽度不对，一般只改 HTML。',
+    demo:'这是模拟 AI 在酒馆里会吐出的原始内容。它必须同时符合世界书规则、能被正则匹配、能填进 HTML。它不是最终样式，而是用来测试三件套是否能跑通。想测试长文本、空字段、特殊符号，就改这里。'
+  };
+  return cleanMarkdownText(ex[kind+'_explanation']||fallback[kind]||'');
+}
+function renderResultContent(){
+  const box=$('resultContent');
+  if(!currentPack){box.innerHTML='<div class="empty">还没有生成内容。</div>';return}
+  if(currentTab==='mapping'){
+    const rows=(currentPack.mapping||[]).map(m=>`<tr><td><b>${esc(m.placeholder||'')}</b></td><td>${esc(m.field||'')}</td><td>${esc(m.source_tag||'')}</td><td>${esc(m.meaning||'')}</td></tr>`).join('');
+    box.innerHTML=`<div class="code-wrap"><div class="code-head"><div><h3>字段对应表</h3><p>这个表说明正则抓到的内容会被放进 HTML 的哪个 $n。内容错位时优先检查这里。</p></div></div><table class="mapping"><thead><tr><th>占位符</th><th>字段</th><th>来源标签</th><th>含义</th></tr></thead><tbody>${rows||'<tr><td colspan="4">暂无 mapping</td></tr>'}</tbody></table></div>`;return;
+  }
+  if(currentTab==='explain'){
+    const li=(arr,empty)=>'<ul class="clean-list">'+((cleanArray(arr).map(x=>`<li>${esc(x)}</li>`).join(''))||`<li>${esc(empty)}</li>` )+'</ul>';
+    const overview=cleanMarkdownText(currentPack.explanation?.overview||'世界书管 AI 输出格式；正则管抓字段；HTML 管最终外观。哪里出问题，就优先改对应那一块。');
+    box.innerHTML=`<div class="grid two"><div class="card"><h3>修改定位</h3><p class="clean-text">${esc(overview)}</p>${li(currentPack.explanation?.how_to_modify,'想增加字段：世界书、正则、HTML 都要一起改。只换颜色或布局：通常只改 HTML。')}</div><div class="card"><h3>本次改动</h3>${li(currentPack.change_summary,'暂无改动说明')}</div><div class="card"><h3>正则说明</h3><p class="clean-text">${esc(sectionExplain('regex'))}</p></div><div class="card"><h3>常见诊断</h3>${li(currentPack.diagnosis_tips,'预览失败时，先检查标签、正则和 $n 对应关系。')}</div></div>`;return;
+  }
+  const map={worldbook:['① 世界书：让 AI 按格式输出','worldbook','worldbook'],regex:['② 正则：从 AI 输出里抓内容','regex','regex'],html:['③ 美化 HTML：负责最终长什么样','html','html'],demo:['④ 示例输出：用来测试三件套是否跑通','demo_output','demo']};
+  const [title,key,exkey]=map[currentTab];
+  const val=currentPack[key]||'';
+  const regexExtra=currentTab==='regex'?`<div class="regex-analysis-entry"><button class="btn small accent" onclick="analyzeWholeRegex()">分析整个正则每一块</button><p>只在正则区显示。它会把整条正则、字段对应表、世界书、HTML 和示例输出一起交给 AI，逐段说明每个标签、每个捕获组、每个 $n 是怎么对应的。</p></div>`:'';
+  const demoExtra=currentTab==='demo'?`<div class="regex-analysis-entry"><button class="btn small accent" onclick="fillDemoFromCurrent()">自动修复示例和正则</button><p>示例输出本身不会有捕获组。这个按钮会根据当前标签，重建一份可匹配的示例输出，并同步重建带 ([\s\S]*?) 捕获组的正则。</p></div>`:'';
+  const fallbackNote=(currentTab==='demo'&&currentPack.demo_generated_fallback)?`<div class="notice warn" style="margin:10px 0 0"><b>提示：</b>这份示例输出是网页根据当前三件套自动补的。最好让 AI 再修一次，生成更贴合剧情的示例输出。</div>`:'';
+  box.innerHTML=`<div class="code-wrap"><div class="code-head"><div><h3>${title}</h3><p>${esc(sectionExplain(exkey))}</p></div><div class="code-actions"><button class="btn small" onclick="copyText(currentPack['${key}']||'')">复制这一块</button><button class="btn small" onclick="saveCurrentToHistory()">保存当前版</button><button class="btn small" onclick="openCodeModal('${key}')">放大查看</button><button class="btn small accent" onclick="analyzeSelection('${key}')">AI 分析选中段</button><button class="btn small" onclick="manualFormatCheck('${key}')">手改后查格式</button><button class="btn small" onclick="editCurrentField('${key}')">快速编辑</button></div></div><textarea class="codebox" readonly id="code_${key}" onmouseup="setActiveCodeField('${key}')" onkeyup="setActiveCodeField('${key}')" onfocus="setActiveCodeField('${key}')">${esc(val)}</textarea>${fallbackNote}<div class="relationship-tip">${esc(relationshipTip(exkey))}</div><div class="manual-check-note">如果你手动改了这一块，点“手改后查格式”。AI 会以当前页为主检查标签闭合、正则捕获、$1-$n 对应和示例匹配，要求不改变内容含义。</div>${regexExtra}${demoExtra}</div>`;
+}
+
+function relationshipTip(kind){
+  const tips={
+    worldbook:'对应关系提示：世界书里的每个标签，原则上都要在正则里有一个对应捕获组；如果这个字段要显示出来，HTML 里还要有对应的 $n。选中某段世界书后可让 AI 判断它会影响正则和 HTML 的哪一段。',
+    regex:'对应关系提示：正则里的每一组括号都会生成一个 $n；HTML 里的 $1-$n 必须和这些括号顺序一致。选中某段正则后，AI 可以帮你看它抓的是哪个标签、会流向 HTML 哪个位置。',
+    html:'对应关系提示：HTML 只负责展示。$1-$n 来自正则，字段含义来自世界书。选中某段 HTML 后，AI 可以帮你判断它是样式、结构、交互，还是某个字段槽位。',
+    demo:'对应关系提示：示例输出是测试样本，不是捕获组。捕获组只在正则里；示例输出负责提供被正则抓取的原始标签内容。它应该长得像世界书要求的输出，并且能被正则抓住。'
+  };
+  return tips[kind]||'';
+}
+function setActiveCodeField(field){activeCodeField=field}
+function fieldLabel(field){return ({worldbook:'世界书',regex:'正则',html:'HTML',demo_output:'示例输出'}[field]||field)}
+function openCodeModal(field){
+  if(!currentPack)return toast('没有三件套');
+  modalField=field; activeCodeField=field;
+  $('codeModalTitle').textContent='放大查看：'+fieldLabel(field);
+  $('modalCodeText').value=currentPack[field]||'';
+  $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>怎么用</b><p>先在代码框里选中一段。点“➕ 荧光标记”确认范围，再点“AI 分析选中段”。</p></div></div>';
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.remove('show');snipBox.textContent=''}
+  const hp=$('highlightPreview');
+  if(hp){hp.classList.remove('show');hp.innerHTML=''}
+  $('codeModal').classList.add('show');
+  lockModalScroll();
+  setTimeout(()=>$('modalCodeText').focus(),30);
+}
+function closeCodeModal(){$('codeModal').classList.remove('show');setTimeout(unlockModalScroll,0)}
+function copyModalCode(){copyText($('modalCodeText').value||'')}
+function saveModalCode(){
+  if(!modalField||!currentPack)return;
+  currentPack[modalField]=$('modalCodeText').value;
+  setCurrentPack(currentPack,{autoSave:true,reason:'放大窗口修改 '+modalField});
+  toast('已保存到 '+fieldLabel(modalField)+'，并自动保存历史');
+}
+function getSelectionFromTextarea(ta){
+  if(!ta)return '';
+  const a=ta.selectionStart||0,b=ta.selectionEnd||0;
+  if(a===b)return '';
+  return ta.value.slice(Math.min(a,b),Math.max(a,b));
+}
+function getSelectedSnippet(field){
+  const modalOpen=$('codeModal')?.classList.contains('show');
+  if(modalOpen && modalField===field){return getSelectionFromTextarea($('modalCodeText'))}
+  return getSelectionFromTextarea($('code_'+field));
+}
+
+let lastModalSelection={start:0,end:0,text:''};
+function rememberModalSelection(){
+  const ta=$('modalCodeText');
+  if(!ta)return;
+  const start=ta.selectionStart||0,end=ta.selectionEnd||0;
+  if(start!==end)lastModalSelection={start,end,text:ta.value.slice(Math.min(start,end),Math.max(start,end))};
+}
+function getModalSelectionRange(){
+  const ta=$('modalCodeText');
+  if(!ta)return null;
+  let start=ta.selectionStart||0,end=ta.selectionEnd||0;
+  if(start===end && lastModalSelection.text){start=lastModalSelection.start;end=lastModalSelection.end;}
+  if(start===end)return null;
+  return {start:Math.min(start,end),end:Math.max(start,end),text:ta.value.slice(Math.min(start,end),Math.max(start,end))};
+}
+function renderModalHighlight(range){
+  const hp=$('highlightPreview');
+  if(!hp||!range)return;
+  hp.innerHTML=renderHighlightedSelection($('modalCodeText').value,range.start,range.end);
+  hp.classList.add('show');
+  setTimeout(()=>{const mark=hp.querySelector('mark'); if(mark) mark.scrollIntoView({block:'center',behavior:'smooth'});},30);
+}
+function markModalSelection(){
+  rememberModalSelection();
+  const range=getModalSelectionRange();
+  if(!range||!range.text.trim())return toast('先在放大代码框里选中一段文字');
+  renderModalHighlight(range);
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.add('show');snipBox.textContent='已荧光标记的选中段：\n'+range.text}
+  toast('已加荧光标记，不会修改代码内容');
+}
+async function analyzeSelection(field){
+  if(!currentPack)return toast('没有三件套');
+  const snippet=getSelectedSnippet(field);
+  if(!snippet.trim())return toast('先在这一块里拖动选中一段文字');
+  if(!$('codeModal').classList.contains('show'))openCodeModal(field);
+  if($('codeModal').classList.contains('show') && modalField===field){
+    rememberModalSelection();
+    const r=getModalSelectionRange();
+    if(r) renderModalHighlight(r);
+  }
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.add('show');snipBox.textContent='本次分析的选中段：\n'+snippet}
+  const crossHtml=renderCrossLinkPanel(field,snippet);
+  showAnalysisLoading('正在分析选中段','正在把选中段和三件套对应关系一起发给 AI。完成后会显示对应世界书、正则、HTML 和示例输出。');
+  $('selectionAnalysis').innerHTML=crossHtml+$('selectionAnalysis').innerHTML;
+  try{
+    const prompt=buildSelectionAnalysisPrompt(field,snippet);
+    const ans=await callChat([{role:'system',content:'你是 SillyTavern 三件套代码讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。只用清楚短句。必须按固定小标题回答：这段是什么、属于哪一环、对应世界书部分、对应正则部分、对应 HTML 部分、对应示例输出部分、对应字段、改了会影响什么、怎么改、常见错误。不要返回 JSON。'},{role:'user',content:prompt}],1800);
+    $('selectionAnalysis').innerHTML=formatClearAnalysis(ans);
+    toast('正则分析完成');
+  }catch(err){
+    $('selectionAnalysis').innerHTML=crossHtml+'<div class="analysis-clean"><div class="analysis-section"><b>分析失败</b><p>'+esc(err.message)+'\n如果还没连 API，先去 API 页设置。上面的三件套对应速查仍然可以先看。</p></div></div>';
+    toast('分析失败：'+err.message);
+  }
+}
+function analyzeModalSelection(){
+  if(!modalField)return toast('没有打开的代码块');
+  analyzeSelection(modalField);
+}
+async function analyzeWholeRegex(){
+  if(!currentPack)return toast('没有三件套');
+  openCodeModal('regex');
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.add('show');snipBox.textContent='本次分析对象：\n整条正则表达式';}
+  showAnalysisLoading('正在分析整条正则','正在逐段检查根标签、子标签、捕获组、$1-$n，以及它和世界书、HTML、示例输出的对应关系。');
+  const localHtml=formatClearAnalysis(localWholeRegexAnalysis());
+  try{
+    const s=getSettings();
+    if(!s.base || !s.key || !s.model){
+      $('selectionAnalysis').innerHTML=localHtml;
+      toast('未连接 API，先显示本地基础分析');
+      return;
+    }
+    const ans=await callChat([{role:'system',content:'你是 SillyTavern 正则讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。按固定小标题回答：这条正则整体在做什么、每个主要标签、每个捕获组、$1-$n 对应、和世界书的关系、和 HTML 的关系、常见错误、修改建议。每段短句清楚。不要返回 JSON。'},{role:'user',content:buildWholeRegexPrompt()}],2600);
+    $('selectionAnalysis').innerHTML=formatClearAnalysis(ans);
+    toast('整条正则分析完成');
+  }catch(err){
+    $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>AI 分析失败，已显示本地基础分析</b><p>'+esc(err.message)+'</p></div></div>'+localHtml;
+    toast('AI 分析失败，已显示本地基础分析');
+  }
+}
+function buildWholeRegexPrompt(){
+  return `请分析下面这条 SillyTavern 美化正则的每一块。\n\n【正则】\n${currentPack.regex}\n\n【字段对应表】\n${JSON.stringify(currentPack.mapping||[],null,2)}\n\n【世界书】\n${currentPack.worldbook}\n\n【HTML】\n${currentPack.html}\n\n【示例输出】\n${currentPack.demo_output}\n\n请重点说明：根标签是什么、每个子标签怎么匹配、每个捕获组对应 $几、会流向 HTML 哪个位置、如果要新增/删除/改名字段要同时改哪几处。不要使用 Markdown 和星号。`;
+}
+function localWholeRegexAnalysis(){
+  const regex=String(currentPack?.regex||'');
+  const mapping=currentPack?.mapping||[];
+  const tagNames=[];
+  const add=t=>{t=cleanTagName(t); if(t && !tagNames.includes(t)) tagNames.push(t)};
+  regex.replace(/<\/?([A-Za-z0-9_\u4e00-\u9fa5-]+)>/g,(m,t)=>add(t));
+  regex.replace(/<\\\/([A-Za-z0-9_\u4e00-\u9fa5-]+)>/g,(m,t)=>add(t));
+  const groupCount=countCapturingGroups(regex);
+  const mapText=mapping.length?mapping.map((m,i)=>`${m.placeholder||('$'+(i+1))}：${m.field||'未命名字段'}${m.source_tag?'，来源 '+m.source_tag:''}${m.meaning?'，含义：'+m.meaning:''}`).join('\n'):'当前 mapping 为空，只能按捕获组顺序推断。';
+  return `这条正则整体在做什么：\n它负责扫描 AI 的原始标签输出，把标签之间的内容抓出来，再交给 HTML 里的 $1、$2、$3 使用。\n\n主要标签：\n我在正则里识别到这些标签线索：${tagNames.join('、')||'没有识别到明显标签，可能是复杂写法或转义写法'}。根标签通常负责包住整段内容，子标签负责包住具体字段。\n\n捕获组数量：\n我粗略统计到 ${groupCount} 个捕获组。第 1 个捕获组会变成 $1，第 2 个会变成 $2，后面依次类推。\n\n$1-$n 对应：\n${mapText}\n\n和世界书的关系：\n世界书必须要求 AI 输出和正则一致的标签名与层级。世界书改了标签名、顺序或字段数量，正则一般也要跟着改。\n\n和 HTML 的关系：\nHTML 里的 $1-$n 会被正则捕获内容替换。如果 HTML 的 $3 显示错内容，通常要检查正则第 3 个捕获组和 mapping。\n\n常见错误：\n标签名不一致、少写结束标签、跨行内容没用 [\\s\\S]*?、括号数量变了但 mapping 没更新、HTML 还在用旧的 $n。\n\n修改建议：\n只是改颜色和布局，优先改 HTML。新增或删除字段，要同时改世界书、正则、HTML 和 mapping。`;
+}
+function countCapturingGroups(pattern){
+  let n=0,escp=false,inClass=false;
+  for(let i=0;i<pattern.length;i++){
+    const ch=pattern[i],next=pattern[i+1];
+    if(escp){escp=false;continue}
+    if(ch==='\\'){escp=true;continue}
+    if(ch==='['){inClass=true;continue}
+    if(ch===']'){inClass=false;continue}
+    if(!inClass && ch==='(' && next!=='?')n++;
+  }
+  return n;
+}
+function buildSelectionAnalysisPrompt(field,snippet){
+  const map={worldbook:'世界书',regex:'正则',html:'HTML 美化代码',demo_output:'示例输出'};
+  return `请分析我在“${map[field]||field}”中选中的这一段。
+
+【选中片段】
+${snippet}
+
+【完整三件套摘要】
+标题：${currentPack.title}
+说明：${currentPack.description}
+字段对应：${JSON.stringify(currentPack.mapping||[],null,2)}
+
+【世界书】
+${currentPack.worldbook}
+
+【正则】
+${currentPack.regex}
+
+【HTML】
+${currentPack.html}
+
+【示例输出】
+${currentPack.demo_output}
+
+【本地初步对应速查】
+${buildCrossLinkPlain(field,snippet)}
+
+请不要使用 Markdown，不要使用星号，不要写长篇大论。
+重点：不要只说“可能有关”，请尽量给出和选中段有关的完整对应片段。比如选中 HTML 里的 $3，就要指出正则第 3 个捕获组、世界书的来源标签、示例输出对应标签，以及字段表中的完整行。
+请按下面小标题回答，每段 1-4 句：
+这段是什么：
+属于哪一环：
+对应世界书部分：
+对应正则部分：
+对应 HTML 部分：
+对应示例输出部分：
+对应字段：
+完整关联片段：
+改了会影响什么：
+怎么改：
+常见错误：`;
+}
+
+function editCurrentField(key){
+  const old=currentPack[key]||'';
+  const txt=prompt('编辑 '+key+'：',old);
+  if(txt!==null){currentPack[key]=txt;setCurrentPack(currentPack,{autoSave:true,reason:'手动编辑 '+key});toast('已更新 '+key+'，已自动保存')}
+}
+function copyText(text){navigator.clipboard.writeText(String(text||'')).then(()=>toast('已复制'))}
+function copyAll(){if(!currentPack)return toast('没有内容');copyText(formatPackTxt(currentPack))}
+function syncPreviewSource(){if(currentPack){if(!currentPack.demo_output||!currentPack.demo_output.trim()){currentPack.demo_output=buildFallbackDemoOutput(currentPack);currentPack.demo_generated_fallback=true;} if(!$('previewSource').value.trim()) $('previewSource').value=currentPack.demo_output||'';} if(currentPack) runPreview(false)}
+function parseRegex(input){
+  let s=String(input||'').trim();
+  if(!s) throw new Error('正则为空');
+  if(s.startsWith('/') && s.lastIndexOf('/')>0){
+    let last=-1;
+    for(let i=s.length-1;i>0;i--){
+      if(s[i]==='/' && s[i-1] !== '\\'){last=i;break}
+    }
+    if(last>0){
+      const pattern=s.slice(1,last);
+      // 预览必须去掉 g。JS 的 String.match 遇到 g 会丢捕获组，导致“匹配成功但 0 个字段”。
+      let flags=s.slice(last+1).replace(/[^gimsuyd]/g,'').replace(/g/g,'');
+      if(!flags.includes('s')) flags+='s';
+      flags=[...new Set(flags.split(''))].join('');
+      return new RegExp(pattern,flags);
+    }
+  }
+  return new RegExp(s,'s');
+}
+function replacePlaceholders(html,captures){
+  let out=String(html||'');
+  for(let i=captures.length-1;i>=1;i--){
+    out=out.replace(new RegExp('\\$'+i+'(?!\\d)','g'),captures[i] ?? '');
+  }
+  return out;
+}
+function runPreview(showToast=true){
+  if(!currentPack){if(showToast) toast('没有三件套');return}
+  let source=$('previewSource').value || currentPack.demo_output || '';
+  if(!String(source).trim()){
+    currentPack.demo_output=buildFallbackDemoOutput(currentPack);
+    currentPack.demo_generated_fallback=true;
+    source=currentPack.demo_output;
+    $('previewSource').value=source;
+  }
+  let re,match;
+  try{
+    re=parseRegex(currentPack.regex);
+    match=source.match(re);
+    if(!match) throw new Error('正则没有匹配到示例输出');
+    const html=replacePlaceholders(currentPack.html,match);
+    renderPreviewFrame(html);
+    renderCaptures(match);
+    $('matchNotice').className='notice ok';
+    $('matchNotice').innerHTML=`<b>匹配成功。</b><br>共抓到 ${match.length-1} 个字段。第 1 个捕获组是 $1，第 2 个是 $2，以此类推。`;
+    if(showToast) toast('预览匹配成功');
+  }catch(err){
+    console.error(err);
+    $('captures').innerHTML='';
+    renderPreviewFrame(`<div style="font-family:system-ui;padding:20px;color:#74302b;background:#fff4f1;border:1px solid #e4b8b2;line-height:1.8"><b>预览失败</b><br>${esc(err.message)}<br><br>可能原因：示例输出为空、标签名不一致、标签顺序不一致、根标签没闭合、正则少了字段、AI 输出多了无法匹配的文字。</div>`);
+    $('matchNotice').className='notice bad';
+    $('matchNotice').innerHTML=`<b>匹配失败：</b>${esc(err.message)}<br>建议：如果 AI 原始输出已经有标签但抓不到，优先改正则；如果 AI 根本没按标签输出，优先改世界书；如果只是不好看，改 HTML。`;
+    if(showToast) toast('预览失败：'+err.message);
+  }
+}
+function renderPreviewFrame(html){
+  const doc=`<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    *{box-sizing:border-box;max-width:100%}
+    html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;background:#f6f0e6}
+    body{padding:18px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;color:#222;overflow-wrap:anywhere}
+    body>*{max-width:100%!important}
+    img,svg,video,canvas,iframe{max-width:100%;height:auto}
+    pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
+    table{display:block;max-width:100%;overflow-x:auto}
+    @media(max-width:640px){body{padding:10px;font-size:14px}}
+  </style></head><body>${html}</body></html>`;
+  lastPreviewDoc=doc;
+  $('previewFrame').srcdoc=doc;
+}
+
+function openPreviewFullscreen(){
+  if(!lastPreviewDoc && currentPack) runPreview(false);
+  $('fullPreviewFrame').srcdoc=lastPreviewDoc || '<!doctype html><html><body style="font-family:system-ui;padding:20px">还没有预览内容。</body></html>';
+  $('previewModal').classList.add('show');
+  lockModalScroll();
+}
+function closePreviewFullscreen(){$('previewModal').classList.remove('show');setTimeout(unlockModalScroll,0)}
+function requestPreviewBrowserFullscreen(){
+  const el=$('previewModal').querySelector('.modal-card');
+  if(el?.requestFullscreen) el.requestFullscreen();
+}
+
+function renderCaptures(match){
+  const list=[];
+  for(let i=1;i<match.length;i++){
+    const mp=(currentPack.mapping||[]).find(x=>String(x.placeholder)==='$'+i)||{};
+    list.push(`<div class="capture-item"><b>$${i}</b><span>${esc(mp.field||'未命名字段')}：</span>${esc(match[i]).replace(/\n/g,'<br>')}</div>`);
+  }
+  $('captures').innerHTML=list.join('')||'<div class="empty">没有捕获组。</div>';
+}
+function scopePromptText(scope){
+  return `当前用户所在结果页是【${scope.label}】。这表示用户这次主要想改【${scope.label}】。\n主改说明：${scope.main}\n联动说明：${scope.linked}\n规则：以当前页为主，不要平均用力；但只要涉及字段、标签、捕获组、$1-$n 或示例匹配，就必须同步修正相关三件套，避免只改一处导致断裂。`;
+}
+function detectRevisionMode(idea,scope){
+  const t=String(idea||'');
+  const key=scope?.key||currentTab||'worldbook';
+  const structural=/新增|添加|删除|去掉字段|字段|标签|tag|根标签|闭合|正则|regex|捕获组|mapping|对应表|\$\d+|匹配失败|检测不到|示例输出.*匹配|世界书|输出格式|格式不一致|顺序不一致/i.test(t);
+  const htmlOnly=/颜色|字体|字号|背景|图片|圆角|边框|宽度|高度|间距|布局|排版|动画|翻页|展开|折叠|按钮|阴影|透明|遮罩|滚动|滑动|居中|对齐|好看|丑|风格|白色|黑色|看不清|适配|手机|电脑|全屏|悬浮|固定/i.test(t);
+  const demoOnly=/只改示例|测试内容|预览文案|示例内容|demo/i.test(t) && !structural;
+  const explainOnly=/解释|说明|帮助|教程|文案|提示|问题分类|FAQ/i.test(t) && !structural && !htmlOnly;
+  if(structural) return {mode:'linked',fields:['worldbook','regex','html','demo_output','mapping','explanation'],label:'联动整套修改',reason:'修改涉及字段、标签、正则、捕获组、$n 或匹配关系，必须联动检查世界书、正则、HTML、示例输出和 mapping。'};
+  if(key==='html' || htmlOnly) return {mode:'html_only',fields:['html','explanation','change_summary','diagnosis_tips'],label:'主要只改 HTML',reason:'修改集中在颜色、布局、动画、翻页、背景、按钮、适配等外观/交互样式，原则上保留世界书、正则、示例输出和 mapping。'};
+  if(key==='demo_output' || demoOnly) return {mode:'demo_only',fields:['demo_output','explanation','change_summary','diagnosis_tips'],label:'主要只改示例输出',reason:'修改集中在测试样本和预览内容，原则上不改世界书、正则、HTML。'};
+  if(key==='explain' || explainOnly) return {mode:'explain_only',fields:['explanation','change_summary','diagnosis_tips'],label:'主要只改说明',reason:'修改集中在解释、教程、帮助文案，原则上不改三件套代码。'};
+  if(key==='regex') return {mode:'linked',fields:['worldbook','regex','html','demo_output','mapping','explanation'],label:'以正则为主联动修改',reason:'当前停在正则页。正则变化会影响 $1-$n、HTML 占位符、示例输出和世界书标签，需要联动检查。'};
+  if(key==='worldbook') return {mode:'linked',fields:['worldbook','regex','html','demo_output','mapping','explanation'],label:'以世界书为主联动修改',reason:'当前停在世界书页。输出规则变化通常会影响正则、示例输出和 HTML 显示字段，需要联动检查。'};
+  return {mode:'safe_full',fields:['worldbook','regex','html','demo_output','mapping','explanation'],label:'安全完整检查',reason:'无法确认是否只需局部修改，因此采用保守策略：主次分清，但检查完整三件套，未涉及的部分必须原样保留。'};
+}
+function buildRevisionSystemPrompt(){
+  return `你是“状态栏制作场”的 SillyTavern 三件套修改助手。你要做稳定修改，不要乱重写。
+
+三件套关系：世界书规定 AI 输出标签；正则用捕获组抓标签内容；HTML 用 $1-$n 显示捕获结果；示例输出用于测试；mapping 说明 $1-$n 对应字段。
+
+返回格式必须是严格 JSON，不要 Markdown，不要代码围栏，不要 JSON 外说明。
+
+允许返回局部 JSON。只返回确实需要改的字段。可用字段：title, description, worldbook, regex, html, demo_output, mapping, explanation, change_summary, diagnosis_tips。
+
+硬规则：
+1. 如果只是颜色、字体、布局、背景、翻页动画、按钮、展开折叠、宽度、适配等外观问题，优先只返回 html 和 change_summary。worldbook、regex、demo_output、mapping 不要返回，表示保持原样。
+2. 如果涉及新增/删除字段、标签名、根标签、正则、捕获组、$1-$n、mapping、匹配失败、示例输出结构，必须返回所有相关字段，至少包括 worldbook, regex, html, demo_output, mapping。
+3. 如果只改示例输出，只返回 demo_output 和说明。
+4. 如果只改解释或帮助，只返回 explanation/change_summary/diagnosis_tips。
+5. 不允许删除原有功能，除非用户明确要求。
+6. 不允许改变用户原本内容含义、角色设定、剧情设定，除非用户明确要求。
+7. change_summary 必须说明：主改区域、联动修改、哪些部分保持原样。`;
+}
+function parseJsonObject(text){
+  const cleaned=extractJsonText(text);
+  try{return JSON.parse(cleaned)}catch(e){throw new Error('修改返回不是可解析 JSON：'+e.message+'。原文前 300 字：'+String(text).slice(0,300))}
+}
+async function callRevisionAI(messages,modeInfo){
+  let raw='';
+  try{
+    raw=await callChat(messages,null,{json:true});
+    return parseJsonObject(raw);
+  }catch(firstErr){
+    const msg=String(firstErr.message||'');
+    if(/API 设置不完整|网络或浏览器拦截|HTTP 401|HTTP 403|HTTP 404|HTTP 429|quota|余额|insufficient|invalid api key|模型|model/i.test(msg)) throw firstErr;
+    try{
+      const repaired=await repairJsonWithAI(raw,firstErr.message||'修改 JSON 解析失败');
+      return parseJsonObject(repaired);
+    }catch(secondErr){
+      throw new Error('继续修改失败。第一次错误：'+msg+'。自动修复也失败：'+(secondErr.message||secondErr));
+    }
+  }
+}
+function mergeRevisionPatch(base,patch,modeInfo){
+  const out=JSON.parse(JSON.stringify(base||{}));
+  patch=patch||{};
+  const allowed=['title','description','worldbook','regex','html','demo_output','mapping','explanation','change_summary','diagnosis_tips'];
+  for(const k of allowed){
+    if(patch[k]===undefined || patch[k]===null) continue;
+    if(typeof patch[k]==='string' && !patch[k].trim() && ['worldbook','regex','html','demo_output'].includes(k)) continue;
+    if(k==='explanation' && typeof patch[k]==='object' && !Array.isArray(patch[k])) out.explanation={...(out.explanation||{}),...patch[k]};
+    else out[k]=patch[k];
+  }
+  const summary=cleanArray(patch.change_summary);
+  const extra=[modeInfo.label+'：'+modeInfo.reason];
+  out.change_summary=summary.length?summary:extra;
+  out.revision_mode=modeInfo.mode;
+  out.updated_at=new Date().toISOString();
+  return normalizePack(out);
+}
+function setReviseDiag(msg,type='info'){
+  let el=$('reviseDiag');
+  if(!el){
+    el=document.createElement('div');
+    el.id='reviseDiag';
+    el.className='notice';
+    const loader=$('reviseLoader');
+    if(loader && loader.parentNode) loader.parentNode.insertBefore(el,loader);
+  }
+  el.style.display='block';
+  el.className='notice '+(type==='bad'?'bad':type==='ok'?'ok':type==='warn'?'warn':'');
+  el.innerHTML=String(msg||'').replace(/\n/g,'<br>');
+}
+async function revisePack(){
+  if(!currentPack){toast('还没有当前三件套');return}
+  const idea=$('reviseIdea').value.trim();
+  if(!idea){toast('先写修改意见');return}
+  const scope=getScopeInfo(currentTab);
+  const modeInfo=detectRevisionMode(idea,scope);
+  setReviseDiag('正在修改：'+modeInfo.label+'。\n'+modeInfo.reason+'\n如果只是 HTML 外观问题，会尽量只改 HTML；如果牵扯字段/标签/正则，会联动整套。','info');
+  const loaderText=$('reviseLoaderText');
+  if(loaderText) loaderText.textContent='AI 正在按“'+modeInfo.label+'”修改...';
+  setLoading('reviseLoader',true);
+  try{
+    const user=`当前用户所在页：${scope.label}
+系统判断修改模式：${modeInfo.label}
+判断原因：${modeInfo.reason}
+允许/建议修改字段：${modeInfo.fields.join(', ')}
+
+用户修改意见：
+${idea}
+
+当前三件套 JSON：
+${JSON.stringify(currentPack,null,2)}
+
+请按判断模式修改：
+- 能局部改就局部改，只返回需要改的字段。
+- 如果你发现用户要求会影响字段、标签、捕获组、$1-$n 或匹配关系，必须返回相关完整字段。
+- 未涉及的字段不要返回，网页会自动保持原样。
+- 必须返回严格 JSON。`;
+    const patch=await callRevisionAI([{role:'system',content:buildRevisionSystemPrompt()},{role:'user',content:user}],modeInfo);
+    const pack=mergeRevisionPatch(currentPack,patch,modeInfo);
+    pack.source_idea=currentPack.source_idea||'';
+    setCurrentPack(pack,{autoSave:true,reason:'AI 修改完成：'+modeInfo.label});
+    $('reviseIdea').value='';
+    setReviseDiag('修改完成：'+modeInfo.label+'。\n已经自动保存。未返回的部分已保持原样，避免简单改动误伤世界书/正则。','ok');
+    toast('新版已生成并保存');
+    goPage('result');
+    if(modeInfo.mode==='html_only') switchResultTab('html');
+    else if(modeInfo.mode==='demo_only') switchResultTab('demo');
+    else if(modeInfo.mode==='explain_only') switchResultTab('explain');
+  }catch(err){
+    console.error(err);
+    setReviseDiag('继续修改失败：'+esc(err.message)+'\n\n建议：先确认 API 测试连接成功；如果只是改样式，可以去 HTML 区快速编辑或放大查看手动改，再点“手改后查格式”。','bad');
+    toast('修改失败：'+String(err.message||err).slice(0,80));
+  }
+  finally{setLoading('reviseLoader',false)}
+}
+async function repairPack(){
+  if(!currentPack){toast('还没有当前三件套');return}
+  const scope=getScopeInfo(currentTab);
+  $('reviseIdea').value = ($('reviseIdea').value.trim()?$('reviseIdea').value.trim()+'\n\n':'') + `请检查并修复当前三件套的世界书、正则、HTML、示例输出是否完全对应。本次主要从【${scope.label}】页发现问题，但要联动检查所有三件套。重点修复：regex 必须能匹配 demo_output；HTML 的 $1-$n 必须与 mapping 对应；不要删原功能。`;
+  await revisePack();
+}
+async function manualFormatCheck(scopeKey){
+  if(!currentPack){toast('还没有当前三件套');return}
+  const scope=getScopeInfo(scopeKey||currentTab);
+  setLoading('reviseLoader',true);
+  try{
+    const user=`用户可能已经手动修改了当前三件套。请做“格式与对应关系检查”，不是重新创作。\n\n当前三件套 JSON：\n${JSON.stringify(currentPack,null,2)}\n\n${scopePromptText(scope)}\n\n检查目标：\n1. 主要检查【${scope.label}】是否有格式问题。\n2. 同步检查世界书标签、正则捕获组、HTML $1-$n、示例输出、mapping 是否互相对应。\n3. 如果发现格式错误，可以修复：标签闭合、标签名不一致、正则无法跨行匹配、捕获组顺序错、$n 对不上、demo_output 为空或不能匹配、JSON 字段名不规范。\n4. 严禁改变用户原本内容含义、剧情设定、文案风格、视觉风格和功能结构；除非不修就无法匹配。\n5. 如果没有问题，原样返回完整 JSON，只在 change_summary 说明“检查通过，未改内容”。\n\n必须返回完整新版 JSON。`;
+    const pack=await callPackAI([{role:'system',content:buildSystemPrompt()},{role:'user',content:user}], '格式检查'); pack.source_idea=currentPack.source_idea||'';
+    setCurrentPack(pack,{autoSave:true,reason:'AI 格式检查：'+scope.label});
+    toast('格式检查完成，已保存当前版');
+    goPage('result');
+    switchResultTab(scope.key==='demo_output'?'demo':scope.key);
+  }catch(err){toast('格式检查失败：'+err.message)}
+  finally{setLoading('reviseLoader',false)}
+}
+function formatPackTxt(p){
+  return `状态栏制作场导出\n标题：${p.title}\n说明：${p.description}\n导出时间：${new Date().toLocaleString()}\n\n================ JSON 原始包 ================\n${JSON.stringify(p,null,2)}\n\n================ 世界书 ================\n${p.worldbook}\n\n================ 正则 ================\n${p.regex}\n\n================ HTML ================\n${p.html}\n\n================ 示例输出 ================\n${p.demo_output}\n\n================ 字段对应 ================\n${(p.mapping||[]).map(m=>`${m.placeholder} = ${m.field} ${m.source_tag?`(${m.source_tag})`:''} ${m.meaning||''}`).join('\n')}\n\n================ 使用说明 ================\n${p.explanation?.overview||''}\n${p.explanation?.worldbook_explanation||''}\n${p.explanation?.regex_explanation||''}\n${p.explanation?.html_explanation||''}\n${p.explanation?.demo_explanation||''}\n`;
+}
+function exportTxt(){
+  if(!currentPack){toast('没有可导出的三件套');return}
+  const blob=new Blob([formatPackTxt(currentPack)],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=(currentPack.title||'酒馆美化三件套').replace(/[\\/:*?"<>|]/g,'_')+'.txt';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function packSignature(p){return JSON.stringify({title:p?.title,worldbook:p?.worldbook,regex:p?.regex,html:p?.html,demo_output:p?.demo_output})}
+function autoSaveCurrent(reason='自动保存'){
+  if(!currentPack)return;
+  const arr=getHistory();
+  const sig=packSignature(currentPack);
+  if(arr[0] && packSignature(arr[0])===sig)return;
+  arr.unshift({...currentPack,saved_at:new Date().toISOString(),auto_saved:true,save_reason:reason});
+  localStorage.setItem(LS_HISTORY,JSON.stringify(arr.slice(0,80)));
+  renderHistory();
+}
+function saveCurrentToHistory(){
+  if(!currentPack){toast('没有可保存内容');return}
+  autoSaveCurrent('手动保存');toast('已保存到历史');renderHistory();
+}
+
+function clearCurrentWorkspace(){
+  currentPack=null;
+  currentTab='worldbook';
+  modalField='';
+  activeCodeField='';
+  localStorage.removeItem(LS_CURRENT);
+  ['previewSource','reviseIdea','importText'].forEach(id=>{if($(id))$(id).value=''});
+  $('captures').innerHTML='';
+  $('matchNotice').className='notice';
+  $('matchNotice').textContent='还没有匹配结果。';
+  $('previewFrame').srcdoc='';
+  $('fullPreviewFrame').srcdoc='';
+  lastPreviewDoc='';
+  renderResult();updateStatus();renderProjectState();
+  renderHistory();
+}
+function renderProjectState(){
+  const txt=currentPack
+    ? `<b>当前制作：</b>${esc(currentPack.title||'未命名')}<br><span>说明：${esc(currentPack.description||'暂无说明')}</span><br><span>如果不想做了，可以先归档，之后从历史记录恢复。</span>`
+    : '<b>当前制作：</b>暂无三件套。可以去“生成”页写新想法，或从历史记录恢复。';
+  if($('homeProjectState')) $('homeProjectState').innerHTML=txt;
+  if($('projectModalState')) $('projectModalState').innerHTML=txt;
+}
+function openProjectModal(){renderProjectState();$('projectModal').classList.add('show');lockModalScroll()}
+function closeProjectModal(){$('projectModal')?.classList.remove('show');setTimeout(unlockModalScroll,0)}
+function archiveAndClearCurrent(){
+  if(!currentPack){toast('当前没有三件套可归档');closeProjectModal();goPage('generate');return}
+  autoSaveCurrent('暂时不做了，已归档');
+  clearCurrentWorkspace();
+  closeProjectModal();
+  toast('已归档到历史，并清空当前工作台');
+  goPage('history');
+}
+function saveAndStartNew(){
+  if(currentPack) autoSaveCurrent('开始新制作前保存');
+  clearCurrentWorkspace();
+  $('userIdea').value='';
+  closeProjectModal();
+  toast('已保存旧版并开启新制作');
+  goPage('generate');
+}
+function discardCurrentOnly(){
+  clearCurrentWorkspace();
+  if($('userIdea')) $('userIdea').value='';
+  closeProjectModal();
+  toast('已直接清空当前制作。历史记录保留，可以重新开始。');
+  goPage('generate');
+}
+
+function getHistory(){try{return JSON.parse(localStorage.getItem(LS_HISTORY)||'[]')}catch(e){return[]}}
+function renderHistory(){
+  const arr=getHistory();const box=$('historyList');
+  if(!arr.length){box.innerHTML='<div class="empty">还没有历史记录。</div>';return}
+  box.innerHTML=arr.map((p,i)=>`<div class="history-item"><div><h3>${esc(p.title||'未命名')} ${p.auto_saved?'<span class="badge">自动保存</span>':''}</h3><p>${esc(p.description||'')}<br>${new Date(p.saved_at||p.created_at||Date.now()).toLocaleString()}${p.save_reason?' ｜ '+esc(p.save_reason):''}</p></div><div class="btn-row"><button class="btn small" onclick="loadHistory(${i})">使用</button><button class="btn small danger" onclick="deleteHistory(${i})">删除</button></div></div>`).join('')
+}
+function loadHistory(i){const arr=getHistory();if(arr[i]){setCurrentPack(arr[i]);toast('已加载历史记录');goPage('result')}}
+function deleteHistory(i){const arr=getHistory();arr.splice(i,1);localStorage.setItem(LS_HISTORY,JSON.stringify(arr));renderHistory()}
+function clearHistory(){if(confirm('确定清空历史记录吗？')){localStorage.removeItem(LS_HISTORY);renderHistory();toast('历史已清空')}}
+function importPack(){
+  const txt=$('importText').value.trim();if(!txt)return toast('先粘贴内容');
+  try{const p=parsePack(txt);setCurrentPack(p,{autoSave:true,reason:'导入旧三件套'});$('importText').value='';toast('导入成功，已自动保存');goPage('result')}catch(e){toast('导入失败：'+e.message)}
+}
+function loadDemoPack(){
+  const demo={
+    title:'阴暗校园双面状态栏演示包',
+    description:'演示世界书、正则、HTML、示例输出和字段对应关系如何联动。',
+    worldbook:`【双面校园状态栏输出规则】\n每次回复结尾必须额外输出以下结构化状态栏。严格保持标签名与顺序，不要用 Markdown 包裹，不要解释标签。\n\n<school_status>\n  <time>{{当前时间}}</time>\n  <place>{{当前地点}}</place>\n  <favor>{{char对user的好感值，0-100}}</favor>\n  <surface>{{char表面状态，一句话}}</surface>\n  <mind>{{char没有说出口的心理活动}}</mind>\n  <dark>{{char当前阴暗值，0-100}}</dark>\n  <possess>{{char当前占有欲，0-100}}</possess>\n  <diary>{{char偷偷写下的日记，贴合当前剧情}}</diary>\n</school_status>\n\n内容要求：字段必须结合当前剧情动态变化；mind 和 diary 可以更细腻，但不要脱离角色设定。`,
+    regex:`/<school_status>\\s*<time>([\\s\\S]*?)<\\/time>\\s*<place>([\\s\\S]*?)<\\/place>\\s*<favor>([\\s\\S]*?)<\\/favor>\\s*<surface>([\\s\\S]*?)<\\/surface>\\s*<mind>([\\s\\S]*?)<\\/mind>\\s*<dark>([\\s\\S]*?)<\\/dark>\\s*<possess>([\\s\\S]*?)<\\/possess>\\s*<diary>([\\s\\S]*?)<\\/diary>\\s*<\\/school_status>/s`,
+    html:`<div style="width:94%;max-width:430px;margin:12px auto;font-family:'Songti SC','Noto Serif SC',serif;color:#2b241c;">\n  <details style="border:1px solid #7c6043;background:#f4ead8;box-shadow:8px 8px 0 rgba(64,42,23,.16);">\n    <summary style="list-style:none;cursor:pointer;padding:12px 14px;background:#e8d8bf;border-bottom:1px solid #7c6043;font-weight:bold;letter-spacing:.08em;">旧课桌里夹着一页状态记录</summary>\n    <div style="padding:14px;background:linear-gradient(180deg,#fbf3e5,#e7d3b8);">\n      <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#6f573f;border-bottom:1px solid rgba(124,96,67,.35);padding-bottom:8px;">\n        <span>时间：$1</span><span>地点：$2</span>\n      </div>\n      <div style="margin-top:12px;padding:10px;background:rgba(255,255,255,.48);border:1px solid rgba(124,96,67,.25);">\n        <b>表面状态</b><br><span style="font-size:13px;line-height:1.7;">$4</span>\n      </div>\n      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">\n        <div style="padding:9px;background:#fff8ed;border:1px solid rgba(124,96,67,.22);">好感：$3</div>\n        <div style="padding:9px;background:#3a2b24;color:#fff;border:1px solid #1e1713;">阴暗值：$6</div>\n      </div>\n      <div style="margin-top:10px;padding:10px;background:#2e251f;color:#fff;border:1px solid #17110e;line-height:1.75;font-size:13px;">\n        <b>没说出口的话</b><br>$5\n      </div>\n      <div style="margin-top:10px;padding:10px;background:#1f1916;color:#fff;border:1px solid #0e0a08;line-height:1.75;font-size:13px;">\n        <b>偷写日记</b><br>占有欲：$7<br>$8\n      </div>\n    </div>\n  </details>\n</div>`,
+    demo_output:`<school_status>\n  <time>周五 17:40</time>\n  <place>教学楼后门</place>\n  <favor>72</favor>\n  <surface>他把书包甩到肩上，笑得像只是刚好路过。</surface>\n  <mind>她今天看起来很累，不能吓到她。可是她为什么又和别人一起走？</mind>\n  <dark>46</dark>\n  <possess>68</possess>\n  <diary>今天她袖口蹭到了我的手背。她应该不知道。那一下太轻了，轻得像是我自己幻想出来的。</diary>\n</school_status>`,
+    mapping:[
+      {placeholder:'$1',field:'时间',source_tag:'<time>',meaning:'显示当前剧情时间'},
+      {placeholder:'$2',field:'地点',source_tag:'<place>',meaning:'显示当前地点'},
+      {placeholder:'$3',field:'好感',source_tag:'<favor>',meaning:'表面亲密度数值'},
+      {placeholder:'$4',field:'表面状态',source_tag:'<surface>',meaning:'角色外在表现'},
+      {placeholder:'$5',field:'心理活动',source_tag:'<mind>',meaning:'角色未说出口的话'},
+      {placeholder:'$6',field:'阴暗值',source_tag:'<dark>',meaning:'阴暗倾向数值'},
+      {placeholder:'$7',field:'占有欲',source_tag:'<possess>',meaning:'占有欲数值'},
+      {placeholder:'$8',field:'日记',source_tag:'<diary>',meaning:'角色隐藏日记内容'}
+    ],
+    explanation:{
+      overview:'世界书要求 AI 输出 <school_status> 这组标签；正则按顺序抓取 time/place/favor 等字段；HTML 用 $1-$8 把字段放进双面状态栏里。',
+      worldbook_explanation:'世界书负责规定 AI 每次输出哪些标签。如果想增加“课程表”或“偷藏物”，要先在世界书里加字段。',
+      regex_explanation:'正则按标签顺序捕获 8 个字段，因此 $1 是 time，$2 是 place，直到 $8 是 diary。标签名或顺序变化时，正则必须一起改。',
+      html_explanation:'HTML 控制最终样式。背景、颜色、边框、展开栏和文字白色都在 HTML 中改。$1-$8 是内容槽位。',
+      demo_explanation:'示例输出模拟 AI 实际吐出的标签文本。预览页用它检查正则是否能匹配。',
+      how_to_modify:['想改样式：改 HTML。','想新增字段：世界书、正则、HTML 都要改。','匹配失败：先查标签名和正则。','内容错位：查 mapping 和 $1-$8。']
+    },
+    change_summary:['演示包已内置完整三件套。'],
+    diagnosis_tips:['展开能用 details/summary，不依赖 JS。','如果字体在酒馆不生效，可换成系统字体或引入可访问字体链接。']
+  };
+  setCurrentPack(demo,{autoSave:true,reason:'加载演示包'});toast('已加载演示包，已自动保存');goPage('result')
+}
+
+
+
+// V2.5 修复：示例输出 / 正则捕获组预览彻底修复。
+// 关键点：1. 正则预览禁止使用 g flag，因为 JS 的 String.match 遇到 g 会丢失捕获组。
+// 关键点：2. 标签识别函数修正，支持 <tag>、</tag>、<\/tag>。
+// 关键点：3. 预览失败时可本地重建“带捕获组”的正则和示例输出。
+function extractTagNamesSafe(text){
+  const t=String(text||'');
+  const names=[];
+  const re=/<\s*\\?\/?\s*([A-Za-z0-9_\u4e00-\u9fa5-]+)(?:\s[^>]*)?>/g;
+  let m;
+  while((m=re.exec(t))){
+    const name=m[1];
+    if(!name) continue;
+    if(/^!|^\?/.test(name)) continue;
+    if(!names.includes(name)) names.push(name);
+  }
+  return names;
+}
+function cleanTagName(raw){
+  return String(raw||'').replace(/[<>]/g,'').replace(/^\\?\/?/,'').replace(/\s.*$/,'').trim();
+}
+function tagNamesFromMapping(mapping){
+  const arr=Array.isArray(mapping)?mapping:[];
+  const out=[];
+  arr.forEach((m,i)=>{
+    if(typeof m==='string') m={field:m};
+    let tag=cleanTagName(m.source_tag||m.tag||m.sourceTag||m['来源标签']||'');
+    if(!tag && m.field && /^[A-Za-z0-9_\u4e00-\u9fa5-]+$/.test(String(m.field))) tag=String(m.field);
+    if(tag && !out.includes(tag)) out.push(tag);
+  });
+  return out;
+}
+function inferRootAndFieldsFromPack(p){
+  p=p||currentPack||{};
+  const demoTags=extractTagNamesSafe(p.demo_output||'');
+  const regexTags=extractTagNamesSafe(p.regex||'');
+  const worldTags=extractTagNamesSafe(p.worldbook||'');
+  let root='';
+  if(demoTags.length) root=demoTags[0];
+  else if(regexTags.length) root=regexTags[0];
+  else if(worldTags.length) root=worldTags[0];
+  else root='status_pack';
+  let fields=[];
+  const mapTags=tagNamesFromMapping(p.mapping||[]).filter(t=>t!==root);
+  if(mapTags.length) fields=mapTags;
+  else if(demoTags.length>1) fields=demoTags.slice(1).filter(t=>t!==root);
+  else if(regexTags.length>1) fields=regexTags.slice(1).filter(t=>t!==root);
+  else if(worldTags.length>1) fields=worldTags.slice(1).filter(t=>t!==root);
+  const seen=[];
+  fields.forEach(t=>{t=cleanTagName(t); if(t && t!==root && !seen.includes(t)) seen.push(t)});
+  if(!seen.length) seen.push('time','place','status');
+  return {root,fields:seen};
+}
+function extractFieldTags(regex,worldbook){
+  const info=inferRootAndFieldsFromPack({regex,worldbook,demo_output:currentPack?.demo_output||'',mapping:currentPack?.mapping||[]});
+  return info.fields;
+}
+function extractRootTag(regex,worldbook){
+  return inferRootAndFieldsFromPack({regex,worldbook,demo_output:currentPack?.demo_output||'',mapping:currentPack?.mapping||[]}).root;
+}
+function parseRegex(input){
+  let s=String(input||'').trim();
+  if(!s) throw new Error('正则为空');
+  if(s.startsWith('/') && s.lastIndexOf('/')>0){
+    let last=-1;
+    for(let i=s.length-1;i>0;i--){
+      if(s[i] !== '/') continue;
+      let bs=0;
+      for(let j=i-1;j>=0 && s[j]==='\\';j--) bs++;
+      if(bs%2===0){last=i;break;}
+    }
+    if(last>0){
+      const pattern=s.slice(1,last);
+      let flags=s.slice(last+1).replace(/[^gimsuy]/g,'');
+      flags=flags.replace(/g/g,'');
+      if(!flags.includes('s')) flags+='s';
+      flags=[...new Set(flags.split(''))].join('');
+      return new RegExp(pattern,flags);
+    }
+  }
+  return new RegExp(s,'s');
+}
+function countCapturingGroups(pattern){
+  let s=String(pattern||'').trim();
+  if(s.startsWith('/') && s.lastIndexOf('/')>0){
+    let last=s.lastIndexOf('/');
+    s=s.slice(1,last);
+  }
+  let n=0,escp=false,inClass=false;
+  for(let i=0;i<s.length;i++){
+    const ch=s[i], next=s[i+1];
+    if(escp){escp=false;continue;}
+    if(ch==='\\'){escp=true;continue;}
+    if(ch==='['){inClass=true;continue;}
+    if(ch===']'){inClass=false;continue;}
+    if(!inClass && ch==='(' && next!=='?') n++;
+  }
+  return n;
+}
+function buildRegexFromRootAndFields(root,fields){
+  root=cleanTagName(root)||'status_pack';
+  fields=(fields||[]).map(cleanTagName).filter(Boolean).filter(t=>t!==root);
+  if(!fields.length) fields=['time','place','status'];
+  const body=fields.map(t=>`\\s*<${t}>([\\s\\S]*?)<\\/${t}>`).join('');
+  return `/<${root}>${body}\\s*<\\/${root}>/s`;
+}
+function buildFallbackDemoOutput(pack){
+  const p=pack||currentPack||{};
+  const info=inferRootAndFieldsFromPack(p);
+  const lines=['<'+info.root+'>'];
+  info.fields.forEach((tag,i)=>{
+    const mapItem=(p.mapping||[]).find(m=>cleanTagName(m.source_tag||m.tag||m.sourceTag)===tag) || (p.mapping||[])[i] || {};
+    const field=mapItem.field||tag;
+    lines.push('  <'+tag+'>'+valueForDemoField(field,i)+'</'+tag+'>');
+  });
+  lines.push('</'+info.root+'>');
+  return lines.join('\n');
+}
+function normalizeMapping(mapping,regex,worldbook){
+  const arr=Array.isArray(mapping)?mapping:[];
+  const info=inferRootAndFieldsFromPack({regex,worldbook,demo_output:currentPack?.demo_output||'',mapping:arr});
+  let base=arr.length?arr:info.fields.map((t,i)=>({placeholder:'$'+(i+1),field:t,source_tag:'<'+t+'>'}));
+  return base.map((m,i)=>{
+    if(typeof m==='string') m={field:m};
+    const ph=m.placeholder||m.place_holder||m.key||('$'+(i+1));
+    let tag=cleanTagName(m.source_tag||m.tag||m.sourceTag||m['来源标签']||'') || info.fields[i] || '';
+    return {placeholder:ph,field:firstText(m.field,m.name,m.label,m['字段名'],tag||'未说明字段'),source_tag:tag?'<'+tag+'>':'',meaning:firstText(m.meaning,m.desc,m.description,m['含义'],'')};
+  });
+}
+function autoRepairDemoAndRegexLocal(opts={}){
+  if(!currentPack) return false;
+  const before=JSON.stringify({regex:currentPack.regex,demo_output:currentPack.demo_output,mapping:currentPack.mapping});
+  const info=inferRootAndFieldsFromPack(currentPack);
+  const newRegex=buildRegexFromRootAndFields(info.root,info.fields);
+  currentPack.regex=newRegex;
+  currentPack.mapping=normalizeMapping(currentPack.mapping,currentPack.regex,currentPack.worldbook);
+  currentPack.demo_output=buildFallbackDemoOutput(currentPack);
+  currentPack.demo_generated_fallback=true;
+  if($('previewSource')) $('previewSource').value=currentPack.demo_output;
+  localStorage.setItem(LS_CURRENT,JSON.stringify(currentPack));
+  if(!opts.silent){renderResult();updateStatus();toast('已本地重建带捕获组的正则和示例输出');}
+  return before!==JSON.stringify({regex:currentPack.regex,demo_output:currentPack.demo_output,mapping:currentPack.mapping});
+}
+function fillDemoFromCurrent(){
+  if(!currentPack)return toast('没有三件套');
+  autoRepairDemoAndRegexLocal({silent:true});
+  setCurrentPack(currentPack,{autoSave:true,reason:'自动修复示例输出和捕获组正则'});
+  toast('已重建示例输出，并同步修正正则捕获组');
+  goPage('preview');
+  runPreview(true);
+}
+function runPreview(showToast=true){
+  if(!currentPack){if(showToast) toast('没有三件套');return;}
+  let source=$('previewSource').value || currentPack.demo_output || '';
+  if(!String(source).trim()){
+    currentPack.demo_output=buildFallbackDemoOutput(currentPack);
+    currentPack.demo_generated_fallback=true;
+    source=currentPack.demo_output;
+    $('previewSource').value=source;
+  }
+  let re,match,usedRepair=false,firstError='';
+  try{
+    re=parseRegex(currentPack.regex);
+    match=source.match(re);
+    if(!match) throw new Error('正则没有匹配到示例输出');
+    if(match.length<=1) throw new Error('正则匹配到了整段，但没有抓到任何捕获组。常见原因：正则用了 g 标志、没有写 (...) 捕获组，或捕获组被写成了 (?:...)。');
+  }catch(err){
+    firstError=err.message;
+    try{
+      usedRepair=autoRepairDemoAndRegexLocal({silent:true});
+      source=$('previewSource').value || currentPack.demo_output || '';
+      re=parseRegex(currentPack.regex);
+      match=source.match(re);
+      if(!match) throw new Error('自动修复后仍未匹配：'+firstError);
+      if(match.length<=1) throw new Error('自动修复后仍没有捕获组：'+firstError);
+    }catch(err2){
+      console.error(err2);
+      $('captures').innerHTML='';
+      renderPreviewFrame(`<div style="font-family:system-ui;padding:20px;color:#74302b;background:#fff4f1;border:1px solid #e4b8b2;line-height:1.8"><b>预览失败</b><br>${esc(err2.message)}<br><br>可以先点“自动补一个示例输出”，它会同步重建带捕获组的正则。<br><br>正确结构应该是：世界书要求 AI 输出标签；示例输出模拟这段标签；正则用 ([\\s\\S]*?) 抓每个字段；HTML 用 $1-$n 显示。</div>`);
+      $('matchNotice').className='notice bad';
+      $('matchNotice').innerHTML=`<b>匹配失败：</b>${esc(err2.message)}<br>这不是美化 HTML 的问题，优先检查示例输出和正则捕获组。`;
+      if(showToast) toast('预览失败：'+err2.message);
+      return;
+    }
+  }
+  const html=replacePlaceholders(currentPack.html,match);
+  renderPreviewFrame(html);
+  renderCaptures(match);
+  $('matchNotice').className='notice ok';
+  $('matchNotice').innerHTML=`<b>匹配成功。</b><br>共抓到 ${match.length-1} 个字段。第 1 个捕获组是 $1，第 2 个是 $2，以此类推。${usedRepair?'<br><b>已自动修复：</b>本次预览已重建示例输出和带捕获组的正则。':''}`;
+  if(usedRepair){renderResult();updateStatus();localStorage.setItem(LS_CURRENT,JSON.stringify(currentPack));}
+  if(showToast) toast(usedRepair?'已自动修复并预览成功':'预览匹配成功');
+}
+function localWholeRegexAnalysis(){
+  const regex=String(currentPack?.regex||'');
+  const mapping=currentPack?.mapping||[];
+  const tagNames=extractTagNamesSafe(regex);
+  const groupCount=countCapturingGroups(regex);
+  const mapText=mapping.length?mapping.map((m,i)=>`${m.placeholder||('$'+(i+1))}：${m.field||'未命名字段'}${m.source_tag?'，来源 '+m.source_tag:''}${m.meaning?'，含义：'+m.meaning:''}`).join('\n'):'当前 mapping 为空，只能按捕获组顺序推断。';
+  return `这条正则整体在做什么：\n它负责扫描 AI 的原始标签输出，把标签之间的内容抓出来，再交给 HTML 里的 $1、$2、$3 使用。\n\n主要标签：\n我在正则里识别到这些标签线索：${tagNames.join('、')||'没有识别到明显标签，可能是复杂写法或转义写法'}。根标签通常负责包住整段内容，子标签负责包住具体字段。\n\n捕获组数量：\n我粗略统计到 ${groupCount} 个捕获组。第 1 个捕获组会变成 $1，第 2 个会变成 $2，后面依次类推。\n\n$1-$n 对应：\n${mapText}\n\n和世界书的关系：\n世界书必须要求 AI 输出和正则一致的标签名与层级。世界书改了标签名、顺序或字段数量，正则一般也要跟着改。\n\n和 HTML 的关系：\nHTML 里的 $1-$n 会被正则捕获内容替换。如果 HTML 的 $3 显示错内容，通常要检查正则第 3 个捕获组和 mapping。\n\n常见错误：\n正则带 g 标志会让 JS 预览丢失捕获组；标签名不一致会匹配失败；少写结束标签会匹配失败；跨行内容建议使用 [\\s\\S]*?；括号数量变了但 mapping 没更新会导致内容错位。\n\n修改建议：\n只是改颜色和布局，优先改 HTML。新增或删除字段，要同时改世界书、正则、HTML 和 mapping。`;
+}
+
+document.querySelectorAll('details.help').forEach(d=>d.removeAttribute('open'));
+loadSettings();loadCurrentPack();renderResult();updateStatus();renderHistory();renderProjectState();
+
+
+// V2.3 顶部导航兜底：用捕获阶段代理点击，避免旧监听因脚本错误或遮罩导致失效。
+(function navHotfix(){
+  const navEl = document.getElementById('nav');
+  if(!navEl) return;
+  navEl.addEventListener('click', function(e){
+    const btn = e.target && e.target.closest ? e.target.closest('button[data-page]') : null;
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(typeof goPage === 'function') goPage(btn.dataset.page);
+  }, true);
+  navEl.addEventListener('touchend', function(e){
+    const btn = e.target && e.target.closest ? e.target.closest('button[data-page]') : null;
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(typeof goPage === 'function') goPage(btn.dataset.page);
+  }, {capture:true, passive:false});
+})();
+
+</script>
+</body>
+</html>
