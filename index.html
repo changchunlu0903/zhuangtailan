@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>状态栏制作场 V2.9 顶部导航彻底修复版</title>
+<title>状态栏制作场 V3.0 API兼容回退版</title>
 <style>
   :root{
     --bg:#f3efe6;
@@ -1240,39 +1240,41 @@ async function testConnection(){
   }catch(err){toast('连接测试失败：'+err.message)}
   finally{setLoading('apiLoader',false)}
 }
-async function callChat(messages,maxOverride,opts={}){
+async function callChat(messages,maxOverride){
   const s=getSettings();
   if(!s.base || !s.key || !s.model) throw new Error('API 设置不完整');
-  const baseBody={model:s.model,messages,temperature:s.temperature,max_tokens:maxOverride||s.max_tokens};
-  if(opts.json) baseBody.response_format={type:'json_object'};
-  try{
-    return await callChatBody(baseBody,opts);
-  }catch(err){
-    const msg=String(err.message||'');
-    const unsupported=opts.json && /response_format|json_object|unsupported|not support|不支持|400|422/i.test(msg);
-    if(unsupported){
-      const retryBody={...baseBody};
-      delete retryBody.response_format;
-      return await callChatBody(retryBody,{...opts,json:false});
-    }
-    throw err;
-  }
+  const body={model:s.model,messages,temperature:s.temperature,max_tokens:maxOverride||s.max_tokens};
+  const res=await fetch(apiUrl('/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
+  const raw=await res.text();
+  if(!res.ok) throw new Error('HTTP '+res.status+'：'+raw.slice(0,500));
+  let data; try{data=JSON.parse(raw)}catch(e){return raw}
+  return data?.choices?.[0]?.message?.content ?? data?.choices?.[0]?.text ?? data?.content ?? raw;
 }
-async function callChatBody(body,opts={}){
-  let res,raw='';
-  try{
-    res=await fetch(apiUrl('/chat/completions'),{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
-    raw=await res.text();
-  }catch(err){
-    throw new Error('网络或浏览器拦截：'+err.message+'。如果是 Failed to fetch，常见原因是 API 不允许网页直连/CORS，被浏览器拦了；可以换支持网页直连的中转接口，或以后做后端代理。');
-  }
-  if(!res.ok){
-    throw new Error('HTTP '+res.status+'：'+raw.slice(0,900));
-  }
-  let data;
-  try{data=JSON.parse(raw)}catch(e){return raw}
-  const content=data?.choices?.[0]?.message?.content ?? data?.choices?.[0]?.text ?? data?.content ?? raw;
-  return typeof content==='string'?content:JSON.stringify(content);
+
+function clipTextForApi(s,limit=12000){
+  s=String(s||'');
+  if(s.length<=limit)return s;
+  const head=Math.floor(limit*0.68);
+  const tail=limit-head;
+  return s.slice(0,head)+'\n\n……中间内容过长，已在网页请求里省略，不代表原文删除……\n\n'+s.slice(-tail);
+}
+function apiPackForRevision(p,modeInfo){
+  p=p||{}; modeInfo=modeInfo||{};
+  // V3.3：不再瘦身、不再截断。继续修改时把当前完整三件套都交给 AI。
+  // 这样用户改 HTML 翻页动画时，AI 仍能看到完整 HTML；如果牵扯正则/世界书，也能完整对照。
+  return {
+    title:p.title||'',
+    description:p.description||'',
+    source_idea:p.source_idea||'',
+    worldbook:p.worldbook||'',
+    regex:p.regex||'',
+    html:p.html||'',
+    demo_output:p.demo_output||'',
+    mapping:Array.isArray(p.mapping)?p.mapping:[],
+    explanation:p.explanation||{},
+    change_summary:p.change_summary||[],
+    diagnosis_tips:p.diagnosis_tips||[]
+  };
 }
 
 function buildSystemPrompt(){
@@ -1316,7 +1318,7 @@ async function callPackAI(messages,taskName){
   let raw='';
   let firstErr=null;
   try{
-    raw=await callChat(messages,null,{json:true});
+    raw=await callChat(messages,null,{json:false});
     return parsePack(raw);
   }catch(err){
     firstErr=err;
@@ -1348,7 +1350,7 @@ async function repairJsonWithAI(raw,errorMsg){
 
 原始内容：
 ${String(raw||'').slice(0,26000)}`;
-  return await callChat([{role:'system',content:'你是 JSON 修复器。只输出严格 JSON。不要 Markdown。不要解释。'},{role:'user',content:repairPrompt}],null,{json:true});
+  return await callChat([{role:'system',content:'你是 JSON 修复器。只输出严格 JSON。不要 Markdown。不要解释。'},{role:'user',content:repairPrompt}],null,{json:false});
 }
 function looseParsePack(text){
   const t=String(text||'');
@@ -1397,7 +1399,7 @@ function buildFailureHelp(err){
   else if(/model/i.test(msg)) reason='模型名可能不对，先去 API 页自动寻找模型，或者手动复制准确模型名。';
   else if(/JSON|解析|Unexpected|unterminated|结尾/i.test(msg)) reason='AI 回答没有按严格 JSON 返回，或者回答太长被截断。网页已经尝试自动修复，仍失败。';
   else reason='接口返回异常，下面是原始错误。';
-  return `<b>生成失败原因判断：</b><br>${esc(reason)}<br><br><b>原始错误：</b><br>${esc(msg)}<br><br><b>你可以这样试：</b><br>1. 先点“测试连接”，确认模型能回复。<br>2. 如果是 JSON/截断问题，把最大输出调到 8000 或 12000。<br>3. 如果是 CORS/Failed to fetch，换支持网页直连的 API 地址，或后面改成后端代理。<br>4. 如果模型总是不听 JSON，换更稳的模型，或者先生成简单一点的需求。`;
+  return `<b>生成失败原因判断：</b><br>${esc(reason)}<br><br><b>原始错误：</b><br>${esc(msg)}<br><br><b>你可以这样试：</b><br>1. 先点“测试连接”，确认模型能回复。<br>2. 如果是 JSON/截断问题，把最大输出调到 8000 或 12000。<br>3. 如果是 CORS/Failed to fetch，先确认 API 页测试连接；本版已关闭 response_format，若测试仍失败就是浏览器/API 本身不允许直连。<br>4. 如果模型总是不听 JSON，换更稳的模型，或者先生成简单一点的需求。`;
 }
 function extractJsonText(text){
   let t=String(text||'').trim();
@@ -1427,7 +1429,8 @@ function normalizePack(obj){
     change_summary:Array.isArray(obj.change_summary)?obj.change_summary:(Array.isArray(obj['改动说明'])?obj['改动说明']:[]),
     diagnosis_tips:Array.isArray(obj.diagnosis_tips)?obj.diagnosis_tips:(Array.isArray(obj['诊断建议'])?obj['诊断建议']:[]),
     created_at:obj.created_at||new Date().toISOString(),
-    source_idea:obj.source_idea||''
+    source_idea:obj.source_idea||'',
+    project_id:obj.project_id||obj._project_id||obj.history_id||''
   };
   if(!p.mapping.length) p.mapping=inferMappingFromHtml(p.html,p.regex,p.worldbook);
   p.mapping=normalizeMapping(p.mapping,p.regex,p.worldbook);
@@ -1524,8 +1527,14 @@ function fillDemoFromCurrent(){
   currentTab='demo';
   switchResultTab('demo');
 }
+function makeProjectId(){
+  return 'pack_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+}
 function setCurrentPack(pack, opts={}){
-  currentPack=normalizePack(pack);
+  const previousProjectId=currentPack?.project_id||'';
+  const normalized=normalizePack(pack);
+  normalized.project_id=normalized.project_id||opts.projectId||previousProjectId||makeProjectId();
+  currentPack=normalized;
   localStorage.setItem(LS_CURRENT,JSON.stringify(currentPack));
   renderResult(); syncPreviewSource(); updateStatus(); renderProjectState();
   if(opts.autoSave && !suppressAutoSave) autoSaveCurrent(opts.reason||'自动保存');
@@ -1547,6 +1556,22 @@ function getScopeInfo(tabOrKey){
   };
   return data[normalized]||data.worldbook;
 }
+function updateReviseModeHint(){
+  const el=$('reviseModeHint');
+  if(!el) return;
+  const ideaEl=$('reviseIdea');
+  const idea=ideaEl?ideaEl.value.trim():'';
+  const scope=getScopeInfo(currentTab);
+  const modeInfo=detectRevisionMode(idea,scope);
+  const shortRules=[
+    '当前所在区块：'+scope.label,
+    '判断结果：'+modeInfo.label,
+    modeInfo.reason,
+    '规则：只改外观、动画、颜色、宽度时，主要改 HTML；新增字段、改标签、改正则、修 $1-$n 对应时，才联动整套。'
+  ];
+  el.innerHTML='<b>'+esc(shortRules[0])+' ｜ '+esc(shortRules[1])+'</b><span class="mini-line">'+esc(shortRules[2])+'</span><span class="mini-line">'+esc(shortRules[3])+'</span>';
+}
+
 function renderReviseScope(){
   const el=$('reviseScope'); if(!el)return;
   const sc=getScopeInfo(currentTab);
@@ -1719,7 +1744,24 @@ async function analyzeWholeRegex(){
   }
 }
 function buildWholeRegexPrompt(){
-  return `请分析下面这条 SillyTavern 美化正则的每一块。\n\n【正则】\n${currentPack.regex}\n\n【字段对应表】\n${JSON.stringify(currentPack.mapping||[],null,2)}\n\n【世界书】\n${currentPack.worldbook}\n\n【HTML】\n${currentPack.html}\n\n【示例输出】\n${currentPack.demo_output}\n\n请重点说明：根标签是什么、每个子标签怎么匹配、每个捕获组对应 $几、会流向 HTML 哪个位置、如果要新增/删除/改名字段要同时改哪几处。不要使用 Markdown 和星号。`;
+  return `请分析下面这条 SillyTavern 美化正则的每一块。
+
+【正则】
+${clipTextForApi(currentPack.regex,10000)}
+
+【字段对应表】
+${JSON.stringify(currentPack.mapping||[],null,2)}
+
+【世界书】
+${clipTextForApi(currentPack.worldbook,8000)}
+
+【HTML】
+${clipTextForApi(currentPack.html,12000)}
+
+【示例输出】
+${clipTextForApi(currentPack.demo_output,8000)}
+
+请重点说明：根标签是什么、每个子标签怎么匹配、每个捕获组对应 $几、会流向 HTML 哪个位置、如果要新增/删除/改名字段要同时改哪几处。不要使用 Markdown 和星号。`;
 }
 function localWholeRegexAnalysis(){
   const regex=String(currentPack?.regex||'');
@@ -1749,7 +1791,7 @@ function buildSelectionAnalysisPrompt(field,snippet){
   return `请分析我在“${map[field]||field}”中选中的这一段。
 
 【选中片段】
-${snippet}
+${clipTextForApi(snippet,6000)}
 
 【完整三件套摘要】
 标题：${currentPack.title}
@@ -1757,16 +1799,16 @@ ${snippet}
 字段对应：${JSON.stringify(currentPack.mapping||[],null,2)}
 
 【世界书】
-${currentPack.worldbook}
+${clipTextForApi(currentPack.worldbook,8000)}
 
 【正则】
-${currentPack.regex}
+${clipTextForApi(currentPack.regex,8000)}
 
 【HTML】
-${currentPack.html}
+${clipTextForApi(currentPack.html,12000)}
 
 【示例输出】
-${currentPack.demo_output}
+${clipTextForApi(currentPack.demo_output,8000)}
 
 【本地初步对应速查】
 ${buildCrossLinkPlain(field,snippet)}
@@ -1910,16 +1952,17 @@ function buildRevisionSystemPrompt(){
 
 返回格式必须是严格 JSON，不要 Markdown，不要代码围栏，不要 JSON 外说明。
 
-允许返回局部 JSON。只返回确实需要改的字段。可用字段：title, description, worldbook, regex, html, demo_output, mapping, explanation, change_summary, diagnosis_tips。
+重要：本版本不允许瘦身，不允许省略字段。必须返回完整新版 JSON，字段至少包含：title, description, worldbook, regex, html, demo_output, mapping, explanation, change_summary, diagnosis_tips。
 
 硬规则：
-1. 如果只是颜色、字体、布局、背景、翻页动画、按钮、展开折叠、宽度、适配等外观问题，优先只返回 html 和 change_summary。worldbook、regex、demo_output、mapping 不要返回，表示保持原样。
-2. 如果涉及新增/删除字段、标签名、根标签、正则、捕获组、$1-$n、mapping、匹配失败、示例输出结构，必须返回所有相关字段，至少包括 worldbook, regex, html, demo_output, mapping。
-3. 如果只改示例输出，只返回 demo_output 和说明。
-4. 如果只改解释或帮助，只返回 explanation/change_summary/diagnosis_tips。
-5. 不允许删除原有功能，除非用户明确要求。
-6. 不允许改变用户原本内容含义、角色设定、剧情设定，除非用户明确要求。
-7. change_summary 必须说明：主改区域、联动修改、哪些部分保持原样。`;
+1. 主次要分清。用户当前在哪个区块/提出什么问题，就主改那个区块。
+2. 如果只是颜色、字体、布局、背景、翻页动画、按钮、展开折叠、宽度、适配等外观问题，只实质修改 html；但是返回 JSON 时 worldbook、regex、demo_output、mapping 也必须完整原样带回，不得省略。
+3. 如果涉及新增/删除字段、标签名、根标签、正则、捕获组、$1-$n、mapping、匹配失败、示例输出结构，必须联动修改 worldbook, regex, html, demo_output, mapping。
+4. 如果只改示例输出，只实质修改 demo_output；其他字段完整原样带回。
+5. 如果只改解释或帮助，只实质修改 explanation/change_summary/diagnosis_tips；三件套代码完整原样带回。
+6. 不允许删除原有功能，除非用户明确要求。
+7. 不允许改变用户原本内容含义、角色设定、剧情设定，除非用户明确要求。
+8. change_summary 必须说明：主改区域、是否联动、哪些部分只是原样保留。`;
 }
 function parseJsonObject(text){
   const cleaned=extractJsonText(text);
@@ -1928,7 +1971,7 @@ function parseJsonObject(text){
 async function callRevisionAI(messages,modeInfo){
   let raw='';
   try{
-    raw=await callChat(messages,null,{json:true});
+    raw=await callChat(messages,null,{json:false});
     return parseJsonObject(raw);
   }catch(firstErr){
     const msg=String(firstErr.message||'');
@@ -1990,20 +2033,21 @@ async function revisePack(){
 用户修改意见：
 ${idea}
 
-当前三件套 JSON：
-${JSON.stringify(currentPack,null,2)}
+当前三件套 JSON（完整未截断版，所有内容都会发送给 AI）：
+${JSON.stringify(apiPackForRevision(currentPack,modeInfo),null,2)}
 
 请按判断模式修改：
-- 能局部改就局部改，只返回需要改的字段。
-- 如果你发现用户要求会影响字段、标签、捕获组、$1-$n 或匹配关系，必须返回相关完整字段。
-- 未涉及的字段不要返回，网页会自动保持原样。
+- 主次分清，能只实质修改一块就只改那一块。
+- 但返回时必须返回完整新版 JSON，不要省略 worldbook、regex、html、demo_output、mapping。
+- 如果某一块不需要改，就把原文完整原样带回。
+- 如果你发现用户要求会影响字段、标签、捕获组、$1-$n 或匹配关系，必须联动修改相关字段。
 - 必须返回严格 JSON。`;
     const patch=await callRevisionAI([{role:'system',content:buildRevisionSystemPrompt()},{role:'user',content:user}],modeInfo);
     const pack=mergeRevisionPatch(currentPack,patch,modeInfo);
     pack.source_idea=currentPack.source_idea||'';
     setCurrentPack(pack,{autoSave:true,reason:'AI 修改完成：'+modeInfo.label});
     $('reviseIdea').value='';
-    setReviseDiag('修改完成：'+modeInfo.label+'。\n已经自动保存。未返回的部分已保持原样，避免简单改动误伤世界书/正则。','ok');
+    setReviseDiag('修改完成：'+modeInfo.label+'。\n已经自动保存。本次使用完整上下文修改。未实质修改的部分应已原样带回，避免简单改动误伤世界书/正则。','ok');
     toast('新版已生成并保存');
     goPage('result');
     if(modeInfo.mode==='html_only') switchResultTab('html');
@@ -2047,18 +2091,34 @@ function exportTxt(){
   a.click();URL.revokeObjectURL(a.href);
 }
 function packSignature(p){return JSON.stringify({title:p?.title,worldbook:p?.worldbook,regex:p?.regex,html:p?.html,demo_output:p?.demo_output})}
+function ensureCurrentProjectId(){
+  if(!currentPack)return '';
+  if(!currentPack.project_id) currentPack.project_id=makeProjectId();
+  localStorage.setItem(LS_CURRENT,JSON.stringify(currentPack));
+  return currentPack.project_id;
+}
 function autoSaveCurrent(reason='自动保存'){
   if(!currentPack)return;
+  const projectId=ensureCurrentProjectId();
   const arr=getHistory();
-  const sig=packSignature(currentPack);
-  if(arr[0] && packSignature(arr[0])===sig)return;
-  arr.unshift({...currentPack,saved_at:new Date().toISOString(),auto_saved:true,save_reason:reason});
+  const entry={...currentPack,project_id:projectId,saved_at:new Date().toISOString(),auto_saved:true,manual_saved:false,save_reason:reason};
+  const sameAutoIndex=arr.findIndex(p=>p.auto_saved && p.project_id && p.project_id===projectId);
+  if(sameAutoIndex>=0){
+    const old=arr.splice(sameAutoIndex,1)[0];
+    arr.unshift({...old,...entry,created_at:currentPack.created_at||old.created_at||entry.saved_at});
+  }else{
+    arr.unshift(entry);
+  }
   localStorage.setItem(LS_HISTORY,JSON.stringify(arr.slice(0,80)));
   renderHistory();
 }
 function saveCurrentToHistory(){
   if(!currentPack){toast('没有可保存内容');return}
-  autoSaveCurrent('手动保存');toast('已保存到历史');renderHistory();
+  const projectId=ensureCurrentProjectId();
+  const arr=getHistory();
+  arr.unshift({...currentPack,project_id:projectId,saved_at:new Date().toISOString(),auto_saved:false,manual_saved:true,save_reason:'手动保存'});
+  localStorage.setItem(LS_HISTORY,JSON.stringify(arr.slice(0,80)));
+  toast('已手动保存到历史');renderHistory();
 }
 
 function clearCurrentWorkspace(){
@@ -2114,14 +2174,18 @@ function getHistory(){try{return JSON.parse(localStorage.getItem(LS_HISTORY)||'[
 function renderHistory(){
   const arr=getHistory();const box=$('historyList');
   if(!arr.length){box.innerHTML='<div class="empty">还没有历史记录。</div>';return}
-  box.innerHTML=arr.map((p,i)=>`<div class="history-item"><div><h3>${esc(p.title||'未命名')} ${p.auto_saved?'<span class="badge">自动保存</span>':''}</h3><p>${esc(p.description||'')}<br>${new Date(p.saved_at||p.created_at||Date.now()).toLocaleString()}${p.save_reason?' ｜ '+esc(p.save_reason):''}</p></div><div class="btn-row"><button class="btn small" onclick="loadHistory(${i})">使用</button><button class="btn small danger" onclick="deleteHistory(${i})">删除</button></div></div>`).join('')
+  box.innerHTML=arr.map((p,i)=>{
+    const badge=p.auto_saved?'<span class="badge">自动保存</span>':(p.manual_saved?'<span class="badge">手动保存</span>':'');
+    const tip=p.auto_saved?'同一个当前制作再次自动保存时，会覆盖这一条自动保存，不会无限堆叠。':'手动保存会保留为独立版本，不会被自动保存覆盖。';
+    return `<div class="history-item"><div><h3>${esc(p.title||'未命名')} ${badge}</h3><p>${esc(p.description||'')}<br>${new Date(p.saved_at||p.created_at||Date.now()).toLocaleString()}${p.save_reason?' ｜ '+esc(p.save_reason):''}<br><span>${esc(tip)}</span></p></div><div class="btn-row"><button class="btn small" onclick="loadHistory(${i})">使用</button><button class="btn small danger" onclick="deleteHistory(${i})">删除</button></div></div>`;
+  }).join('')
 }
-function loadHistory(i){const arr=getHistory();if(arr[i]){setCurrentPack(arr[i]);toast('已加载历史记录');goPage('result')}}
+function loadHistory(i){const arr=getHistory();if(arr[i]){if(!arr[i].project_id) arr[i].project_id=makeProjectId();setCurrentPack(arr[i],{projectId:arr[i].project_id});toast('已加载历史记录');goPage('result')}}
 function deleteHistory(i){const arr=getHistory();arr.splice(i,1);localStorage.setItem(LS_HISTORY,JSON.stringify(arr));renderHistory()}
 function clearHistory(){if(confirm('确定清空历史记录吗？')){localStorage.removeItem(LS_HISTORY);renderHistory();toast('历史已清空')}}
 function importPack(){
   const txt=$('importText').value.trim();if(!txt)return toast('先粘贴内容');
-  try{const p=parsePack(txt);setCurrentPack(p,{autoSave:true,reason:'导入旧三件套'});$('importText').value='';toast('导入成功，已自动保存');goPage('result')}catch(e){toast('导入失败：'+e.message)}
+  try{const p=parsePack(txt);setCurrentPack(p,{autoSave:true,reason:'导入旧三件套',projectId:makeProjectId()});$('importText').value='';toast('导入成功，已自动保存');goPage('result')}catch(e){toast('导入失败：'+e.message)}
 }
 function loadDemoPack(){
   const demo={
