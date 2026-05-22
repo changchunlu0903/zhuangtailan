@@ -368,6 +368,14 @@
   textarea::selection,input::selection,.codebox::selection,.modal-code::selection,pre::selection{background:#111!important;color:#fff!important;text-shadow:none!important;}
   textarea::-moz-selection,input::-moz-selection,.codebox::-moz-selection,.modal-code::-moz-selection,pre::-moz-selection{background:#111!important;color:#fff!important;text-shadow:none!important;}
 
+
+  /* V3.5 选中段分析：AI 完成后保留本地快速定位和荧光范围 */
+  .ai-analysis-result{border:1px solid rgba(15,95,75,.26);background:rgba(15,95,75,.06);padding:12px;display:grid;gap:10px}
+  .ai-analysis-result>h4{margin:0;color:#0f5f4b;font-size:14px;font-family:var(--serif);letter-spacing:.03em}
+  .analysis-keep-note{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.55);color:#5f5145;padding:9px 10px;font-size:12.5px;line-height:1.7}
+  .crosslink-panel h4:after{content:' · 分析完成后也会保留';font-family:var(--sans);font-size:11px;color:#7b6d60;font-weight:600;letter-spacing:0}
+  @media (max-width:760px){.ai-analysis-result{padding:10px}.crosslink-panel h4:after{display:block;margin-top:2px}}
+
 </style>
 </head>
 <body>
@@ -833,7 +841,7 @@
       <textarea class="modal-code" id="modalCodeText" onmouseup="rememberModalSelection()" onkeyup="rememberModalSelection()" onselect="rememberModalSelection()"></textarea>
       <pre class="highlight-preview" id="highlightPreview"></pre>
       <pre class="selected-snippet" id="selectedSnippetBox"></pre>
-      <div class="analysis-box" id="selectionAnalysis">还没有分析。选中一段后，可以先点“➕ 荧光标记”确认范围，再点 AI 分析。</div>
+      <div class="analysis-box" id="selectionAnalysis">还没有分析。选中一段后，可以先点“➕ 荧光标记”确认范围，再点 AI 分析。分析完成后，本地三件套定位和荧光范围会继续保留。</div>
     </div>
   </div>
 </div>
@@ -1159,7 +1167,7 @@ function renderCrossLinkPanel(field,snippet){
   const regexCtx=rel.map(m=>completeRegexPieceForMapping(m)).filter(Boolean).join('\n\n') || phs.map(ph=>regexAroundPlaceholder(ph)).filter(Boolean).join('\n\n') || (field==='regex'?snippet:'没有识别到明确捕获组。');
   const wbCtx=parts.wb || '没有定位到明显世界书片段，可能是字段表缺少 source_tag，或这段是纯样式/结构。';
   const demoCtx=parts.demo || '没有定位到明显示例输出片段，可能需要看完整 demo_output。';
-  return `<div class="crosslink-panel"><h4>三件套对应速查</h4><div class="crosslink-grid"><div class="crosslink-item"><b>当前选中区域</b><p>${esc(fieldKeyForDisplay(field))}</p></div><div class="crosslink-item"><b>可能对应字段</b><p>${esc(relText)}</p></div><div class="crosslink-item"><b>对应世界书部分</b><p>${esc(wbCtx)}</p></div><div class="crosslink-item"><b>对应正则部分</b><p>${esc(regexCtx)}</p></div><div class="crosslink-item"><b>对应 HTML 部分</b><p>${esc(htmlCtx)}</p></div><div class="crosslink-item"><b>对应示例输出</b><p>${esc(demoCtx)}</p></div>${renderFullRelatedBlock(parts)}</div></div>`;
+  return `<div class="crosslink-panel"><h4>本地快速定位：三件套对应速查</h4><div class="crosslink-grid"><div class="crosslink-item"><b>当前选中区域</b><p>${esc(fieldKeyForDisplay(field))}</p></div><div class="crosslink-item"><b>可能对应字段</b><p>${esc(relText)}</p></div><div class="crosslink-item"><b>对应世界书部分</b><p>${esc(wbCtx)}</p></div><div class="crosslink-item"><b>对应正则部分</b><p>${esc(regexCtx)}</p></div><div class="crosslink-item"><b>对应 HTML 部分</b><p>${esc(htmlCtx)}</p></div><div class="crosslink-item"><b>对应示例输出</b><p>${esc(demoCtx)}</p></div>${renderFullRelatedBlock(parts)}</div></div>`;
 }
 function buildCrossLinkPlain(field,snippet){
   const parts=relatedFullParts(field,snippet);
@@ -1632,7 +1640,7 @@ function openCodeModal(field){
   modalField=field; activeCodeField=field;
   $('codeModalTitle').textContent='放大查看：'+fieldLabel(field);
   $('modalCodeText').value=currentPack[field]||'';
-  $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>怎么用</b><p>先在代码框里选中一段。点“➕ 荧光标记”确认范围，再点“AI 分析选中段”。</p></div></div>';
+  $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>怎么用</b><p>先在代码框里选中一段。点“➕ 荧光标记”确认范围，再点“AI 分析选中段”。分析完成后，本地快速定位不会消失。</p></div></div>';
   const snipBox=$('selectedSnippetBox');
   if(snipBox){snipBox.classList.remove('show');snipBox.textContent=''}
   const hp=$('highlightPreview');
@@ -1705,15 +1713,17 @@ async function analyzeSelection(field){
   const snipBox=$('selectedSnippetBox');
   if(snipBox){snipBox.classList.add('show');snipBox.textContent='本次分析的选中段：\n'+snippet}
   const crossHtml=renderCrossLinkPanel(field,snippet);
+  const loadingHtml=`<div class="analysis-keep-note">上面的“本地快速定位”和荧光标记会一直保留。下面是 AI 详细分析区，分析完成后只替换这里，不会把定位结果冲掉。</div>`;
   showAnalysisLoading('正在分析选中段','正在把选中段和三件套对应关系一起发给 AI。完成后会显示对应世界书、正则、HTML 和示例输出。');
-  $('selectionAnalysis').innerHTML=crossHtml+$('selectionAnalysis').innerHTML;
+  const progressHtml=$('selectionAnalysis').innerHTML;
+  $('selectionAnalysis').innerHTML=crossHtml+loadingHtml+progressHtml;
   try{
     const prompt=buildSelectionAnalysisPrompt(field,snippet);
-    const ans=await callChat([{role:'system',content:'你是 SillyTavern 三件套代码讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。只用清楚短句。必须按固定小标题回答：这段是什么、属于哪一环、对应世界书部分、对应正则部分、对应 HTML 部分、对应示例输出部分、对应字段、改了会影响什么、怎么改、常见错误。不要返回 JSON。'},{role:'user',content:prompt}],1800);
-    $('selectionAnalysis').innerHTML=formatClearAnalysis(ans);
-    toast('正则分析完成');
+    const ans=await callChat([{role:'system',content:'你是 SillyTavern 三件套代码讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。只用清楚短句。必须按固定小标题回答：这段是什么、属于哪一环、对应世界书部分、对应正则部分、对应 HTML 部分、对应示例输出部分、对应字段、完整关联片段、改了会影响什么、怎么改、常见错误。不要返回 JSON。'},{role:'user',content:prompt}],1800);
+    $('selectionAnalysis').innerHTML=crossHtml+`<div class="ai-analysis-result"><h4>AI 详细分析</h4>${formatClearAnalysis(ans)}</div>`;
+    toast('选中段分析完成');
   }catch(err){
-    $('selectionAnalysis').innerHTML=crossHtml+'<div class="analysis-clean"><div class="analysis-section"><b>分析失败</b><p>'+esc(err.message)+'\n如果还没连 API，先去 API 页设置。上面的三件套对应速查仍然可以先看。</p></div></div>';
+    $('selectionAnalysis').innerHTML=crossHtml+'<div class="analysis-clean"><div class="analysis-section"><b>分析失败</b><p>'+esc(err.message)+'\n如果还没连 API，先去 API 页设置。上面的三件套对应速查仍然可以先看，荧光定位也会保留。</p></div></div>';
     toast('分析失败：'+err.message);
   }
 }
@@ -1736,7 +1746,7 @@ async function analyzeWholeRegex(){
       return;
     }
     const ans=await callChat([{role:'system',content:'你是 SillyTavern 正则讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。按固定小标题回答：这条正则整体在做什么、每个主要标签、每个捕获组、$1-$n 对应、和世界书的关系、和 HTML 的关系、常见错误、修改建议。每段短句清楚。不要返回 JSON。'},{role:'user',content:buildWholeRegexPrompt()}],2600);
-    $('selectionAnalysis').innerHTML=formatClearAnalysis(ans);
+    $('selectionAnalysis').innerHTML=localHtml+`<div class="ai-analysis-result"><h4>AI 详细分析</h4>${formatClearAnalysis(ans)}</div>`;
     toast('整条正则分析完成');
   }catch(err){
     $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>AI 分析失败，已显示本地基础分析</b><p>'+esc(err.message)+'</p></div></div>'+localHtml;
