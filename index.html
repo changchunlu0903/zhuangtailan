@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>状态栏制作场 V3.0 API兼容回退版</title>
+<title>酒馆制作场 V5.6 页面错乱修复版</title>
 <style>
   :root{
     --bg:#f3efe6;
@@ -376,14 +376,246 @@
   .crosslink-panel h4:after{content:' · 分析完成后也会保留';font-family:var(--sans);font-size:11px;color:#7b6d60;font-weight:600;letter-spacing:0}
   @media (max-width:760px){.ai-analysis-result{padding:10px}.crosslink-panel h4:after{display:block;margin-top:2px}}
 
+
+
+  /* V3.6 双功能 + 电脑适配：桌面端做成左右工作台，手机端保持单列 */
+  @media (min-width:1100px){
+    .app{max-width:1440px!important;padding-left:24px!important;padding-right:24px!important;}
+    .hero{min-height:220px!important;padding:28px!important;}
+    .hero h2{font-size:40px!important;}
+    .feature-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .opening-layout{grid-template-columns:minmax(360px,.82fr) minmax(560px,1.18fr);align-items:start;}
+    .opening-preview-frame{height:720px!important;}
+    .opening-codebox{min-height:520px!important;}
+    #page-result .panel,#page-preview .panel,#page-opening .panel{padding:22px!important;}
+    #page-preview .preview-shell{grid-template-columns:minmax(380px,.78fr) minmax(620px,1.22fr)!important;}
+  }
+  @media (min-width:1500px){
+    .app{max-width:1520px!important;}
+    .opening-preview-frame{height:780px!important;}
+  }
+  .feature-choice-grid{display:grid;gap:14px;}
+  .feature-choice-card{border:1px solid rgba(127,85,57,.24);background:rgba(255,255,255,.58);padding:16px;display:grid;gap:10px;cursor:pointer;transition:.18s ease;min-height:170px;align-content:start;}
+  .feature-choice-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(63,45,28,.12);border-color:rgba(127,85,57,.42);}
+  .feature-choice-card b{font-family:var(--serif);font-size:20px;letter-spacing:.04em;color:var(--ink);}
+  .feature-choice-card p{margin:0;color:var(--ink-soft);font-size:13px;line-height:1.8;}
+  .feature-choice-card.opening{background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(234,216,192,.34));}
+  .opening-layout{display:grid;gap:16px;}
+  .opening-left,.opening-right{min-width:0;}
+  .opening-codebox{white-space:pre;overflow:auto;font-family:var(--mono);background:#27231f!important;color:#fff9ea!important;}
+  .opening-preview-frame{height:560px;background:#fff;border:1px solid rgba(127,85,57,.25);}
+  .opening-help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .opening-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;}
+  .opening-option{display:flex;gap:8px;align-items:flex-start;padding:10px;border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.45);font-size:13px;line-height:1.55;color:var(--muted);}
+  .opening-option input{margin-top:3px;accent-color:#7f5539;}
+  .opening-list-panel{display:grid;gap:10px;}
+  .opening-list-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;}
+  .opening-swipe-board{display:grid;gap:10px;max-height:360px;overflow:auto;padding:10px;border:1px dashed rgba(127,85,57,.26);background:rgba(255,255,255,.34);overscroll-behavior:contain;}
+  .opening-swipe-card{padding:12px;border:1px solid rgba(127,85,57,.22);background:linear-gradient(180deg,rgba(255,250,240,.86),rgba(241,230,211,.62));box-shadow:0 10px 22px rgba(89,63,42,.08);}
+  .opening-swipe-card.main{border-color:rgba(67,46,31,.42);background:linear-gradient(180deg,rgba(255,248,232,.96),rgba(229,210,181,.72));}
+  .opening-swipe-card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px;}
+  .opening-swipe-card b{font-size:15px;color:#382920;}
+  .opening-swipe-card .type{font-size:11px;padding:2px 7px;border:1px solid rgba(127,85,57,.25);background:rgba(255,255,255,.55);white-space:nowrap;color:#71503b;}
+  .opening-swipe-card p{margin:0;color:#6f6458;line-height:1.7;font-size:13px;}
+  .opening-swipe-card code{display:inline-block;margin-top:7px;font-size:12px;color:#7f5539;background:rgba(255,255,255,.6);padding:3px 6px;border:1px solid rgba(127,85,57,.16);}
+  .opening-jump-note{font-size:12px;line-height:1.7;color:#71503b;background:rgba(255,248,232,.62);border:1px solid rgba(127,85,57,.2);padding:10px;}
+  @media (max-width:920px){.feature-choice-grid,.opening-layout,.opening-help-grid,.opening-option-grid{grid-template-columns:1fr!important}.opening-preview-frame{height:460px!important}.opening-codebox{min-height:300px!important}}
+  @media (max-width:760px){.feature-choice-card b{font-size:17px}.feature-choice-card{min-height:auto;padding:13px}.opening-preview-frame{height:420px!important}}
+
+
+  /* V3.8 分离工作台：选择页 / 状态栏工作台 / 开场白工作台 */
+  .workspace-mode-note{font-size:12px;color:#6f6458;padding:8px 10px;border:1px solid rgba(127,85,57,.16);background:rgba(255,255,255,.45)}
+  .nav button.back-btn{background:#2c261f!important;color:#fff8ec!important;border-color:#2c261f!important;min-width:74px!important}
+  .nav button.back-btn:before{content:'←';font-weight:700}
+  #page-opening .opening-right:empty{display:none!important}
+  #page-opening .opening-layout{grid-template-columns:1fr!important}
+  #openingHtmlMount .opening-codebox{min-height:560px!important}
+  #openingPreviewMount .opening-preview-frame{height:760px!important}
+  #openingHelpMount .opening-help-panel{display:block}
+  .opening-history-item{border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.48);padding:12px;display:grid;gap:8px}
+  .opening-history-item b{color:#382920}
+  .opening-history-item p{margin:0;color:#6f6458;font-size:13px;line-height:1.7}
+  @media(max-width:760px){#openingPreviewMount .opening-preview-frame{height:520px!important}#openingHtmlMount .opening-codebox{min-height:360px!important}}
+
+/* V3.9 首页三按钮铺满 + 开场白主副分离 */
+.nav.home-nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;overflow:hidden!important;padding:1px 18px 4px!important;}
+.nav.home-nav button{min-width:0!important;width:100%!important;justify-content:center!important;flex:1 1 auto!important;}
+.opening-part-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.opening-part-card{display:grid;gap:8px;border:1px solid rgba(127,85,57,.18);background:rgba(255,255,255,.42);padding:12px;min-width:0;}
+.opening-part-card h4{margin:0;font-size:14px;color:#382920;display:flex;justify-content:space-between;gap:8px;align-items:center;}
+.opening-part-card p{margin:0;color:#6f6458;font-size:12px;line-height:1.7;}
+.opening-part-code{min-height:360px!important;white-space:pre;overflow:auto;font-family:var(--mono);background:#27231f!important;color:#fff9ea!important;}
+.opening-combined-box summary{cursor:pointer;color:#7f5539;font-weight:700;font-size:13px;padding:9px 0;}
+.opening-revise-panel{border:1px solid rgba(127,85,57,.20);background:rgba(255,248,232,.56);padding:12px;display:grid;gap:10px;}
+.opening-revise-row{display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:start;}
+.opening-revise-row select{width:100%;border:1px solid rgba(127,85,57,.25);background:rgba(255,255,255,.72);padding:10px;outline:none;}
+.opening-revise-row textarea{min-height:92px;}
+.opening-view-switch{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.opening-view-switch select{border:1px solid rgba(127,85,57,.24);background:rgba(255,255,255,.72);padding:7px 9px;font-size:12px;}
+.opening-combined-note{font-size:12px;color:#71503b;line-height:1.7;background:rgba(255,248,232,.74);border:1px solid rgba(127,85,57,.18);padding:9px;}
+@media(max-width:920px){.opening-part-grid{grid-template-columns:1fr}.opening-revise-row{grid-template-columns:1fr}.nav.home-nav{padding-left:14px!important;padding-right:14px!important}.opening-part-code{min-height:300px!important}}
+@media(max-width:520px){.nav.home-nav{gap:6px!important}.nav.home-nav button{font-size:12px!important;padding:8px 4px!important}.opening-part-card{padding:10px}.opening-part-code{min-height:240px!important}}
+
+/* V4.1 多副开场白 + 工作台导航铺满 + 开场白预览去重 */
+.nav.workspace-nav{display:grid!important;grid-auto-flow:column!important;grid-auto-columns:minmax(0,1fr)!important;gap:8px!important;overflow:hidden!important;padding:1px 10px 4px!important;}
+.nav.workspace-nav button{min-width:0!important;width:100%!important;justify-content:center!important;padding-left:6px!important;padding-right:6px!important;}
+.opening-sub-toolbar{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;}
+.opening-sub-toolbar select{width:100%;min-width:0;border:1px solid rgba(127,85,57,.25);background:rgba(255,255,255,.74);padding:9px;outline:none;color:#382920;}
+.opening-sub-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:#71503b;line-height:1.6;}
+.opening-sub-tabs{display:flex;gap:6px;flex-wrap:wrap;max-height:82px;overflow:auto;padding:3px;border:1px dashed rgba(127,85,57,.18);background:rgba(255,255,255,.35);}
+.opening-sub-tab{border:1px solid rgba(127,85,57,.20);background:rgba(255,255,255,.64);color:#6f4a33;padding:6px 8px;font-size:12px;cursor:pointer;}
+.opening-sub-tab.active{background:#33251c;color:#fff8ec;border-color:#33251c;}
+.opening-swipe-filter{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.opening-swipe-filter select{border:1px solid rgba(127,85,57,.24);background:rgba(255,255,255,.72);padding:7px 9px;font-size:12px;}
+@media(max-width:680px){.nav.workspace-nav{gap:5px!important;padding-left:6px!important;padding-right:6px!important}.nav.workspace-nav button{font-size:12px!important;padding:8px 3px!important}.nav.workspace-nav button small{display:none}.opening-sub-toolbar{grid-template-columns:1fr 1fr 1fr;}.opening-sub-toolbar select{grid-column:1/-1}}
+
+
+/* V4.2 首页选择前置 + 开场白紧凑编辑 */
+.opening-compact-editor{display:grid;gap:10px;border:1px solid rgba(127,85,57,.20);background:rgba(255,255,255,.50);padding:12px;min-width:0;}
+.opening-editor-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+.opening-editor-title h4{margin:0;font-size:15px;color:#382920;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.opening-editor-title p{margin:6px 0 0;color:#6f6458;font-size:12px;line-height:1.7;}
+.opening-active-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) auto auto auto;gap:8px;align-items:center;}
+.opening-active-toolbar select{width:100%;min-width:0;border:1px solid rgba(127,85,57,.25);background:rgba(255,255,255,.78);padding:9px;outline:none;color:#382920;}
+.opening-active-code{min-height:430px!important;}
+.opening-hidden-storage{display:none!important;}
+#page-opening .opening-layout{grid-template-columns:1fr!important;}
+@media (min-width:1180px){#page-opening .opening-layout{grid-template-columns:minmax(360px,.72fr) minmax(620px,1.28fr)!important;align-items:start}.opening-active-code{min-height:520px!important}.opening-preview-frame{height:620px!important}}
+@media(max-width:680px){.opening-active-toolbar{grid-template-columns:1fr 1fr 1fr}.opening-active-toolbar select{grid-column:1/-1}.opening-active-code{min-height:300px!important}}
+
+
+
+/* V4.6 开场白 HTML 放大选段修改 */
+.opening-active-toolbar{grid-template-columns:minmax(180px,1fr) auto auto auto auto!important;}
+.modal-selected-revise{display:grid;gap:8px;border:1px solid rgba(127,85,57,.24);background:linear-gradient(180deg,#fff8e4,#fffdf7);padding:12px;box-shadow:0 10px 24px rgba(63,45,28,.08);}
+.modal-selected-revise.visible-edit-idea{position:sticky;top:0;z-index:5;border:2px solid rgba(123,78,39,.38);}
+.modal-selected-revise label{font-size:13px;font-weight:900;color:#2c2117;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.modal-selected-revise textarea{width:100%;min-height:96px;resize:vertical;border:1px solid rgba(63,45,28,.36);background:#fff;color:#19130e;padding:11px;line-height:1.65;outline:none;font-size:13px;}
+.modal-selected-revise textarea:focus{border-color:#6e4428;box-shadow:0 0 0 3px rgba(110,68,40,.14);}
+.modal-selected-revise .mini{font-size:12.5px;color:#5c432f;line-height:1.7;}
+.modal-mode-note{font-size:12px;color:#71503b;line-height:1.7;background:rgba(255,255,255,.58);border:1px dashed rgba(127,85,57,.22);padding:8px;}
+@media(max-width:680px){.opening-active-toolbar{grid-template-columns:1fr 1fr!important}.opening-active-toolbar select{grid-column:1/-1}.modal-selected-revise textarea{min-height:92px}}
+
+
+
+/* V4.7 修复：放大查看里的“修改要求”不再悬浮遮挡代码，整体改成正常上下排布 */
+#codeModal .modal-body.code-modal-body{
+  display:flex!important;
+  flex-direction:column!important;
+  grid-template-rows:none!important;
+  gap:12px!important;
+  overflow:auto!important;
+  align-items:stretch!important;
+}
+#codeModal .selection-how,
+#codeModal .modal-selected-revise,
+#codeModal #modalCodeText,
+#codeModal #highlightPreview,
+#codeModal #selectedSnippetBox,
+#codeModal #selectionAnalysis{
+  position:static!important;
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  z-index:auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+#codeModal .modal-selected-revise.visible-edit-idea{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+  margin:0!important;
+  border:1px solid rgba(127,85,57,.26)!important;
+  background:#fffaf0!important;
+  box-shadow:none!important;
+}
+#codeModal .modal-selected-revise .btn-row{
+  position:static!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  margin-top:6px!important;
+  background:transparent!important;
+}
+#codeModal .modal-selected-revise .btn{
+  position:static!important;
+  transform:none!important;
+  margin:0!important;
+}
+#codeModal .modal-code{
+  display:block!important;
+  flex:0 0 auto!important;
+  height:42dvh!important;
+  min-height:300px!important;
+  max-height:54dvh!important;
+  resize:vertical!important;
+  margin:0!important;
+  clear:both!important;
+}
+#codeModal .highlight-preview,
+#codeModal .selected-snippet{
+  flex:0 0 auto!important;
+  margin:0!important;
+}
+#codeModal .analysis-box{
+  flex:0 0 auto!important;
+  min-height:220px!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+#codeModal:not(.opening-edit-modal) #modalSelectedReviseBox{
+  display:none!important;
+}
+#codeModal.opening-edit-modal #modalSelectedReviseBox{
+  display:grid!important;
+}
+@media(max-width:760px){
+  #codeModal .modal-body.code-modal-body{gap:10px!important;padding:8px!important;}
+  #codeModal .modal-selected-revise textarea{min-height:92px!important;font-size:12px!important;line-height:1.6!important;}
+  #codeModal .modal-code{height:40dvh!important;min-height:300px!important;font-size:11px!important;}
+  #codeModal .analysis-box{min-height:220px!important;font-size:12.5px!important;}
+}
+
+
+/* V4.8 修复：开场白放大查看时，修改要求输入区强制显示且不悬浮 */
+#codeModal.opening-edit-modal #modalSelectedReviseBox,
+#modalSelectedReviseBox.force-opening-visible{
+  display:grid!important;
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#modalSelectedReviseBox .modal-edit-title{
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  padding:5px 8px;
+  background:#30251b;
+  color:#fff7e9;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.04em;
+}
+#modalSelectionEditIdea{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top-intro">
     <section class="brand">
-      <h1>状态栏制作场</h1>
-      <p>AI 生成世界书 / 正则 / HTML，并在站内试用。</p>
+      <h1>酒馆制作场</h1>
+      <p>首页选择功能，进入后各自是独立工作台。</p>
     </section>
     <div class="project-actions">
       <div class="status-card" id="statusCard"><b>状态</b>：未连接 API</div>
@@ -393,13 +625,9 @@
 
   <div class="nav-sticky" aria-label="页面跳转导航">
     <nav class="nav" id="nav">
-      <button type="button" data-page="home" class="active" onclick="goPageSafe('home')">首页 <small>说明</small></button>
-      <button type="button" data-page="api" onclick="goPageSafe('api')">API <small>连接模型</small></button>
-      <button type="button" data-page="generate" onclick="goPageSafe('generate')">生成 <small>写想法</small></button>
-      <button type="button" data-page="result" onclick="goPageSafe('result')">结果 <small>三件套</small></button>
-      <button type="button" data-page="preview" onclick="goPageSafe('preview')">预览 <small>试跑</small></button>
-      <button type="button" data-page="history" onclick="goPageSafe('history')">历史 <small>存档</small></button>
-      <button type="button" data-page="help" onclick="goPageSafe('help')">帮助 <small>定位问题</small></button>
+      <button type="button" data-page="home" class="active">首页 <small>说明</small></button>
+      <button type="button" data-page="choose">选择 <small>功能入口</small></button>
+      <button type="button" data-page="api">API <small>连接模型</small></button>
     </nav>
   </div>
 
@@ -409,6 +637,7 @@
   (function(){
     function navTo(page){
       if(!page) return;
+      if(page==='opening-result') page='opening';
       var id='page-'+page;
       var found=false;
       document.querySelectorAll('.page').forEach(function(p){
@@ -444,12 +673,35 @@
   <main class="main">
     <section class="page active" id="page-home">
       <div class="hero">
-        <h2>把一句想法，变成酒馆美化三件套。</h2>
-        <p>这个工具不让用户选死模板，而是让 AI 按你的美化规范生成完整的世界书、正则、HTML、示例输出和字段对应表。生成后可以直接在网页里模拟正则替换，看到最终效果。</p>
+        <h2>先选你今天要做什么。</h2>
+        <p>先到“选择”决定做状态栏还是开场白；需要调用 AI 时，再去 API 页连接模型。手机能用，电脑也会自动拉开成工作台布局。</p>
         <div class="btn-row">
-          <button class="btn primary" onclick="goPage('api')">先连接 API</button>
-          <button class="btn accent" onclick="goPage('generate')">直接写想法</button>
-          <button class="btn" onclick="goPage('help')">我想先看关系说明</button>
+          <button class="btn primary" onclick="goPage('choose')">先选择功能</button>
+          <button class="btn accent" onclick="enterWorkspace('status')">做状态栏三件套</button>
+          <button class="btn" onclick="enterWorkspace('opening')">做开场白 HTML</button>
+          <button class="btn ghost" onclick="goPage('api')">连接 API</button>
+        </div>
+      </div>
+
+      <div class="panel grid home-feature-panel">
+        <div class="code-head">
+          <div>
+            <h3>选择功能</h3>
+            <p>状态栏三件套适合要放进酒馆正则/世界书的复杂美化；开场白 HTML 适合做角色发布页、开场白介绍页、场景菜单、剧情入口展示。</p>
+          </div>
+          <span class="badge">双功能工作台</span>
+        </div>
+        <div class="feature-choice-grid">
+          <article class="feature-choice-card" onclick="enterWorkspace('status')">
+            <b>状态栏 / 美化三件套</b>
+            <p>生成世界书、正则、HTML、示例输出和字段对应表。适合状态栏、论坛体、手机界面、日记本、双人选择页。</p>
+            <button class="btn small primary" type="button">进入状态栏工作台</button>
+          </article>
+          <article class="feature-choice-card opening" onclick="enterWorkspace('opening')">
+            <b>开场白 HTML</b>
+            <p>只生成一段可以展示的 HTML，不需要世界书和正则。适合开场白菜单、角色介绍页、剧情入口页、发布页。</p>
+            <button class="btn small accent" type="button">进入开场白工作台</button>
+          </article>
         </div>
       </div>
 
@@ -485,6 +737,38 @@
         <div class="card"><h3>没有模板限制</h3><p>用户可以直接说“古风双人”“手机聊天”“阴暗日记本”“论坛体番外”，AI 自己按想法生成结构。</p></div>
         <div class="card"><h3>每一步都解释</h3><p>生成结果旁边会告诉用户：这一块干嘛、什么时候该改、改错会发生什么。</p></div>
         <div class="card"><h3>可以继续改稿</h3><p>用户说“字太黑”“背景没铺满”“char 页跑 user 页”，AI 会基于当前三件套返回完整新版。</p></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-choose">
+      <div class="hero">
+        <h2>选择今天要做的功能。</h2>
+        <p>两个工作台是分开的：状态栏负责 SillyTavern 美化三件套；开场白负责只生成 HTML 展示页。进到工作台后，顶部只显示当前功能自己的目录。</p>
+      </div>
+      <div class="panel grid home-feature-panel">
+        <div class="code-head">
+          <div>
+            <h3>功能选择</h3>
+            <p>状态栏和开场白不是同一个流程。状态栏要世界书、正则、HTML 三边配合；开场白更像一张角色发布/入口展示页，只看 HTML 和预览。</p>
+          </div>
+          <span class="badge">分离式工作台</span>
+        </div>
+        <div class="feature-choice-grid">
+          <article class="feature-choice-card" onclick="enterWorkspace('status')">
+            <b>状态栏 / 美化三件套</b>
+            <p>适合状态栏、论坛体、手机界面、日记本、双人选择页。会生成世界书、正则、HTML、示例输出和字段对应表。</p>
+            <button class="btn small primary" type="button">进入状态栏工作台</button>
+          </article>
+          <article class="feature-choice-card opening" onclick="enterWorkspace('opening')">
+            <b>开场白 HTML</b>
+            <p>适合主开场白/副开场白展示、角色发布页、剧情入口、酒单式菜单。只生成 HTML、展示、历史和帮助，不混状态栏三件套。</p>
+            <button class="btn small accent" type="button">进入开场白工作台</button>
+          </article>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="card"><h3>状态栏是干嘛的？</h3><p>它是酒馆消息里的“动态信息面板”。世界书规定 AI 输出标签，正则抓取标签内容，HTML 把内容变成漂亮界面。字段一变，三件套通常要一起改。</p></div>
+        <div class="card"><h3>开场白是干嘛的？</h3><p>它是角色卡开局/副开局的展示页。主要是 HTML 视觉和入口说明，不需要正则捕获。要跳到副开场白时，再按酒馆助手写按钮和 swipe_id。</p></div>
       </div>
     </section>
 
@@ -579,6 +863,211 @@
         <div class="loader" id="genLoader"><span class="spin"></span><span>AI 正在生成世界书、正则、HTML 和说明...</span></div>
         <div class="notice warn" id="genDiag" style="display:none"></div>
       </div>
+    </section>
+
+    <section class="page" id="page-opening">
+      <div class="panel grid opening-workbench">
+        <div class="code-head">
+          <div>
+            <h3>开场白 HTML 生成</h3>
+            <p>这里是开场白完整工作台：写需求、主/副 HTML、修改选择、展示预览和清单都在这一页。历史和帮助仍然单独放，方便查。</p>
+          </div>
+          <span class="badge">只生成 HTML</span>
+        </div>
+
+        <div class="opening-layout">
+          <div class="opening-left grid">
+            <div>
+              <label>你想要什么开场白 HTML？</label>
+              <textarea id="openingIdea" placeholder="例如：做一个校园阴郁小狗男高角色的开场白选择页。主开场白 1 个，副开场白 4 个：初见、再见、爱恋、深陷。展示时像酒馆开场白那样一起列出来，每个入口有短介绍。主开场白里要有按钮，可以跳到副开场白。手机端能看清。"></textarea>
+              <div class="quick-examples">
+                <span class="chip" onclick="insertOpeningExample(0)">五个开场白酒单</span>
+                <span class="chip" onclick="insertOpeningExample(1)">角色发布页</span>
+                <span class="chip" onclick="insertOpeningExample(2)">校园菜单</span>
+                <span class="chip" onclick="insertOpeningExample(3)">古风卷轴</span>
+              </div>
+            </div>
+            <div class="notice">
+              <b>这里和状态栏三件套不一样：</b><br>
+              开场白 HTML 主要负责展示：主开场白、副开场白、入口说明、按钮样式。如果要真的在酒馆里切换开场白，需要使用酒馆助手/脚本能力；普通展示 HTML 只能做视觉菜单。
+            </div>
+            <div class="opening-option-grid">
+              <label class="opening-option"><input id="openingUseMainSub" type="checkbox" checked><span><b>主副开场白结构</b><br>让 AI 同时列出主开场白和副开场白，预览区会像酒馆那样一起展示。</span></label>
+              <label class="opening-option"><input id="openingUseJump" type="checkbox"><span><b>需要跳转按钮</b><br>用户要求“主开场白跳到副开场白”时勾选。AI 会生成带 class 和 data-swipe-index 的按钮写法，并附酒馆助手脚本说明。</span></label>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="generateOpeningHtml()">AI 生成开场白 HTML</button>
+              <button class="btn" onclick="renderOpeningPreview()">刷新展示</button>
+              <button class="btn" onclick="copyOpeningHtml()">复制 HTML</button>
+              <button class="btn" onclick="insertOpeningJumpHelper()">插入跳转脚本</button>
+              <button class="btn ghost" onclick="loadOpeningDemo()">加载演示</button>
+            </div>
+            <div class="loader" id="openingLoader"><span class="spin"></span><span>AI 正在生成开场白 HTML...</span></div>
+            <div class="notice" id="openingDiag" style="display:none"></div>
+          </div>
+
+          <div class="opening-right grid">
+            <div>
+              <div class="code-head">
+                <div>
+                  <h3>主 / 副开场白 HTML</h3>
+                  <p>主开场白单独编辑；副开场白可以有很多个，一个一个选着改。最下面会自动生成合并 HTML，但预览只支持单独看主、当前副或全部副，避免主副混在一起看不清。</p>
+                </div>
+                <div class="btn-row code-actions">
+                  <button class="btn small" onclick="syncOpeningCombinedFromParts();renderOpeningPreview()">刷新展示</button>
+                  <button class="btn small" onclick="askOpeningRevise()">按选择修改</button>
+                </div>
+              </div>
+              <div class="opening-part-card opening-compact-editor">
+                  <div class="opening-editor-title">
+                    <div>
+                      <h4>当前开场白 HTML <span class="badge">选择查看 / 单独修改</span></h4>
+                      <p>主开场白和副开场白不再同时铺开。先在下拉框选“主开场白”或“副开场白 N”，下面只显示你正在改的那一份，页面会短很多。</p>
+                    </div>
+                  </div>
+                  <div class="opening-active-toolbar">
+                    <select id="openingPartSelect" onchange="switchOpeningActivePart(this.value)"></select>
+                    <button class="btn small" type="button" onclick="openOpeningCodeModal()">放大当前 HTML</button>
+                    <button class="btn small" type="button" onclick="addOpeningSub()">新增副</button>
+                    <button class="btn small" type="button" onclick="duplicateOpeningSub()">复制当前</button>
+                    <button class="btn small danger" type="button" onclick="deleteOpeningSub()">删除当前副</button>
+                  </div>
+                  <div class="opening-sub-meta" id="openingSubMeta">当前还没有内容。</div>
+                  <div class="opening-sub-tabs" id="openingSubTabs"></div>
+                  <textarea id="openingActiveHtml" class="codebox opening-part-code opening-active-code" spellcheck="false" oninput="syncOpeningActiveToParts();syncOpeningCombinedFromParts(false)" placeholder="选择主开场白或某一个副开场白后，在这里编辑对应 HTML。"></textarea>
+                  <div class="opening-hidden-storage" aria-hidden="true">
+                    <select id="openingSubSelect" onchange="selectOpeningSub(Number(this.value))"></select>
+                    <textarea id="openingMainHtml" class="codebox opening-part-code" spellcheck="false"></textarea>
+                    <textarea id="openingSubHtml" class="codebox opening-part-code" spellcheck="false"></textarea>
+                  </div>
+                </div>
+              <details class="opening-combined-box">
+                <summary>自动合并 HTML（给复制/导出/整体预览用）</summary>
+                <div class="opening-combined-note">这里是工具自动把“主开场白 HTML + 所有副开场白 HTML”拼起来的结果。平时不要在这里大改，优先用上面的选择框切到某一份单独修改。</div>
+                <textarea id="openingHtml" class="codebox opening-codebox" spellcheck="false" oninput="splitOpeningPartsFromCombined(false)" placeholder="自动合并后的 HTML 会出现在这里。"></textarea>
+              </details>
+            </div>
+            <div class="opening-revise-panel">
+              <div class="code-head" style="padding:0;border:0;background:transparent">
+                <div>
+                  <h3>选择要修改哪一块</h3>
+                  <p>比如只改主开场白按钮，就不要让 AI 重写副开场白；只改副开场白卡片，也不要动主开场白。</p>
+                </div>
+              </div>
+              <div class="opening-revise-row">
+                <select id="openingReviseTarget">
+                  <option value="main">主要修改：主开场白 HTML</option>
+                  <option value="sub-current">主要修改：当前选中的副开场白</option>
+                  <option value="sub-all">主要修改：全部副开场白</option>
+                  <option value="style">只改整体样式 / 颜色 / 字体 / 动画</option>
+                  <option value="jump">只改跳转按钮 / swipe_id</option>
+                  <option value="all">主开场白和所有副开场白联动修改</option>
+                </select>
+                <textarea id="openingReviseIdea" placeholder="例如：只把主开场白里的跳转按钮改小一点；副开场白不要动。或者：只改当前第 3 个副开场白。也可以选择“全部副开场白”统一改卡片样式。"></textarea>
+              </div>
+              <div class="btn-row">
+                <button class="btn primary" id="openingReviseBtn" onclick="askOpeningRevise()">AI 按选择修改</button>
+                <button class="btn" onclick="syncOpeningCombinedFromParts();renderOpeningPreview()">刷新合并预览</button>
+                <button class="btn ghost" onclick="copyOpeningHtml()">复制合并 HTML</button>
+              </div>
+              <div class="loader" id="openingReviseLoader"><span class="spin"></span><span>AI 正在按你选择的范围修改，请等一下...</span></div>
+              <div class="notice" id="openingReviseStatus" style="display:none"></div>
+            </div>
+            <div>
+              <div class="code-head">
+                <div>
+                  <h3>展示预览</h3>
+                  <p>这里不再做“主副一起看”，只单独检查主开场白、当前副开场白或全部副开场白，避免预览混在一起。真实跳转仍需要酒馆助手/脚本环境。</p>
+                </div>
+                <div class="opening-view-switch">
+                  <select id="openingPreviewMode" onchange="renderOpeningPreview()">
+                    <option value="main">只看主开场白</option>
+                    <option value="sub-current">只看当前副开场白</option>
+                    <option value="sub-all">只看全部副开场白</option>
+                  </select>
+                  <button class="btn small" onclick="openOpeningFullscreen()">全屏展示</button>
+                </div>
+              </div>
+              <iframe class="preview-frame opening-preview-frame" id="openingPreviewFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel grid opening-help-panel">
+        <div class="code-head">
+          <div>
+            <h3>开场白 HTML 帮助</h3>
+            <p>HTML 新手先看这里。开场白页只处理“长什么样”和“怎么展示”，不处理世界书、正则、捕获组。</p>
+          </div>
+          <span class="badge">新手说明</span>
+        </div>
+        <div class="help-grid opening-help-grid">
+          <details class="help"><summary>我只想改颜色、字体、背景，改哪里？</summary><div class="inner">改 HTML 里的 CSS，也就是 style 里面的 color、background、font-size、font-family、border、box-shadow。开场白页没有正则，所以不用管 $1-$n。</div></details>
+          <details class="help"><summary>我想多加一个开场白按钮怎么办？</summary><div class="inner">如果只是展示，在 HTML 里复制一个入口卡片，然后改标题和介绍。如果要对应酒馆里的第几个开场白，按钮上建议写 data-swipe-index="0"、data-swipe-index="1" 这种编号；酒馆的 swipe_id 通常从 0 开始，第 3 个开场白就是 swipe_id:2。</div></details>
+          <details class="help"><summary>主开场白和副开场白要怎么展示？</summary><div class="inner">主开场白通常放最上面，说明“从这里进入故事”；副开场白像分支入口一样并列展示。这个工具会让 AI 返回 openings 清单，并在预览区合并显示主/副开场白；如果要逐个检查，可以用预览模式切到主开场白、当前副开场白或全部副开场白。</div></details>
+          <details class="help"><summary>为什么我点按钮没反应？</summary><div class="inner">普通 HTML 片段只能负责视觉展示，很多酒馆环境不会直接执行 JS。要真实切换开场白，建议使用酒馆助手版本：按钮使用 class="st-opening-jump" 和 data-swipe-index，脚本里调用 setChatMessages([{message_id:0, swipe_id:目标编号}], {refresh:'affected'})。如果只是发布页展示，不需要这个脚本。</div></details>
+          <details class="help"><summary>主开场白跳到副开场白怎么写？</summary><div class="inner">做法是给按钮加编号，例如 &lt;button class="st-opening-jump" data-swipe-index="1"&gt;跳到副开场白&lt;/button&gt;。酒馆助手脚本读取这个编号，再调用 setChatMessages 切换第 0 楼的 swipe_id。注意：这属于酒馆助手/脚本环境，不是普通浏览器都能生效。</div></details>
+          <details class="help"><summary>电脑好看，手机挤爆怎么办？</summary><div class="inner">给最外层容器设置 width:95%; max-width:420px; margin:auto; 并避免固定很大的宽度。图片和卡片用 max-width:100%。这版工具预览区也会限制宽度，避免把页面撑开。</div></details>
+          <details class="help"><summary>开场白 HTML 和状态栏三件套的区别是什么？</summary><div class="inner">开场白 HTML 是“一段直接展示的页面”；状态栏三件套是“AI 先输出标签，正则抓字段，再用 HTML 展示”。所以开场白更简单，主要看 HTML；状态栏更复杂，要看世界书、正则、HTML 三边对应。</div></details>
+          <details class="help"><summary>发布页、菜单页、开场白选择页都能做吗？</summary><div class="inner">能。你只要在需求里说清楚用途、入口数量、每个入口叫什么、要不要短介绍、整体风格、手机端宽度。AI 会生成一段完整 HTML 片段用于展示。</div></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-opening-result">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>开场白结果</h3>
+            <p>这里专门放开场白 HTML 和主副开场白清单。它不显示状态栏三件套，不显示世界书和正则。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="copyOpeningHtml()">复制 HTML</button>
+            <button class="btn small" onclick="syncOpeningCombinedFromParts();renderOpeningPreview();goPage('opening-preview')">刷新并预览</button>
+            <button class="btn small" onclick="saveOpeningManual()">手动保存</button>
+          </div>
+        </div>
+        <div id="openingHtmlMount" class="grid"></div>
+        <div id="openingListMount" class="grid"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-opening-preview">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>开场白预览</h3>
+            <p>这里只展示开场白 HTML 的实际效果。普通浏览器只能看视觉；真实跳副开场白要放到酒馆助手/脚本环境里。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="renderOpeningPreview()">刷新预览</button>
+            <button class="btn small" onclick="openOpeningFullscreen()">全屏展示</button>
+            <button class="btn small" onclick="goPage('opening')">回开场白页</button>
+          </div>
+        </div>
+        <div id="openingPreviewMount" class="grid"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-opening-history">
+      <div class="panel grid">
+        <div class="code-head">
+          <div>
+            <h3>开场白历史</h3>
+            <p>自动保存会顶替同一个当前制作；手动保存会留下独立版本，适合存一个你觉得能用的版本。</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" onclick="saveOpeningManual()">手动保存当前开场白</button>
+            <button class="btn small ghost" onclick="renderOpeningHistory()">刷新历史</button>
+          </div>
+        </div>
+        <div id="openingHistoryBox" class="grid"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-opening-help">
+      <div id="openingHelpMount" class="grid"></div>
     </section>
 
     <section class="page" id="page-result">
@@ -702,7 +1191,7 @@
         <div class="code-head">
           <div>
             <h3>帮助中心：按问题分类找原因</h3>
-            <p>先看分类，再看问题。别一上来乱改三件套：输出不稳定看世界书，匹配失败看正则，不好看或点不动看 HTML；内容错位看正则捕获顺序和字段对应表。</p>
+            <p>先看分类，再看问题。别一上来乱改三件套：状态栏输出不稳定看世界书，匹配失败看正则，不好看或点不动看 HTML；内容错位看正则捕获顺序和字段对应表。开场白 HTML 则只看 HTML/CSS，不用管世界书和正则。</p>
           </div>
           <span class="badge">分类版帮助</span>
         </div>
@@ -838,6 +1327,17 @@
       <div class="selection-how">
         <b>AI 怎么知道你选中了哪段：</b>你在下面文本框里拖动选中后，网站会读取选区起点/终点，拿到这段原文；点击分析时，会把“选中片段 + 当前所在块 + 完整世界书/正则/HTML/示例输出 + 字段对应表”一起发给 AI，所以它能判断这段和三件套其他部分的关系。
       </div>
+      <div class="modal-selected-revise visible-edit-idea" id="modalSelectedReviseBox">
+        <div class="modal-edit-title">修改要求输入区</div>
+        <label>这里输入你想让 AI 改什么 <span class="badge">选中代码段后使用</span></label>
+        <textarea id="modalSelectionEditIdea" placeholder="例如：把我选中的这段按钮改小一点，保留原来的跳转功能；或者：这段翻页动画太硬，改成柔和一点，不要影响其他 HTML。"></textarea>
+        <div class="mini">步骤：① 在下面代码框里选中一段 ② 点“➕ 荧光标记”确认范围 ③ 在这里写修改要求 ④ 点“AI 按选中段修改”。AI 会读取完整 HTML 上下文，返回补全后的完整当前开场白 HTML，不会只给碎片。</div>
+        <div class="btn-row">
+          <button class="btn small" type="button" onmousedown="event.preventDefault()" onclick="markModalSelection()">➕ 荧光标记选中段</button>
+          <button class="btn small primary" type="button" onmousedown="event.preventDefault()" onclick="reviseModalSelectedSegment()">AI 按选中段修改</button>
+          <button class="btn small" type="button" onmousedown="event.preventDefault()" onclick="saveModalCode()">保存当前放大框</button>
+        </div>
+      </div>
       <textarea class="modal-code" id="modalCodeText" onmouseup="rememberModalSelection()" onkeyup="rememberModalSelection()" onselect="rememberModalSelection()"></textarea>
       <pre class="highlight-preview" id="highlightPreview"></pre>
       <pre class="selected-snippet" id="selectedSnippetBox"></pre>
@@ -901,6 +1401,7 @@
 <script>
 // V2.8 顶部导航兜底：即使后续脚本某处出错，顶部按钮也尽量能切页
 function goPageSafe(page){
+  if(page==='opening-result') page='opening';
   try{ if(typeof goPage==='function'){ goPage(page); return false; } }catch(e){}
   try{
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -911,6 +1412,411 @@ function goPageSafe(page){
   }catch(e){ location.hash='page-'+page; }
   return false;
 }
+
+/* V4.1 多副开场白：副开场白按数组管理，可以一个一个选，也可以一起看/一起改；展示只保留预览，不再重复显示酒馆式清单 */
+let openingSubParts = [];
+let openingSubIndex = 0;
+function normalizeSubHtmlParts(value){
+  if(Array.isArray(value)) return value.map(x=>String(x||'').trim()).filter(Boolean);
+  const text=String(value||'').trim();
+  if(!text) return [];
+  const parts=[];
+  const re=/<!--\s*副开场白\s*(?:HTML)?\s*(?:#|第)?\s*\d*[^>]*-->\s*([\s\S]*?)(?=<!--\s*副开场白\s*(?:HTML)?\s*(?:#|第)?\s*\d*[^>]*-->|$)/gi;
+  let m;
+  while((m=re.exec(text))){ const part=(m[1]||'').trim(); if(part) parts.push(part); }
+  return parts.length?parts:[text];
+}
+function syncCurrentSubToArray(){
+  const el=$('openingSubHtml');
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubParts[openingSubIndex]=el?el.value||'':'';
+  renderOpeningSubSelector(false);
+}
+function getOpeningSubParts(){
+  syncCurrentSubToArray();
+  return openingSubParts.map(x=>String(x||'').trim()).filter(Boolean);
+}
+function getOpeningCurrentSubHtml(){
+  syncCurrentSubToArray();
+  return openingSubParts[openingSubIndex]||'';
+}
+function getOpeningMainHtml(){return $('openingMainHtml')?.value||'';}
+function getOpeningSubHtml(){return getOpeningSubParts().join('\n\n');}
+function setOpeningSubParts(parts,selected=0){
+  openingSubParts=normalizeSubHtmlParts(parts);
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubIndex=Math.max(0,Math.min(Number(selected)||0,openingSubParts.length-1));
+  const el=$('openingSubHtml'); if(el) el.value=openingSubParts[openingSubIndex]||'';
+  renderOpeningSubSelector(false);
+}
+function selectOpeningSub(index){
+  syncCurrentSubToArray();
+  openingSubIndex=Math.max(0,Math.min(Number(index)||0,openingSubParts.length-1));
+  const el=$('openingSubHtml'); if(el) el.value=openingSubParts[openingSubIndex]||'';
+  renderOpeningSubSelector(false);
+  renderOpeningPreview();
+}
+function addOpeningSub(){
+  syncCurrentSubToArray();
+  openingSubParts.push('');
+  openingSubIndex=openingSubParts.length-1;
+  const el=$('openingSubHtml'); if(el){el.value=''; el.focus();}
+  renderOpeningSubSelector(false);
+  renderOpeningPreview();
+  toast('已新增一个副开场白');
+}
+function duplicateOpeningSub(){
+  syncCurrentSubToArray();
+  const source=openingSubParts[openingSubIndex]||'';
+  openingSubParts.splice(openingSubIndex+1,0,source);
+  openingSubIndex=openingSubIndex+1;
+  const el=$('openingSubHtml'); if(el) el.value=source;
+  renderOpeningSubSelector(false);
+  renderOpeningPreview();
+  toast('已复制当前副开场白');
+}
+function deleteOpeningSub(){
+  syncCurrentSubToArray();
+  if(!openingSubParts.length){setOpeningSubParts(['']);return;}
+  openingSubParts.splice(openingSubIndex,1);
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubIndex=Math.max(0,Math.min(openingSubIndex,openingSubParts.length-1));
+  const el=$('openingSubHtml'); if(el) el.value=openingSubParts[openingSubIndex]||'';
+  renderOpeningSubSelector(false);
+  renderOpeningPreview();
+  toast('已删除当前副开场白');
+}
+function renderOpeningSubSelector(save=true){
+  const select=$('openingSubSelect');
+  const tabs=$('openingSubTabs');
+  const meta=$('openingSubMeta');
+  if(!openingSubParts.length) openingSubParts=[''];
+  if(openingSubIndex<0 || openingSubIndex>=openingSubParts.length) openingSubIndex=0;
+  const count=openingSubParts.length;
+  if(select){
+    select.innerHTML=openingSubParts.map((part,i)=>`<option value="${i}" ${i===openingSubIndex?'selected':''}>副开场白 ${i+1}${part.trim()?'':' · 空'}</option>`).join('');
+  }
+  if(tabs){
+    tabs.innerHTML=openingSubParts.map((part,i)=>`<button type="button" class="opening-sub-tab ${i===openingSubIndex?'active':''}" onclick="selectOpeningSub(${i})">副 ${i+1}${part.trim()?'':' · 空'}</button>`).join('');
+  }
+  if(meta){meta.textContent=`当前正在编辑：副开场白 ${openingSubIndex+1} / ${count}。底部预览可以选择“主开场白”“当前副”或“全部副”。`;}
+  if(save) saveOpeningLocal();
+}
+function combineOpeningParts(main,sub){
+  main=String(main||'').trim();
+  let parts=Array.isArray(sub)?sub:normalizeSubHtmlParts(sub);
+  parts=parts.map(x=>String(x||'').trim()).filter(Boolean);
+  const chunks=[];
+  if(main) chunks.push(`<!-- 主开场白 HTML：单独维护 -->\n${main}`);
+  parts.forEach((part,i)=>chunks.push(`<!-- 副开场白 HTML #${i+1}：单独维护 -->\n${part}`));
+  return chunks.join('\n\n');
+}
+function syncOpeningCombinedFromParts(save=true){
+  syncCurrentSubToArray();
+  const combinedEl=$('openingHtml');
+  if(!combinedEl) return '';
+  combinedEl.value=combineOpeningParts(getOpeningMainHtml(), openingSubParts);
+  if(save) saveOpeningLocal();
+  return combinedEl.value||'';
+}
+function splitOpeningPartsFromCombined(save=true){
+  const combined=$('openingHtml')?.value||'';
+  const mainEl=$('openingMainHtml');
+  let main='';
+  const mainMatch=combined.match(/<!--\s*主开场白[\s\S]*?-->\s*([\s\S]*?)(?=<!--\s*副开场白[\s\S]*?-->|$)/i);
+  if(mainMatch) main=(mainMatch[1]||'').trim();
+  else main=combined.replace(/<!--\s*副开场白[\s\S]*?-->[\s\S]*$/i,'').trim();
+  const subs=[];
+  const subRe=/<!--\s*副开场白[\s\S]*?-->\s*([\s\S]*?)(?=<!--\s*副开场白[\s\S]*?-->|$)/gi;
+  let m; while((m=subRe.exec(combined))){ if((m[1]||'').trim()) subs.push((m[1]||'').trim()); }
+  if(mainEl) mainEl.value=main;
+  setOpeningSubParts(subs.length?subs:[''],0);
+  if(save) saveOpeningLocal();
+}
+function extractOpeningSubPartsFromMaybeCombined(text){
+  text=String(text||'').trim();
+  if(!text) return [];
+  const parts=[];
+  const re=/<!--\s*副开场白[\s\S]*?-->\s*([\s\S]*?)(?=<!--\s*副开场白[\s\S]*?-->|$)/gi;
+  let m;
+  while((m=re.exec(text))){
+    const part=(m[1]||'').trim();
+    if(part) parts.push(part);
+  }
+  return parts;
+}
+function cleanOpeningSubForPreview(raw,index=0){
+  raw=String(raw||'').trim();
+  if(!raw) return '';
+  const parts=extractOpeningSubPartsFromMaybeCombined(raw);
+  if(parts.length) return parts[Math.max(0,Math.min(Number(index)||0,parts.length-1))] || parts[0] || '';
+  const mainPos=raw.search(/<!--\s*主开场白[\s\S]*?-->/i);
+  const subPos=raw.search(/<!--\s*副开场白[\s\S]*?-->/i);
+  if(mainPos>=0 && subPos>=0){
+    return raw.slice(subPos).replace(/<!--\s*副开场白[\s\S]*?-->/i,'').trim();
+  }
+  return raw;
+}
+function getOpeningPreviewHtml(){
+  const select=$('openingPreviewMode');
+  let mode=select?.value||'main';
+  if(mode==='combined'){
+    mode='main';
+    if(select) select.value='main';
+  }
+  syncCurrentSubToArray();
+  if(mode==='main') return getOpeningMainHtml() || '<div style="padding:18px;color:#7f5539">还没有主开场白 HTML。</div>';
+  if(mode==='sub-current'){
+    const raw=openingSubParts[openingSubIndex] || '';
+    return cleanOpeningSubForPreview(raw, openingSubIndex) || '<div style="padding:18px;color:#7f5539">当前副开场白还是空的。</div>';
+  }
+  if(mode==='sub-all'){
+    const subs=openingSubParts.map((part,i)=>cleanOpeningSubForPreview(part,i)).filter(Boolean);
+    return subs.length ? combineOpeningParts('', subs) : '<div style="padding:18px;color:#7f5539">还没有副开场白 HTML。</div>';
+  }
+  return getOpeningMainHtml() || '<div style="padding:18px;color:#7f5539">还没有主开场白 HTML。</div>';
+}
+function setOpeningPartsFromParsed(parsed){
+  const main=firstText(parsed.main_html,parsed.mainHtml,parsed.main,parsed['主开场白HTML'],parsed['主开场白html'],'');
+  const subList=parsed.sub_htmls||parsed.subHtmls||parsed.subs||parsed['副开场白HTML列表']||parsed['副开场白列表'];
+  const sub=firstText(parsed.sub_html,parsed.subHtml,parsed.sub,parsed['副开场白HTML'],parsed['副开场白html'],'');
+  const html=firstText(parsed.html,parsed.HTML,parsed.code,parsed['html代码'],parsed['开场白HTML'],'');
+  if($('openingMainHtml')) $('openingMainHtml').value=main || (subList||sub?'':html);
+  setOpeningSubParts(subList || sub || [], 0);
+  if($('openingHtml')) $('openingHtml').value=(main||subList||sub)?combineOpeningParts(main,openingSubParts):html;
+  if(!main && !subList && !sub && html) splitOpeningPartsFromCombined(false);
+  return $('openingHtml')?.value||'';
+}
+function saveOpeningLocal(){
+  syncCurrentSubToArray();
+  const combined=syncOpeningCombinedFromParts(false);
+  const data={
+    idea:$('openingIdea')?.value||'',
+    main_html:getOpeningMainHtml(),
+    sub_html:getOpeningSubHtml(),
+    sub_htmls:getOpeningSubParts(),
+    sub_index:openingSubIndex,
+    html:combined || ($('openingHtml')?.value||''),
+    meta:openingMeta||{},
+    opts:getOpeningOptions(),
+    time:Date.now()
+  };
+  try{localStorage.setItem(LS_OPENING,JSON.stringify(data));}catch(e){}
+  try{saveOpeningAutoHistory();}catch(e){}
+}
+function loadOpeningLocal(){
+  try{
+    const data=JSON.parse(localStorage.getItem(LS_OPENING)||'{}');
+    if(data.idea && $('openingIdea')) $('openingIdea').value=data.idea;
+    if($('openingMainHtml')) $('openingMainHtml').value=data.main_html||'';
+    setOpeningSubParts(data.sub_htmls || data.sub_html || '', data.sub_index||0);
+    if(data.html && $('openingHtml')) $('openingHtml').value=data.html;
+    if(data.html && !data.main_html && !data.sub_html && !data.sub_htmls) splitOpeningPartsFromCombined(false);
+    if(data.opts){
+      if($('openingUseMainSub')) $('openingUseMainSub').checked=data.opts.mainSub!==false;
+      if($('openingUseJump')) $('openingUseJump').checked=!!data.opts.jump;
+    }
+    openingMeta=data.meta||{openings:[],explanation:'',jump_notes:''};
+    if(data.html || data.main_html || data.sub_html || data.sub_htmls) setTimeout(()=>{syncOpeningCombinedFromParts(false);renderOpeningPreview();renderOpeningList();},80);
+  }catch(e){ setOpeningSubParts([''],0); }
+}
+function normalizeOpenings(list){
+  if(!Array.isArray(list)) return [];
+  return list.map((it,i)=>{
+    if(typeof it==='string') return {title:it,type:i===0?'主开场白':'副开场白',summary:'',swipe_index:i};
+    const title=firstText(it.title,it.name,it.label,it['标题'],'开场白 '+(i+1));
+    const typeRaw=firstText(it.type,it.kind,it['类型'],i===0?'main':'sub');
+    const type=/主|main/i.test(typeRaw)?'主开场白':'副开场白';
+    const summary=firstText(it.summary,it.desc,it.description,it.intro,it['简介'],it['短介绍'],'');
+    let swipe=it.swipe_index??it.swipeId??it.index??it['开场白编号']??i;
+    swipe=Number(swipe); if(!Number.isFinite(swipe)) swipe=i;
+    return {title,type,summary,swipe_index:swipe};
+  });
+}
+function inferOpeningsFromHtml(html){
+  const out=[];
+  const re=/<(?:button|a|div|li|section|article)[^>]*(?:data-swipe-index=["']?(\d+)["']?)?[^>]*>([\s\S]*?)<\/(?:button|a|div|li|section|article)>/gi;
+  let m;
+  while((m=re.exec(html||'')) && out.length<60){
+    const text=m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    if(!text || text.length>90) continue;
+    if(/初见|再见|爱恋|初现|深陷|开场白|主线|副线|入口|副/.test(text)){
+      const idx=m[1]!=null?Number(m[1]):out.length;
+      out.push({title:text.slice(0,24),type:out.length===0?'主开场白':'副开场白',summary:text,swipe_index:Number.isFinite(idx)?idx:out.length});
+    }
+  }
+  return out;
+}
+function renderOpeningList(){
+  const board=$('openingSwipeBoard'); if(!board) return;
+  syncOpeningCombinedFromParts(false);
+  const html=$('openingHtml')?.value||'';
+  let list=normalizeOpenings(openingMeta?.openings||[]);
+  if(!list.length) list=inferOpeningsFromHtml(html);
+  if(!list.length){
+    board.innerHTML='<div class="opening-jump-note">还没有开场白清单。生成时勾选“主副开场白结构”，AI 会返回 openings 字段；或者在 HTML 按钮里写 data-swipe-index，也能辅助识别。</div>';
+    return;
+  }
+  const mode=$('openingListMode')?.value||'all';
+  let filtered=list;
+  if(mode==='main') filtered=list.filter(x=>x.type==='主开场白');
+  if(mode==='sub-all') filtered=list.filter(x=>x.type!=='主开场白');
+  if(mode==='sub-current'){
+    const targetIndex=openingSubIndex+1;
+    filtered=list.filter(x=>Number(x.swipe_index)===targetIndex || (x.type!=='主开场白' && list.filter(y=>y.type!=='主开场白').indexOf(x)===openingSubIndex));
+  }
+  if(!filtered.length) filtered=list;
+  const jump=openingMeta?.jump_notes||'如果要真的从主开场白跳到副开场白：按钮使用 class="st-opening-jump" 和 data-swipe-index，酒馆助手脚本读取编号后切换第 0 楼 swipe_id。';
+  board.innerHTML=filtered.map((it,i)=>`<div class="opening-swipe-card ${it.type==='主开场白'?'main':''}"><div class="top"><b>${esc(it.title)}</b><span class="type">${esc(it.type)}</span></div><p>${esc(it.summary||'还没有短介绍。')}</p><code>swipe_id: ${Number(it.swipe_index)||0}</code></div>`).join('')+`<div class="opening-jump-note"><b>当前查看：</b>${esc(mode==='all'?'全部开场白':mode==='main'?'主开场白':mode==='sub-current'?'当前选中的副开场白':'全部副开场白')}<br><b>跳转说明：</b><br>${esc(jump)}</div>`;
+}
+function tryParseOpeningHtml(raw){
+  const text=String(raw||'').trim();
+  try{
+    const obj=JSON.parse(extractJsonText(text));
+    const main_html=firstText(obj.main_html,obj.mainHtml,obj.main,obj['主开场白HTML'],obj['主开场白html'],'');
+    const sub_htmls=normalizeSubHtmlParts(obj.sub_htmls||obj.subHtmls||obj.subs||obj['副开场白HTML列表']||obj['副开场白列表']||[]);
+    const sub_html=firstText(obj.sub_html,obj.subHtml,obj.sub,obj['副开场白HTML'],obj['副开场白html'],'');
+    const finalSubs=sub_htmls.length?sub_htmls:normalizeSubHtmlParts(sub_html);
+    const html=firstText(obj.html,obj.HTML,obj.code,obj['html代码'],obj['开场白HTML'], combineOpeningParts(main_html,finalSubs));
+    const openings=normalizeOpenings(obj.openings||obj.first_messages||obj.firstMessages||obj['开场白列表']||obj['开场白清单']||[]);
+    const explanation=firstText(obj.explanation,obj.description,obj['说明'],obj.help);
+    const jump_notes=firstText(obj.jump_notes,obj.jumpNotes,obj['跳转说明'],obj['按钮说明'],'');
+    return {html,main_html,sub_htmls:finalSubs,sub_html:finalSubs.join('\n\n'),openings,explanation,jump_notes};
+  }catch(e){}
+  const fence=text.match(/```html\s*([\s\S]*?)```/i) || text.match(/```\s*([\s\S]*?)```/i);
+  if(fence){
+    const html=fence[1].trim();
+    return {html,main_html:html,sub_htmls:[],sub_html:'',openings:inferOpeningsFromHtml(html),explanation:'AI 返回了代码块，网页已提取其中 HTML。',jump_notes:''};
+  }
+  const divStart=text.search(/<(style|div|section|article|details|main|aside|ul|ol|h[1-6]|p|span|button|a)\b/i);
+  if(divStart>=0){
+    const html=text.slice(divStart).trim();
+    return {html,main_html:html,sub_htmls:[],sub_html:'',openings:inferOpeningsFromHtml(html),explanation:'AI 没有返回 JSON，网页已从第一个 HTML 标签开始提取。',jump_notes:''};
+  }
+  return {html:text,main_html:text,sub_htmls:[],sub_html:'',openings:[],explanation:'AI 返回内容未识别为标准 HTML，请检查。',jump_notes:''};
+}
+function applyOpeningParsed(parsed){
+  setOpeningPartsFromParsed(parsed);
+  openingMeta={openings:normalizeOpenings(parsed.openings||[]),explanation:parsed.explanation||'',jump_notes:parsed.jump_notes||''};
+  syncOpeningCombinedFromParts(false);
+  renderOpeningPreview();
+  renderOpeningList();
+  saveOpeningLocal();
+}
+function buildOpeningPrompt(idea){
+  const opts=getOpeningOptions();
+  return `你是 SillyTavern 开场白 HTML 生成器。请根据用户想法生成可以直接展示的 HTML。\n\n用户想法：\n${idea}\n\n重要规则：\n- 这是开场白 HTML，不是状态栏三件套；不需要世界书和正则。\n- 必须支持一个主开场白和多个副开场白。副开场白可能有 10 个以上。\n- 主开场白 HTML 放 main_html。\n- 每个副开场白必须分开放进 sub_htmls 数组，不要把所有副开场白塞进一个 sub_html 字符串。\n- html 字段是 main_html + 所有 sub_htmls 的合并预览版本。\n- openings 数组必须列出每个开场白：主开场白 swipe_index 为 0，副开场白依次为 1、2、3……。\n- ${opts.mainSub?'必须把主开场白和所有副开场白一起展示，并返回 openings 数组。':'如果需求里出现多个开场白，请返回 openings 数组。'}\n- openings 数组每项格式：{ "title":"开场白标题", "type":"main 或 sub", "summary":"短介绍", "swipe_index":0 }。\n- ${opts.jump?'用户需要跳转按钮：必须使用 class="st-opening-jump" 和 data-swipe-index，并在 jump_notes 说明酒馆助手切换逻辑。':'如果用户提到“跳到副开场白/切换开场白/跳转”，必须使用 class="st-opening-jump" 和 data-swipe-index。'}\n- HTML 必须手机端可读，不要超宽。\n- 不要输出完整 html/head/body，只输出可嵌入片段。\n\n返回严格 JSON，不要 Markdown。格式：{"title":"","main_html":"主开场白HTML片段","sub_htmls":["副开场白1HTML片段","副开场白2HTML片段"],"html":"主副合并HTML片段","openings":[{"title":"","type":"main","summary":"","swipe_index":0}],"jump_notes":"跳转按钮和酒馆助手说明","explanation":"给新手看的说明：主副分别改哪里、哪里改颜色、哪里改入口、手机适配怎么看"}` + buildOpeningJumpInstruction();
+}
+async function generateOpeningHtml(){
+  const idea=($('openingIdea')?.value||'').trim();
+  if(!idea){toast('先写一下你想要什么开场白 HTML');return;}
+  goPage('opening');
+  showOpeningDiag('正在请求 AI 生成开场白 HTML。会把主开场白和多个副开场白分开返回；预览区可单独看主、当前副或全部副，不再提供主副一起看。','info');
+  setLoading('openingLoader',true);
+  try{
+    const raw=await callChat([{role:'system',content:'你是开场白 HTML 生成器。只返回严格 JSON，不要 Markdown。必须包含 main_html、sub_htmls、html、openings。副开场白必须放数组，不要混成一个。'},{role:'user',content:buildOpeningPrompt(idea)}],null);
+    const parsed=tryParseOpeningHtml(raw);
+    applyOpeningParsed(parsed);
+    showOpeningDiag('生成成功。'+(parsed.explanation?'<br><br>'+esc(parsed.explanation):'')+(parsed.jump_notes?'<br><br><b>跳转说明：</b><br>'+esc(parsed.jump_notes):''),'ok');
+    toast('开场白 HTML 生成完成');
+  }catch(err){
+    console.error(err); showOpeningDiag(buildFailureHelp(err),'bad'); toast('开场白生成失败：'+String(err.message||err).slice(0,80));
+  }finally{setLoading('openingLoader',false)}
+}
+async function askOpeningRevise(){
+  syncOpeningCombinedFromParts(false);
+  const html=($('openingHtml')?.value||'').trim();
+  const mainHtml=getOpeningMainHtml().trim();
+  const subParts=getOpeningSubParts();
+  if(!html && !mainHtml && !subParts.length){toast('还没有 HTML 可以修改');return;}
+  let req=($('openingReviseIdea')?.value||'').trim();
+  if(!req){ req=prompt('你想怎么修改？例如：只改当前副开场白；其他副开场白不要动。')||''; }
+  if(!req.trim()) return;
+  const target=$('openingReviseTarget')?.value||'all';
+  const targetText={main:'主要修改主开场白 HTML。所有副开场白除非必须配合跳转，否则保持原样。','sub-current':`主要修改当前选中的副开场白：第 ${openingSubIndex+1} 个。主开场白和其他副开场白保持原样。`,'sub-all':'主要修改全部副开场白。主开场白除非必须配合入口，否则保持原样。',style:'只修改整体样式、颜色、字体、动画和布局。主副内容含义不变。',jump:'只修改跳转按钮、class、data-swipe-index、跳转说明。主副正文不改。',all:'主开场白和所有副开场白可以一起联动修改。'}[target]||'按需求修改。';
+  setLoading('openingLoader',true);
+  setLoading('openingReviseLoader',true);
+  const reviseBtn=$('openingReviseBtn');
+  const reviseStatus=$('openingReviseStatus');
+  if(reviseBtn){reviseBtn.disabled=true; reviseBtn.dataset.oldText=reviseBtn.textContent; reviseBtn.textContent='正在修改...';}
+  if(reviseStatus){reviseStatus.style.display='block'; reviseStatus.className='notice'; reviseStatus.innerHTML='<b>正在修改：</b>'+esc(targetText)+'<br>已经把当前主开场白、所有副开场白、当前选择范围和你的要求发给 AI。完成前不要重复点击。';}
+  showOpeningDiag('AI 正在按你选择的范围修改：'+targetText,'info');
+  try{
+    const promptText=`请根据修改意见，修改下面的开场白 HTML。\n\n修改范围：${targetText}\n修改意见：${req}\n\n当前主开场白 HTML：\n${mainHtml}\n\n当前所有副开场白 HTML 数组，数组下标从 0 开始，对应酒馆 swipe_id 从 1 开始：\n${JSON.stringify(subParts,null,2)}\n\n当前选中的副开场白数组下标：${openingSubIndex}\n当前合并 HTML：\n${html}\n\n当前 openings 清单：\n${JSON.stringify(openingMeta?.openings||[],null,2)}\n\n要求：\n- 只返回严格 JSON：{"main_html":"修改后的主开场白HTML","sub_htmls":["副开场白1HTML","副开场白2HTML"],"html":"主副合并HTML","openings":[{"title":"","type":"main/sub","summary":"","swipe_index":0}],"jump_notes":"","explanation":"说明改了哪里"}。\n- 如果用户选择当前副开场白，只能改 sub_htmls[${openingSubIndex}]，其他 sub_htmls 必须原样保留。\n- 如果用户选择主开场白，所有 sub_htmls 必须原样保留。\n- 如果用户选择全部副开场白，可以统一修改 sub_htmls，但 main_html 尽量原样保留。\n- 如果只是改样式，openings 可以保持原结构。\n- 如果增加/删除副开场白入口，必须同步更新 sub_htmls 和 openings。\n- 如果用户要求跳转，按钮统一使用 class="st-opening-jump" 和 data-swipe-index。\n- 不要 Markdown。不要省略。`;
+    const raw=await callChat([{role:'system',content:'你是 HTML 修改助手。只返回严格 JSON，不要 Markdown。必须把多个副开场白放 sub_htmls 数组，并按用户选择范围保留不相关部分。'},{role:'user',content:promptText}],null);
+    const parsed=tryParseOpeningHtml(raw);
+    if(!parsed.main_html && mainHtml) parsed.main_html=mainHtml;
+    if((!parsed.sub_htmls || !parsed.sub_htmls.length) && subParts.length) parsed.sub_htmls=subParts;
+    if(!parsed.html) parsed.html=combineOpeningParts(parsed.main_html,parsed.sub_htmls);
+    applyOpeningParsed(parsed);
+    showOpeningDiag('修改完成。'+(parsed.explanation?'<br><br>'+esc(parsed.explanation):'')+(parsed.jump_notes?'<br><br><b>跳转说明：</b><br>'+esc(parsed.jump_notes):''),'ok');
+    toast('开场白 HTML 已修改');
+  }catch(err){
+    console.error(err); showOpeningDiag(buildFailureHelp(err),'bad'); toast('修改失败：'+String(err.message||err).slice(0,80));
+  }finally{setLoading('openingLoader',false)}
+}
+function loadOpeningDemo(){
+  const sharedStyle=`<style>\n.opening-menu{width:95%;max-width:430px;margin:14px auto;padding:18px;border:1px solid rgba(92,63,42,.35);background:linear-gradient(180deg,#fff8ec,#efe1c8);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;color:#2c261f;box-shadow:0 14px 36px rgba(63,45,28,.15)}\n.opening-menu h2{margin:0 0 8px;font-family:'Songti SC',serif;letter-spacing:.08em;font-size:22px}\n.opening-menu p{margin:0;color:#6f6458;line-height:1.8;font-size:13px}\n.opening-list{display:grid;gap:9px;margin-top:14px}\n.opening-item{padding:12px;border:1px solid rgba(92,63,42,.22);background:rgba(255,255,255,.45)}\n.opening-item.main{background:rgba(255,248,232,.8);border-color:rgba(92,63,42,.42)}\n.opening-item b{display:block;margin-bottom:4px;font-size:15px}\n.opening-item button{margin-top:8px;border:1px solid rgba(92,63,42,.35);background:#2b251f;color:#fff8ec;padding:7px 10px;font-size:12px;letter-spacing:.04em}\n.opening-note{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(92,63,42,.28);font-size:12px;color:#7a6b5c}\n</style>`;
+  const main=`${sharedStyle}\n<div class="opening-menu"><h2>主开场白 · 初见</h2><p>走廊尽头的第一眼，像阳光不小心撞进阴影里。这一页是主入口，可以放角色介绍、开局氛围和跳转按钮。</p><div class="opening-list"><div class="opening-item main"><b>进入主线 · 初见</b><p>从第一次相遇开始进入故事。</p><button class="st-opening-jump" data-swipe-index="1">跳到副开场白 · 再见</button></div></div><div class="opening-note">主开场白单独维护。按钮使用 class="st-opening-jump" 和 data-swipe-index。</div></div>`;
+  const subs=['再见','爱恋','初现','深陷','失控','雨夜','社团','天台','告白','终章'].map((name,i)=>`${sharedStyle}\n<div class="opening-menu"><h2>副开场白 · ${name}</h2><p>这是第 ${i+1} 个副开场白的单独展示块。它可以单独修改，也可以和其他副开场白一起看。</p><div class="opening-list"><div class="opening-item"><b>${name}</b><p>短介绍写在这里，不直接塞正文，适合做酒馆开场白入口。</p></div></div></div>`);
+  if($('openingMainHtml')) $('openingMainHtml').value=main;
+  setOpeningSubParts(subs,0);
+  syncOpeningCombinedFromParts(false);
+  openingMeta={
+    openings:[{title:'初见',type:'主开场白',summary:'走廊尽头的第一眼，像阳光不小心撞进阴影里。',swipe_index:0},...subs.map((_,i)=>({title:['再见','爱恋','初现','深陷','失控','雨夜','社团','天台','告白','终章'][i],type:'副开场白',summary:'第 '+(i+1)+' 个副开场白入口。',swipe_index:i+1}))],
+    explanation:'演示版把主开场白和十个副开场白分成多个独立 HTML 区块。你可以一个一个选着改，也可以全部一起预览。',
+    jump_notes:'主开场白按钮 data-swipe-index="1"，表示尝试跳到第 2 个开场白。酒馆 setChatMessages 的 swipe_id 通常从 0 开始。'
+  };
+  renderOpeningPreview(); renderOpeningList(); showOpeningDiag('已加载一个“1 主 + 10 副”的开场白 HTML 演示。','ok');
+}
+function saveOpeningAutoHistory(){
+  syncCurrentSubToArray();
+  const html=syncOpeningCombinedFromParts(false).trim();
+  const idea=($('openingIdea')?.value||'').trim();
+  const main_html=getOpeningMainHtml();
+  const sub_htmls=getOpeningSubParts();
+  if(!html && !idea && !main_html && !sub_htmls.length) return;
+  let list=getOpeningHistory().filter(x=>x.kind!=='auto');
+  list.unshift({kind:'auto',title:'自动保存 · 当前开场白',time:Date.now(),idea,main_html,sub_html:getOpeningSubHtml(),sub_htmls,sub_index:openingSubIndex,html,meta:openingMeta||{},opts:getOpeningOptions()});
+  setOpeningHistory(list);
+}
+function saveOpeningManual(){
+  const html=syncOpeningCombinedFromParts(false).trim();
+  if(!html){toast('还没有开场白 HTML 可以保存');return;}
+  const idea=($('openingIdea')?.value||'').trim();
+  const main_html=getOpeningMainHtml();
+  const sub_htmls=getOpeningSubParts();
+  let list=getOpeningHistory();
+  list.unshift({kind:'manual',title:'手动保存 · 开场白 HTML',time:Date.now(),idea,main_html,sub_html:getOpeningSubHtml(),sub_htmls,sub_index:openingSubIndex,html,meta:openingMeta||{},opts:getOpeningOptions()});
+  setOpeningHistory(list); renderOpeningHistory(); toast('已手动保存开场白版本');
+}
+function loadOpeningHistoryItem(i){
+  const item=getOpeningHistory()[i]; if(!item) return;
+  if($('openingIdea')) $('openingIdea').value=item.idea||'';
+  if($('openingMainHtml')) $('openingMainHtml').value=item.main_html||'';
+  setOpeningSubParts(item.sub_htmls || item.sub_html || '', item.sub_index||0);
+  if($('openingHtml')) $('openingHtml').value=item.html||'';
+  if(item.html && !item.main_html && !item.sub_html && !item.sub_htmls) splitOpeningPartsFromCombined(false);
+  openingMeta=item.meta||{openings:[],explanation:'',jump_notes:''};
+  if(item.opts){ if($('openingUseMainSub')) $('openingUseMainSub').checked=item.opts.mainSub!==false; if($('openingUseJump')) $('openingUseJump').checked=!!item.opts.jump; }
+  renderOpeningPreview(); renderOpeningList(); goPage('opening'); toast('已载入开场白历史');
+}
+function renderContextNav(activePage){
+  const nav=document.getElementById('nav'); if(!nav) return;
+  let items=[];
+  nav.classList.toggle('home-nav', workspaceMode==='home');
+  nav.classList.toggle('workspace-nav', workspaceMode!=='home');
+  if(workspaceMode==='opening'){
+    items=[navButton('返回',null,'','back-btn'),navButton('开场白','opening','编辑'),navButton('预览','opening-preview','展示'),navButton('历史','opening-history','存档'),navButton('帮助','opening-help','HTML')];
+  }else if(workspaceMode==='status'){
+    items=[navButton('返回',null,'','back-btn'),navButton('状态栏','generate','生成'),navButton('结果','result','三件套'),navButton('预览','preview','试跑'),navButton('历史','history','存档'),navButton('帮助','help','定位')];
+  }else{
+    items=[navButton('首页','home','说明'),navButton('选择','choose','功能'),navButton('API','api','连接')];
+  }
+  nav.innerHTML=items.join('');
+  nav.querySelectorAll('[data-page]').forEach(btn=>btn.classList.toggle('active',btn.getAttribute('data-page')===activePage));
+}
+
 document.addEventListener('click',function(e){
   var btn=e.target && e.target.closest ? e.target.closest('#nav button[data-page]') : null;
   if(btn){ e.preventDefault(); e.stopPropagation(); goPageSafe(btn.dataset.page); }
@@ -1637,6 +2543,12 @@ function setActiveCodeField(field){activeCodeField=field}
 function fieldLabel(field){return ({worldbook:'世界书',regex:'正则',html:'HTML',demo_output:'示例输出'}[field]||field)}
 function openCodeModal(field){
   if(!currentPack)return toast('没有三件套');
+  modalMode='status';
+  openingModalSnapshot=null;
+  const cm=$('codeModal');
+  if(cm){ cm.classList.remove('opening-edit-modal'); cm.classList.add('status-edit-modal'); }
+  const editBox=$('modalSelectedReviseBox');
+  if(editBox){ editBox.style.display='none'; editBox.classList.remove('force-opening-visible'); }
   modalField=field; activeCodeField=field;
   $('codeModalTitle').textContent='放大查看：'+fieldLabel(field);
   $('modalCodeText').value=currentPack[field]||'';
@@ -1746,7 +2658,7 @@ async function analyzeWholeRegex(){
       return;
     }
     const ans=await callChat([{role:'system',content:'你是 SillyTavern 正则讲解助手。必须用中文。不要 Markdown，不要星号，不要项目符号。按固定小标题回答：这条正则整体在做什么、每个主要标签、每个捕获组、$1-$n 对应、和世界书的关系、和 HTML 的关系、常见错误、修改建议。每段短句清楚。不要返回 JSON。'},{role:'user',content:buildWholeRegexPrompt()}],2600);
-    $('selectionAnalysis').innerHTML=localHtml+`<div class="ai-analysis-result"><h4>AI 详细分析</h4>${formatClearAnalysis(ans)}</div>`;
+    $('selectionAnalysis').innerHTML=formatClearAnalysis(ans);
     toast('整条正则分析完成');
   }catch(err){
     $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>AI 分析失败，已显示本地基础分析</b><p>'+esc(err.message)+'</p></div></div>'+localHtml;
@@ -1912,7 +2824,49 @@ function renderPreviewFrame(html){
     pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
     table{display:block;max-width:100%;overflow-x:auto}
     @media(max-width:640px){body{padding:10px;font-size:14px}}
-  </style></head><body>${html}</body></html>`;
+  </style></head><body>${html}
+
+<!-- V5.5：撤掉开场白放大页 AI 定位/荧光选段修改，回到外部选择修改；并强化外部修改反馈 -->
+<style id="v55RemoveOpeningLocatorStyle">
+  #codeModal.opening-edit-modal #modalSelectedReviseBox{display:none!important;}
+  #codeModal.opening-edit-modal .modal-head .btn-row button:nth-child(2),
+  #codeModal.opening-edit-modal .modal-head .btn-row button:nth-child(3){display:none!important;}
+  #openingReviseLoader.show{margin-top:8px;}
+  #openingReviseStatus{margin-top:8px;}
+  #openingReviseBtn:disabled{opacity:.72;cursor:wait;}
+</style>
+<script>
+(function v55ExternalOpeningReviseOnly(){
+  function $(id){return document.getElementById(id)}
+  function setupOpeningModalSimple(){
+    var modal=$('codeModal');
+    if(!modal || !modal.classList.contains('opening-edit-modal')) return;
+    var reviseBox=$('modalSelectedReviseBox');
+    if(reviseBox){reviseBox.style.display='none';}
+    var analysis=$('selectionAnalysis');
+    if(analysis){
+      analysis.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>放大查看模式</b><p>这里现在只用于查看、复制和手动编辑当前 HTML。想让 AI 自动修改，请关闭放大窗口，回到外面的“选择要修改哪一块”，选择主开场白、当前副开场白、全部副开场白、样式或跳转按钮，再点“AI 按选择修改”。</p></div></div>';
+    }
+    var snip=$('selectedSnippetBox'); if(snip){snip.classList.remove('show');snip.textContent='';}
+    var hp=$('highlightPreview'); if(hp){hp.classList.remove('show');hp.innerHTML='';}
+  }
+  var oldOpen=window.openOpeningCodeModal;
+  if(typeof oldOpen==='function'){
+    window.openOpeningCodeModal=function(){
+      var ret=oldOpen.apply(this, arguments);
+      setTimeout(setupOpeningModalSimple, 0);
+      setTimeout(setupOpeningModalSimple, 80);
+      return ret;
+    };
+  }
+  window.locateOpeningSegmentByIdea=function(){
+    if(window.toast) toast('这个定位功能已撤掉。请回到外面的“选择要修改哪一块”让 AI 修改。');
+    else alert('这个定位功能已撤掉。请回到外面的“选择要修改哪一块”让 AI 修改。');
+  };
+})();
+<\/script>
+
+</body></html>`;
   lastPreviewDoc=doc;
   $('previewFrame').srcdoc=doc;
 }
@@ -2432,9 +3386,927 @@ function localWholeRegexAnalysis(){
   return `这条正则整体在做什么：\n它负责扫描 AI 的原始标签输出，把标签之间的内容抓出来，再交给 HTML 里的 $1、$2、$3 使用。\n\n主要标签：\n我在正则里识别到这些标签线索：${tagNames.join('、')||'没有识别到明显标签，可能是复杂写法或转义写法'}。根标签通常负责包住整段内容，子标签负责包住具体字段。\n\n捕获组数量：\n我粗略统计到 ${groupCount} 个捕获组。第 1 个捕获组会变成 $1，第 2 个会变成 $2，后面依次类推。\n\n$1-$n 对应：\n${mapText}\n\n和世界书的关系：\n世界书必须要求 AI 输出和正则一致的标签名与层级。世界书改了标签名、顺序或字段数量，正则一般也要跟着改。\n\n和 HTML 的关系：\nHTML 里的 $1-$n 会被正则捕获内容替换。如果 HTML 的 $3 显示错内容，通常要检查正则第 3 个捕获组和 mapping。\n\n常见错误：\n正则带 g 标志会让 JS 预览丢失捕获组；标签名不一致会匹配失败；少写结束标签会匹配失败；跨行内容建议使用 [\\s\\S]*?；括号数量变了但 mapping 没更新会导致内容错位。\n\n修改建议：\n只是改颜色和布局，优先改 HTML。新增或删除字段，要同时改世界书、正则、HTML 和 mapping。`;
 }
 
-document.querySelectorAll('details.help').forEach(d=>d.removeAttribute('open'));
-loadSettings();loadCurrentPack();renderResult();updateStatus();renderHistory();renderProjectState();
 
+
+/* V3.7 开场白 HTML 生成：支持主副开场白、酒馆式清单、跳转按钮脚本说明 */
+const LS_OPENING='st_workshop_opening_html_v37';
+const openingExamples=[
+  '做一个五个开场白入口的酒单式 HTML。主开场白是“初见”，副开场白是：再见、爱恋、初现、深陷。展示时要像酒馆开场白那样一起列出来，每个入口只有短介绍，不要直接放正文。整体高级、微暗、适合手机端。',
+  '做一个角色卡发布页 HTML，包含作者、角色名、性向、测试模型、世界书/正则/状态栏有无、二改二传规则、故事简介、标签、作者的话。下面要有主开场白和副开场白入口展示。',
+  '做一个校园风开场白菜单 HTML，像课桌上的便签和校内公告栏。主开场白 1 个，副开场白 3 个，要求手机端宽度稳定，文字清楚。',
+  '做一个古风卷轴式开场白 HTML，主开场白可以跳到副开场白。副开场白 4 个，边框不要圆角，整体古雅但别太花，适合放在酒馆消息里。'
+];
+let openingMeta={openings:[],explanation:'',jump_notes:''};
+function insertOpeningExample(i){
+  const el=$('openingIdea'); if(el) el.value=openingExamples[i]||openingExamples[0];
+  if(i===3 && $('openingUseJump')) $('openingUseJump').checked=true;
+}
+function showOpeningDiag(msg,type='info'){
+  const el=$('openingDiag'); if(!el)return;
+  el.style.display='block';
+  el.className='notice '+(type==='bad'?'bad':type==='ok'?'ok':type==='warn'?'warn':'');
+  el.innerHTML=String(msg||'').replace(/\n/g,'<br>');
+}
+function getOpeningOptions(){
+  return {
+    mainSub:!!$('openingUseMainSub')?.checked,
+    jump:!!$('openingUseJump')?.checked
+  };
+}
+
+function getOpeningMainHtml(){return $('openingMainHtml')?.value||'';}
+function getOpeningSubHtml(){return $('openingSubHtml')?.value||'';}
+function combineOpeningParts(main,sub){
+  main=String(main||'').trim();
+  let parts=Array.isArray(sub)?sub:normalizeSubHtmlParts(sub);
+  parts=parts.map(x=>String(x||'').trim()).filter(Boolean);
+  const chunks=[];
+  if(main) chunks.push(`<!-- 主开场白 HTML：单独维护 -->
+${main}`);
+  parts.forEach((part,i)=>chunks.push(`<!-- 副开场白 HTML #${i+1}：单独维护 -->
+${part}`));
+  return chunks.join('\n\n');
+}
+function syncOpeningCombinedFromParts(save=true){
+  syncCurrentSubToArray();
+  const combinedEl=$('openingHtml');
+  if(!combinedEl) return '';
+  combinedEl.value=combineOpeningParts(getOpeningMainHtml(), openingSubParts);
+  if(save) saveOpeningLocal();
+  return combinedEl.value||'';
+}
+function splitOpeningPartsFromCombined(save=true){
+  const combined=$('openingHtml')?.value||'';
+  const mainEl=$('openingMainHtml');
+  let main='';
+  const mainMatch=combined.match(/<!--\s*主开场白[\s\S]*?-->\s*([\s\S]*?)(?=<!--\s*副开场白[\s\S]*?-->|$)/i);
+  if(mainMatch) main=(mainMatch[1]||'').trim();
+  else main=combined.replace(/<!--\s*副开场白[\s\S]*?-->[\s\S]*$/i,'').trim();
+  const subs=[];
+  const subRe=/<!--\s*副开场白[\s\S]*?-->\s*([\s\S]*?)(?=<!--\s*副开场白[\s\S]*?-->|$)/gi;
+  let m; while((m=subRe.exec(combined))){ if((m[1]||'').trim()) subs.push((m[1]||'').trim()); }
+  if(mainEl) mainEl.value=main;
+  setOpeningSubParts(subs.length?subs:[''],0);
+  if(save) saveOpeningLocal();
+}
+function getOpeningPreviewHtml(){
+  const select=$('openingPreviewMode');
+  let mode=select?.value||'main';
+  if(mode==='combined' || mode==='sub'){
+    mode = mode==='sub' ? 'sub-current' : 'main';
+    if(select) select.value=mode;
+  }
+  syncCurrentSubToArray();
+  if(mode==='main') return getOpeningMainHtml() || '<div style="padding:18px;color:#7f5539">还没有主开场白 HTML。</div>';
+  if(mode==='sub-current'){
+    const raw=openingSubParts[openingSubIndex] || '';
+    return cleanOpeningSubForPreview(raw, openingSubIndex) || '<div style="padding:18px;color:#7f5539">当前副开场白还是空的。</div>';
+  }
+  if(mode==='sub-all'){
+    const subs=openingSubParts.map((part,i)=>cleanOpeningSubForPreview(part,i)).filter(Boolean);
+    return subs.length ? combineOpeningParts('', subs) : '<div style="padding:18px;color:#7f5539">还没有副开场白 HTML。</div>';
+  }
+  return getOpeningMainHtml() || '<div style="padding:18px;color:#7f5539">还没有主开场白 HTML。</div>';
+}
+function setOpeningPartsFromParsed(parsed){
+  const main=firstText(parsed.main_html,parsed.mainHtml,parsed.main,parsed['主开场白HTML'],parsed['主开场白html'],'');
+  const subList=parsed.sub_htmls||parsed.subHtmls||parsed.subs||parsed['副开场白HTML列表']||parsed['副开场白列表'];
+  const sub=firstText(parsed.sub_html,parsed.subHtml,parsed.sub,parsed['副开场白HTML'],parsed['副开场白html'],'');
+  const html=firstText(parsed.html,parsed.HTML,parsed.code,parsed['html代码'],parsed['开场白HTML'],'');
+  if($('openingMainHtml')) $('openingMainHtml').value=main || ((subList&&subList.length)||sub?'':html);
+  setOpeningSubParts((subList&&subList.length)?subList:(sub?sub:[]), 0);
+  if($('openingHtml')) $('openingHtml').value=(main||(subList&&subList.length)||sub)?combineOpeningParts(main,openingSubParts):html;
+  if(!main && !(subList&&subList.length) && !sub && html) splitOpeningPartsFromCombined(false);
+  updateOpeningPartSelectorOnly?.();
+  updateOpeningActiveEditorFromPart?.();
+  return $('openingHtml')?.value||'';
+}
+function saveOpeningLocal(){
+  const combined=syncOpeningCombinedFromParts(false);
+  const data={
+    idea:$('openingIdea')?.value||'',
+    main_html:getOpeningMainHtml(),
+    sub_html:getOpeningSubHtml(),
+    html:combined || ($('openingHtml')?.value||''),
+    meta:openingMeta||{},
+    opts:getOpeningOptions(),
+    time:Date.now()
+  };
+  try{localStorage.setItem(LS_OPENING,JSON.stringify(data));}catch(e){}
+}
+function loadOpeningLocal(){
+  try{
+    const data=JSON.parse(localStorage.getItem(LS_OPENING)||'{}');
+    if(data.idea && $('openingIdea')) $('openingIdea').value=data.idea;
+    if($('openingMainHtml')) $('openingMainHtml').value=data.main_html||'';
+    if(data.sub_htmls){
+      setOpeningSubParts(data.sub_htmls, data.sub_index||0);
+    }else if(data.sub_html){
+      setOpeningSubParts(data.sub_html, data.sub_index||0);
+    }else if($('openingSubHtml')){
+      $('openingSubHtml').value='';
+      setOpeningSubParts([''],0);
+    }
+    if(data.html && $('openingHtml')) $('openingHtml').value=data.html;
+    if(data.html && !data.main_html && !data.sub_html && !data.sub_htmls) splitOpeningPartsFromCombined(false);
+    if(data.opts){
+      if($('openingUseMainSub')) $('openingUseMainSub').checked=data.opts.mainSub!==false;
+      if($('openingUseJump')) $('openingUseJump').checked=!!data.opts.jump;
+    }
+    openingMeta=data.meta||{openings:[],explanation:'',jump_notes:''};
+    if(data.html || data.main_html || data.sub_html) setTimeout(()=>{syncOpeningCombinedFromParts(false);renderOpeningPreview();renderOpeningList();},80);
+  }catch(e){}
+}
+function openingHtmlShell(html){
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;background:#f8f1e5;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;}body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:14px;box-sizing:border-box;}*{box-sizing:border-box;max-width:100%;}</style></head><body>${html||'<div style="padding:20px;color:#7f5539">还没有 HTML。</div>'}</body></html>`;
+}
+function renderOpeningPreview(){
+  syncOpeningCombinedFromParts(false);
+  const html=getOpeningPreviewHtml();
+  const frame=$('openingPreviewFrame');
+  if(frame) frame.srcdoc=openingHtmlShell(html);
+  const mount=$('openingPreviewMount');
+  if(mount){ mount.innerHTML=`<iframe class="preview-frame opening-preview-frame" sandbox="allow-same-origin allow-scripts" srcdoc="${esc(openingHtmlShell(html))}"></iframe>`; }
+  renderOpeningList();
+  saveOpeningLocal();
+}
+function normalizeOpenings(list){
+  if(!Array.isArray(list)) return [];
+  return list.map((it,i)=>{
+    if(typeof it==='string') return {title:it,type:i===0?'主开场白':'副开场白',summary:'',swipe_index:i};
+    const title=firstText(it.title,it.name,it.label,it['标题'],'开场白 '+(i+1));
+    const typeRaw=firstText(it.type,it.kind,it['类型'],i===0?'main':'sub');
+    const type=/主|main/i.test(typeRaw)?'主开场白':'副开场白';
+    const summary=firstText(it.summary,it.desc,it.description,it.intro,it['简介'],it['短介绍'],'');
+    let swipe=it.swipe_index??it.swipeId??it.index??it['开场白编号']??i;
+    swipe=Number(swipe); if(!Number.isFinite(swipe)) swipe=i;
+    return {title,type,summary,swipe_index:swipe};
+  });
+}
+function inferOpeningsFromHtml(html){
+  const out=[];
+  const re=/<(?:button|a|div|li|section|article)[^>]*(?:data-swipe-index=["']?(\d+)["']?)?[^>]*>([\s\S]*?)<\/(?:button|a|div|li|section|article)>/gi;
+  let m;
+  while((m=re.exec(html||'')) && out.length<10){
+    const text=m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    if(!text || text.length>70) continue;
+    if(/初见|再见|爱恋|初现|深陷|开场白|主线|副线|入口/.test(text)){
+      const idx=m[1]!=null?Number(m[1]):out.length;
+      out.push({title:text.slice(0,18),type:out.length===0?'主开场白':'副开场白',summary:text,swipe_index:Number.isFinite(idx)?idx:out.length});
+    }
+  }
+  return out;
+}
+function renderOpeningList(){
+  const board=$('openingSwipeBoard'); if(!board) return;
+  syncOpeningCombinedFromParts(false);
+  const html=$('openingHtml')?.value||'';
+  let list=normalizeOpenings(openingMeta?.openings||[]);
+  if(!list.length) list=inferOpeningsFromHtml(html);
+  if(!list.length){
+    board.innerHTML='<div class="opening-jump-note">还没有开场白清单。生成时勾选“主副开场白结构”，AI 会返回 openings 字段；或者在 HTML 按钮里写 data-swipe-index，也能辅助识别。</div>';
+    return;
+  }
+  const jump=openingMeta?.jump_notes||'如果要真的从主开场白跳到副开场白：按钮使用 class="st-opening-jump" 和 data-swipe-index，酒馆助手脚本读取编号后切换第 0 楼 swipe_id。';
+  board.innerHTML=list.map((it,i)=>`<div class="opening-swipe-card ${it.type==='主开场白'?'main':''}"><div class="top"><b>${esc(it.title)}</b><span class="type">${esc(it.type)}</span></div><p>${esc(it.summary||'还没有短介绍。')}</p><code>swipe_id: ${Number(it.swipe_index)||0}</code></div>`).join('')+`<div class="opening-jump-note"><b>跳转说明：</b><br>${esc(jump)}</div>`;
+}
+function tryParseOpeningHtml(raw){
+  const text=String(raw||'').trim();
+  try{
+    const obj=JSON.parse(extractJsonText(text));
+    const main_html=firstText(obj.main_html,obj.mainHtml,obj.main,obj['主开场白HTML'],obj['主开场白html'],'');
+    const sub_htmls=normalizeSubHtmlParts(obj.sub_htmls||obj.subHtmls||obj.subs||obj['副开场白HTML列表']||obj['副开场白列表']||[]);
+    const sub_html=firstText(obj.sub_html,obj.subHtml,obj.sub,obj['副开场白HTML'],obj['副开场白html'],'');
+    const finalSubs=sub_htmls.length?sub_htmls:normalizeSubHtmlParts(sub_html);
+    const html=firstText(obj.html,obj.HTML,obj.code,obj['html代码'],obj['开场白HTML'], combineOpeningParts(main_html,finalSubs));
+    const openings=normalizeOpenings(obj.openings||obj.first_messages||obj.firstMessages||obj['开场白列表']||obj['开场白清单']||[]);
+    const explanation=firstText(obj.explanation,obj.description,obj['说明'],obj.help);
+    const jump_notes=firstText(obj.jump_notes,obj.jumpNotes,obj['跳转说明'],obj['按钮说明'],'');
+    return {html,main_html,sub_htmls:finalSubs,sub_html:finalSubs.join('\n\n'),openings,explanation,jump_notes};
+  }catch(e){}
+  const fence=text.match(/```html\s*([\s\S]*?)```/i) || text.match(/```\s*([\s\S]*?)```/i);
+  if(fence){
+    const html=fence[1].trim();
+    return {html,main_html:html,sub_htmls:[],sub_html:'',openings:inferOpeningsFromHtml(html),explanation:'AI 返回了代码块，网页已提取其中 HTML。',jump_notes:''};
+  }
+  const divStart=text.search(/<(style|div|section|article|details|main|aside|ul|ol|h[1-6]|p|span|button|a)/i);
+  if(divStart>=0){
+    const html=text.slice(divStart).trim();
+    return {html,main_html:html,sub_htmls:[],sub_html:'',openings:inferOpeningsFromHtml(html),explanation:'AI 没有返回 JSON，网页已从第一个 HTML 标签开始提取。',jump_notes:''};
+  }
+  return {html:text,main_html:text,sub_htmls:[],sub_html:'',openings:[],explanation:'AI 返回内容未识别为标准 HTML，请检查。',jump_notes:''};
+}
+function buildOpeningJumpInstruction(){
+  return `\n\n【如果用户要求主开场白跳到副开场白】\n请在 HTML 中使用统一按钮类名和编号：\n<button class="st-opening-jump" data-swipe-index="1">前往副开场白</button>\n说明：data-swipe-index 对应酒馆第 0 楼开场白 swipes 的 swipe_id，通常从 0 开始。第 1 个开场白是 0，第 2 个是 1，第 3 个是 2。\n如果生成酒馆助手版本，可以附带脚本，优先尝试：\nconst TH = window.TavernHelper || window.parent?.TavernHelper;\nconst api = TH || window;\nawait api.setChatMessages([{message_id:0, swipe_id:index}], {refresh:'affected'});\n普通展示 HTML 中，这个按钮可以只是视觉提示；真实切换需要酒馆助手/脚本环境。`;
+}
+function buildOpeningPrompt(idea){
+  const opts=getOpeningOptions();
+  return `你是 SillyTavern 开场白 HTML 生成器。
+
+用户需求：
+${idea}
+
+只生成“开场白/角色发布/菜单展示”用的 HTML 片段。
+要求：
+- 主要输出 HTML 和 CSS，不需要世界书，不需要正则，不需要示例输出，不需要 $1-$n。
+- 主开场白和副开场白必须分开生成：main_html 放主开场白/主入口，sub_htmls 数组放每一个副开场白。
+- 副开场白可能有十几个，必须一个副开场白一个数组项，不要把多个副开场白塞进同一个字符串。
+- html 字段可以是 main_html + 所有 sub_htmls 的合并版，用于复制导出；但预览不再提供“主副一起看”。
+- 必须适配手机，也要在电脑端居中好看。最外层建议 width:95%; max-width:430px 或根据需求合理设置。
+- HTML 可以包含 <style>，但不要输出完整 <html><head><body>，除非用户明确要求酒馆助手完整网页。
+- 文案要根据用户需求写，不要模板化敷衍。
+- ${opts.mainSub?'必须返回 openings 数组，列出主开场白和每一个副开场白。':'如果需求里出现多个开场白，请返回 openings 数组。'}
+- openings 数组每项格式：{ "title":"开场白标题", "type":"main 或 sub", "summary":"短介绍", "swipe_index":0 }。主开场白通常 swipe_index 为 0，副开场白依次为 1、2、3。
+- ${opts.jump?'用户需要跳转按钮：必须使用 class="st-opening-jump" 和 data-swipe-index，并在 jump_notes 说明酒馆助手切换逻辑。':'如果用户提到“跳到副开场白/切换开场白/跳转”，必须使用 class="st-opening-jump" 和 data-swipe-index。'}
+${buildOpeningJumpInstruction()}
+
+返回严格 JSON，不要 Markdown。格式：{"title":"","main_html":"主开场白HTML片段","sub_htmls":["副开场白1HTML片段","副开场白2HTML片段"],"html":"主副合并HTML片段","openings":[{"title":"","type":"main","summary":"","swipe_index":0}],"jump_notes":"跳转按钮和酒馆助手说明","explanation":"给新手看的说明：主副分别改哪里、哪里改颜色、哪里改入口、手机适配怎么看"}`;
+}
+function applyOpeningParsed(parsed){
+  const combined=setOpeningPartsFromParsed(parsed);
+  if(!combined || !combined.trim()) throw new Error('AI 没有返回 HTML');
+  openingMeta={openings:normalizeOpenings(parsed.openings||[]),explanation:parsed.explanation||'',jump_notes:parsed.jump_notes||''};
+  renderOpeningPreview();
+  renderOpeningList();
+}
+async function generateOpeningHtml(){
+  const idea=($('openingIdea')?.value||'').trim();
+  if(!idea){toast('先写你想要什么开场白 HTML');return;}
+  saveSettings(false);
+  showOpeningDiag('正在请求 AI 生成开场白 HTML。会分别处理主开场白和多个副开场白；如果需求里有跳转，会生成按钮编号和酒馆助手说明。','info');
+  setLoading('openingLoader',true);
+  try{
+    const raw=await callChat([{role:'system',content:'你是开场白 HTML 生成器。只返回严格 JSON，不要 Markdown。必须包含 main_html、sub_htmls、html，可根据需求包含 openings 和 jump_notes。'},{role:'user',content:buildOpeningPrompt(idea)}],null);
+    const parsed=tryParseOpeningHtml(raw);
+    applyOpeningParsed(parsed);
+    showOpeningDiag('生成成功。'+(parsed.explanation?'<br><br>'+esc(parsed.explanation):'')+(parsed.jump_notes?'<br><br><b>跳转说明：</b><br>'+esc(parsed.jump_notes):''),'ok');
+    toast('开场白 HTML 生成完成');
+  }catch(err){
+    console.error(err);
+    showOpeningDiag(buildFailureHelp(err),'bad');
+    toast('开场白生成失败：'+String(err.message||err).slice(0,80));
+  }finally{setLoading('openingLoader',false)}
+}
+async function askOpeningRevise(){
+  syncOpeningCombinedFromParts(false);
+  const html=($('openingHtml')?.value||'').trim();
+  const mainHtml=getOpeningMainHtml().trim();
+  const subParts=getOpeningSubParts();
+  const subHtml=subParts.join('\n\n');
+  if(!html && !mainHtml && !subParts.length){toast('还没有 HTML 可以修改');return;}
+  let req=($('openingReviseIdea')?.value||'').trim();
+  if(!req){ req=prompt('你想怎么修改？例如：只改主开场白按钮；副开场白不要动。')||''; }
+  if(!req.trim()) return;
+  const target=$('openingReviseTarget')?.value||'all';
+  const targetText={
+    main:'主要修改主开场白 HTML。副开场白除非必须配合跳转，否则保持原样。',
+    'sub-current':'主要修改当前选中的副开场白。主开场白和其他副开场白除非必须配合跳转，否则保持原样。',
+    'sub-all':'主要修改全部副开场白。主开场白尽量保持原样。',
+    sub:'主要修改当前副开场白 HTML。主开场白除非必须配合入口，否则保持原样。',
+    style:'只修改整体样式、颜色、字体、动画和布局。主副内容含义不变。',
+    jump:'只修改跳转按钮、class、data-swipe-index、跳转说明。主副正文不改。',
+    all:'主开场白和所有副开场白可以一起联动修改。'
+  }[target]||'按需求修改。';
+  setLoading('openingLoader',true);
+  setLoading('openingReviseLoader',true);
+  const reviseBtn=$('openingReviseBtn');
+  const reviseStatus=$('openingReviseStatus');
+  if(reviseBtn){reviseBtn.disabled=true; reviseBtn.dataset.oldText=reviseBtn.textContent; reviseBtn.textContent='正在修改...';}
+  if(reviseStatus){reviseStatus.style.display='block'; reviseStatus.className='notice'; reviseStatus.innerHTML='<b>正在修改：</b>'+esc(targetText)+'<br>已经把当前主开场白、所有副开场白、当前选择范围和你的要求发给 AI。完成前不要重复点击。';}
+  showOpeningDiag('AI 正在按你选择的范围修改：'+targetText,'info');
+  try{
+    const promptText=`请根据修改意见，修改下面的开场白 HTML。
+
+修改范围：${targetText}
+修改意见：${req}
+
+当前主开场白 HTML：
+${mainHtml}
+
+当前所有副开场白 HTML 数组，数组下标从 0 开始，对应酒馆 swipe_id 从 1 开始：
+${JSON.stringify(subParts,null,2)}
+
+当前选中的副开场白数组下标：${openingSubIndex}
+
+当前合并 HTML：
+${html}
+
+当前 openings 清单：
+${JSON.stringify(openingMeta?.openings||[],null,2)}
+
+要求：
+- 只返回严格 JSON：{"main_html":"修改后的主开场白HTML","sub_htmls":["副开场白1HTML","副开场白2HTML"],"html":"主副合并HTML","openings":[{"title":"","type":"main/sub","summary":"","swipe_index":0}],"jump_notes":"","explanation":"说明改了哪里"}。
+- 用户选择主开场白时，所有 sub_htmls 必须原样保留。
+- 用户选择当前副开场白时，只能改 sub_htmls[openingSubIndex]，其他副开场白和主开场白不要重写。
+- 用户选择全部副开场白时，可以统一修改 sub_htmls，但 main_html 尽量原样保留。
+- 如果只是改样式，openings 可以保持原结构。
+- 如果增加/删除主副开场白入口，必须同步更新 openings。
+- 如果用户要求跳转，按钮统一使用 class="st-opening-jump" 和 data-swipe-index。
+- 不要 Markdown。不要省略。`;
+    const raw=await callChat([{role:'system',content:'你是 HTML 修改助手。只返回严格 JSON，不要 Markdown。必须尽量按用户选择的修改范围保留不相关部分。'},{role:'user',content:promptText}],null);
+    const parsed=tryParseOpeningHtml(raw);
+    // 如果 AI 只返回了其中一块，保留另一块原样
+    if(!parsed.main_html && mainHtml) parsed.main_html=mainHtml;
+    if((!parsed.sub_htmls || !parsed.sub_htmls.length) && subParts.length) parsed.sub_htmls=subParts;
+    if(!parsed.html) parsed.html=combineOpeningParts(parsed.main_html,parsed.sub_htmls || subParts);
+    applyOpeningParsed(parsed);
+    showOpeningDiag('修改完成。'+(parsed.explanation?'<br><br>'+esc(parsed.explanation):'')+(parsed.jump_notes?'<br><br><b>跳转说明：</b><br>'+esc(parsed.jump_notes):''),'ok');
+    toast('开场白 HTML 已修改');
+  }catch(err){
+    console.error(err);
+    showOpeningDiag(buildFailureHelp(err),'bad');
+    toast('修改失败：'+String(err.message||err).slice(0,80));
+  }finally{
+    setLoading('openingLoader',false);
+    setLoading('openingReviseLoader',false);
+    const reviseBtn=$('openingReviseBtn');
+    const reviseStatus=$('openingReviseStatus');
+    if(reviseBtn){reviseBtn.disabled=false; reviseBtn.textContent=reviseBtn.dataset.oldText||'AI 按选择修改';}
+    if(reviseStatus){reviseStatus.style.display='block'; reviseStatus.className='notice ok'; reviseStatus.innerHTML='<b>修改流程已结束。</b>如果预览没有变化，请检查 AI 是否返回了有效 HTML，或看上方诊断信息。';}
+  }
+}
+function copyOpeningHtml(){
+  const html=syncOpeningCombinedFromParts(false) || ($('openingHtml')?.value||'');
+  if(!html.trim()){toast('还没有 HTML');return;}
+  copyText(html);
+}
+function buildOpeningJumpHelperSnippet(){
+  return `<script>\n(function(){\n  function findApi(){\n    return window.TavernHelper || (window.parent && window.parent.TavernHelper) || window;\n  }\n  document.querySelectorAll('.st-opening-jump').forEach(function(btn){\n    btn.addEventListener('click', async function(){\n      var index = Number(btn.getAttribute('data-swipe-index') || '0');\n      try{\n        var api = findApi();\n        if(api && typeof api.setChatMessages === 'function'){\n          await api.setChatMessages([{ message_id: 0, swipe_id: index }], { refresh: 'affected' });\n        }else{\n          alert('这里只是预览环境。放进酒馆助手脚本环境后，按钮才会尝试切换开场白 swipe_id: '+index);\n        }\n      }catch(err){\n        console.error(err);\n        alert('切换失败：请确认这是酒馆助手/脚本环境，并且第 0 楼存在对应副开场白。');\n      }\n    });\n  });\n})();\n<\/script>`;
+}
+function insertOpeningJumpHelper(){
+  syncOpeningCombinedFromParts(false);
+  const snippet=`\n\n<!-- 酒馆助手跳转脚本：按钮需使用 class="st-opening-jump" data-swipe-index="1" -->\n${buildOpeningJumpHelperSnippet()}`;
+  const all=($('openingHtml')?.value||'')+getOpeningMainHtml()+getOpeningSubHtml();
+  if(/st-opening-jump/.test(all) && /setChatMessages/.test(all)){toast('当前 HTML 里已经有跳转按钮/脚本了');return;}
+  const subEl=$('openingSubHtml'), mainEl=$('openingMainHtml'), el=$('openingHtml');
+  if(subEl){ subEl.value=(subEl.value||'')+snippet; }
+  else if(mainEl){ mainEl.value=(mainEl.value||'')+snippet; }
+  else if(el){ el.value=(el.value||'')+snippet; }
+  syncOpeningCombinedFromParts(false);
+  openingMeta.jump_notes='已插入酒馆助手跳转脚本。按钮 class="st-opening-jump"，data-swipe-index 对应要切换到的开场白编号。';
+  renderOpeningPreview();
+  showOpeningDiag('已插入跳转脚本。注意：普通浏览器预览只会提示；放到酒馆助手/可执行脚本环境里才会尝试 setChatMessages 切换开场白。','ok');
+}
+function loadOpeningDemo(){
+  const sharedStyle=`<style>
+.opening-menu{width:95%;max-width:430px;margin:14px auto;padding:18px;border:1px solid rgba(92,63,42,.35);background:linear-gradient(180deg,#fff8ec,#efe1c8);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;color:#2c261f;box-shadow:0 14px 36px rgba(63,45,28,.15)}
+.opening-menu h2{margin:0 0 8px;font-family:'Songti SC',serif;letter-spacing:.08em;font-size:22px}
+.opening-menu p{margin:0;color:#6f6458;line-height:1.8;font-size:13px}
+.opening-list{display:grid;gap:9px;margin-top:14px}
+.opening-item{padding:12px;border:1px solid rgba(92,63,42,.22);background:rgba(255,255,255,.45)}
+.opening-item.main{background:rgba(255,248,232,.8);border-color:rgba(92,63,42,.42)}
+.opening-item b{display:block;margin-bottom:4px;font-size:15px}
+.opening-item button{margin-top:8px;border:1px solid rgba(92,63,42,.35);background:#2b251f;color:#fff8ec;padding:7px 10px;font-size:12px;letter-spacing:.04em}
+.opening-note{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(92,63,42,.28);font-size:12px;color:#7a6b5c}
+
+/* V4.2 首页选择前置 + 开场白紧凑编辑 */
+.opening-compact-editor{display:grid;gap:10px;border:1px solid rgba(127,85,57,.20);background:rgba(255,255,255,.50);padding:12px;min-width:0;}
+.opening-editor-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+.opening-editor-title h4{margin:0;font-size:15px;color:#382920;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.opening-editor-title p{margin:6px 0 0;color:#6f6458;font-size:12px;line-height:1.7;}
+.opening-active-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) auto auto auto;gap:8px;align-items:center;}
+.opening-active-toolbar select{width:100%;min-width:0;border:1px solid rgba(127,85,57,.25);background:rgba(255,255,255,.78);padding:9px;outline:none;color:#382920;}
+.opening-active-code{min-height:430px!important;}
+.opening-hidden-storage{display:none!important;}
+#page-opening .opening-layout{grid-template-columns:1fr!important;}
+@media (min-width:1180px){#page-opening .opening-layout{grid-template-columns:minmax(360px,.72fr) minmax(620px,1.28fr)!important;align-items:start}.opening-active-code{min-height:520px!important}.opening-preview-frame{height:620px!important}}
+@media(max-width:680px){.opening-active-toolbar{grid-template-columns:1fr 1fr 1fr}.opening-active-toolbar select{grid-column:1/-1}.opening-active-code{min-height:300px!important}}
+
+</style>`;
+  const main=`${sharedStyle}
+<div class="opening-menu">
+  <h2>主开场白 · 初见</h2>
+  <p>走廊尽头的第一眼，像阳光不小心撞进阴影里。这一页是主入口，可以放角色介绍、开局氛围和跳转按钮。</p>
+  <div class="opening-list">
+    <div class="opening-item main"><b>进入主线 · 初见</b><p>从第一次相遇开始进入故事。</p><button class="st-opening-jump" data-swipe-index="1">跳到副开场白 · 再见</button></div>
+  </div>
+  <div class="opening-note">主开场白单独维护。按钮使用 class="st-opening-jump" 和 data-swipe-index。</div>
+</div>`;
+  const sub=`${sharedStyle}
+<div class="opening-menu">
+  <h2>副开场白清单</h2>
+  <p>这些是副开场白入口，只展示短介绍，不直接塞正文。</p>
+  <div class="opening-list">
+    <div class="opening-item"><b>副开场白 · 再见</b><p>他装作只是路过，却把你的习惯记得太清楚。</p></div>
+    <div class="opening-item"><b>副开场白 · 爱恋</b><p>笑意太亮，藏不住心底一点点失控的占有。</p></div>
+    <div class="opening-item"><b>副开场白 · 初现</b><p>温顺外壳裂开一角，露出不该被看见的阴暗。</p></div>
+    <div class="opening-item"><b>副开场白 · 深陷</b><p>他终于承认，自己早就不想只站在朋友的位置。</p></div>
+  </div>
+</div>`;
+  if($('openingMainHtml')) $('openingMainHtml').value=main;
+  if($('openingSubHtml')) $('openingSubHtml').value=sub;
+  syncOpeningCombinedFromParts(false);
+  openingMeta={
+    openings:[
+      {title:'初见',type:'主开场白',summary:'走廊尽头的第一眼，像阳光不小心撞进阴影里。',swipe_index:0},
+      {title:'再见',type:'副开场白',summary:'他装作只是路过，却把你的习惯记得太清楚。',swipe_index:1},
+      {title:'爱恋',type:'副开场白',summary:'笑意太亮，藏不住心底一点点失控的占有。',swipe_index:2},
+      {title:'初现',type:'副开场白',summary:'温顺外壳裂开一角，露出不该被看见的阴暗。',swipe_index:3},
+      {title:'深陷',type:'副开场白',summary:'他终于承认，自己早就不想只站在朋友的位置。',swipe_index:4}
+    ],
+    explanation:'演示版把主开场白和副开场白分成两个 HTML 区块，底部再合并预览。',
+    jump_notes:'主开场白按钮 data-swipe-index="1"，表示尝试跳到第 2 个开场白。酒馆 setChatMessages 的 swipe_id 通常从 0 开始。'
+  };
+  renderOpeningPreview();
+  renderOpeningList();
+  showOpeningDiag('已加载一个“主副分离”的开场白 HTML 演示。','ok');
+}
+function openOpeningFullscreen(){
+  const html=getOpeningPreviewHtml();
+  if(!String(html||'').trim()){toast('还没有 HTML 可以预览');return;}
+  const modal=$('previewModal');
+  const frame=$('fullPreviewFrame');
+  if(!modal || !frame){toast('全屏预览组件没有找到');return;}
+  const title=modal.querySelector('.modal-head h3');
+  if(title) title.textContent='开场白全屏展示';
+  const buttons=modal.querySelectorAll('.modal-head .btn-row .btn');
+  if(buttons[1]) buttons[1].setAttribute('onclick','renderOpeningPreview();openOpeningFullscreen()');
+  frame.setAttribute('sandbox','allow-same-origin allow-scripts');
+  frame.srcdoc=openingHtmlShell(html);
+  modal.classList.add('show');
+  lockModalScroll();
+}
+
+
+
+
+/* V3.8 分离导航和开场白独立工作台 */
+const LS_WORKSPACE_MODE='st_workshop_workspace_mode_v38';
+const LS_OPENING_HISTORY='st_workshop_opening_history_v38';
+let workspaceMode='home';
+function getPageMode(page){
+  if(['home','api','choose'].includes(page)) return 'home';
+  if(['opening','opening-preview','opening-history','opening-help'].includes(page)) return 'opening';
+  if(page==='opening-result') return 'opening';
+  return 'status';
+}
+function navButton(label,page,small,cls){
+  return `<button type="button" ${page?`data-page="${page}"`:''} class="${cls||''}">${label}${small?` <small>${small}</small>`:''}</button>`;
+}
+function renderContextNav(activePage){
+  const nav=document.getElementById('nav'); if(!nav) return;
+  let items=[];
+  nav.classList.toggle('home-nav', workspaceMode==='home');
+  if(workspaceMode==='opening'){
+    items=[navButton('返回',null,'','back-btn'),navButton('开场白','opening','编辑'),navButton('预览','opening-preview','展示'),navButton('历史','opening-history','存档'),navButton('帮助','opening-help','HTML')];
+  }else if(workspaceMode==='status'){
+    items=[navButton('返回',null,'','back-btn'),navButton('状态栏','generate','生成'),navButton('结果','result','三件套'),navButton('预览','preview','试跑'),navButton('历史','history','存档'),navButton('帮助','help','定位')];
+  }else{
+    items=[navButton('首页','home','说明'),navButton('选择','choose','功能'),navButton('API','api','连接')];
+  }
+  nav.innerHTML=items.join('');
+  nav.querySelectorAll('[data-page]').forEach(btn=>btn.classList.toggle('active',btn.getAttribute('data-page')===activePage));
+}
+function enterWorkspace(mode){
+  workspaceMode=mode==='opening'?'opening':'status';
+  try{localStorage.setItem(LS_WORKSPACE_MODE,workspaceMode)}catch(e){}
+  goPage(workspaceMode==='opening'?'opening':'generate');
+}
+function backToChoose(){
+  workspaceMode='home';
+  try{localStorage.setItem(LS_WORKSPACE_MODE,'home')}catch(e){}
+  goPage('choose');
+}
+function goPage(page){
+  page=page||'home';
+  if(page==='opening-result') page='opening';
+  const mode=getPageMode(page);
+  if(page==='home'||page==='api'||page==='choose') workspaceMode='home';
+  else workspaceMode=mode;
+  try{localStorage.setItem(LS_WORKSPACE_MODE,workspaceMode); localStorage.setItem('st_workshop_last_page',page);}catch(e){}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+page);
+  if(target) target.classList.add('active');
+  renderContextNav(page);
+  if(page==='history') renderHistory();
+  if(page==='preview') syncPreviewSource();
+  if(page==='opening-preview') renderOpeningPreview();
+  if(page==='opening-result'){ renderOpeningPreview(); renderOpeningList(); }
+  if(page==='opening-history') renderOpeningHistory();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.goPage=goPage;
+window.goPageSafe=goPage;
+function setupSeparatedOpeningPages(){
+  // V3.9：开场白和结果合并在同一个“开场白”工作台里。
+  // 不再把 HTML / 清单 / 预览搬到 opening-result 页面，只把帮助区搬到独立帮助页。
+  const helpMount=document.getElementById('openingHelpMount');
+  const help=document.querySelector('.opening-help-panel');
+  if(helpMount && help && !helpMount.contains(help)) helpMount.appendChild(help);
+  // 确保主副分区存在时，合并框和预览同步。
+  setTimeout(()=>{ try{ syncOpeningCombinedFromParts(false); renderOpeningList(); }catch(e){} }, 60);
+}
+function loadWorkspaceMode(){
+  try{workspaceMode=localStorage.getItem(LS_WORKSPACE_MODE)||'home'}catch(e){workspaceMode='home'}
+}
+function getOpeningHistory(){
+  try{return JSON.parse(localStorage.getItem(LS_OPENING_HISTORY)||'[]')}catch(e){return []}
+}
+function setOpeningHistory(list){
+  try{localStorage.setItem(LS_OPENING_HISTORY,JSON.stringify(list.slice(0,40)))}catch(e){}
+}
+function saveOpeningAutoHistory(){
+  const html=syncOpeningCombinedFromParts(false).trim();
+  const idea=($('openingIdea')?.value||'').trim();
+  const main_html=getOpeningMainHtml();
+  const sub_html=getOpeningSubHtml();
+  if(!html && !idea && !main_html && !sub_html) return;
+  let list=getOpeningHistory().filter(x=>x.kind!=='auto');
+  list.unshift({kind:'auto',title:'自动保存 · 当前开场白',time:Date.now(),idea,main_html,sub_html,html,meta:openingMeta||{},opts:getOpeningOptions()});
+  setOpeningHistory(list);
+}
+function saveOpeningManual(){
+  const html=syncOpeningCombinedFromParts(false).trim();
+  if(!html){toast('还没有开场白 HTML 可以保存');return;}
+  const idea=($('openingIdea')?.value||'').trim();
+  const main_html=getOpeningMainHtml();
+  const sub_html=getOpeningSubHtml();
+  let list=getOpeningHistory();
+  list.unshift({kind:'manual',title:'手动保存 · 开场白 HTML',time:Date.now(),idea,main_html,sub_html,html,meta:openingMeta||{},opts:getOpeningOptions()});
+  setOpeningHistory(list);
+  renderOpeningHistory();
+  toast('已手动保存开场白版本');
+}
+function loadOpeningHistoryItem(i){
+  const item=getOpeningHistory()[i]; if(!item) return;
+  if($('openingIdea')) $('openingIdea').value=item.idea||'';
+  if($('openingMainHtml')) $('openingMainHtml').value=item.main_html||'';
+  if($('openingSubHtml')) $('openingSubHtml').value=item.sub_html||'';
+  if($('openingHtml')) $('openingHtml').value=item.html||'';
+  if(item.html && !item.main_html && !item.sub_html) splitOpeningPartsFromCombined(false);
+  openingMeta=item.meta||{openings:[],explanation:'',jump_notes:''};
+  if(item.opts){ if($('openingUseMainSub')) $('openingUseMainSub').checked=item.opts.mainSub!==false; if($('openingUseJump')) $('openingUseJump').checked=!!item.opts.jump; }
+  renderOpeningPreview(); renderOpeningList(); goPage('opening'); toast('已载入开场白历史');
+}
+function renderOpeningHistory(){
+  const box=$('openingHistoryBox'); if(!box) return;
+  const list=getOpeningHistory();
+  if(!list.length){box.innerHTML='<div class="notice">还没有开场白历史。生成、修改或点“手动保存”后会出现在这里。</div>';return;}
+  box.innerHTML=list.map((it,i)=>{
+    const d=new Date(it.time||Date.now()).toLocaleString();
+    const kind=it.kind==='auto'?'自动保存':'手动保存';
+    const intro=(it.idea||'未填写需求').slice(0,90);
+    return `<div class="opening-history-item"><b>${kind} · ${d}</b><p>${esc(intro)}</p><div class="btn-row"><button class="btn small" onclick="loadOpeningHistoryItem(${i})">载入</button><button class="btn small" onclick="copyText(getOpeningHistory()[${i}].html||'')">复制 HTML</button></div></div>`;
+  }).join('');
+}
+(function(){
+  const oldSave=saveOpeningLocal;
+  saveOpeningLocal=function(){ oldSave(); saveOpeningAutoHistory(); };
+})();
+document.addEventListener('click',function(e){
+  const back=e.target && e.target.closest ? e.target.closest('#nav .back-btn') : null;
+  if(back){e.preventDefault();e.stopPropagation();backToChoose();return;}
+  const btn=e.target && e.target.closest ? e.target.closest('#nav [data-page]') : null;
+  if(btn){e.preventDefault();e.stopPropagation();goPage(btn.getAttribute('data-page'));}
+},true);
+
+/* V4.2 开场白紧凑编辑覆盖：主/副共用一个编辑框，按选择切换 */
+let openingActivePart = 'main';
+function normalizeOpeningActivePart(value){
+  value=String(value||'main');
+  if(value==='main') return 'main';
+  const m=value.match(/^sub-(\d+)$/);
+  if(m){
+    const idx=Math.max(0,Math.min(Number(m[1])||0,Math.max(0,openingSubParts.length-1)));
+    return 'sub-'+idx;
+  }
+  return 'main';
+}
+function getOpeningActiveIndex(){
+  const m=String(openingActivePart||'main').match(/^sub-(\d+)$/);
+  return m?Math.max(0,Math.min(Number(m[1])||0,Math.max(0,openingSubParts.length-1))):0;
+}
+function syncOpeningActiveToParts(){
+  const active=$('openingActiveHtml');
+  if(!active) return;
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingActivePart=normalizeOpeningActivePart(openingActivePart);
+  if(openingActivePart==='main'){
+    const main=$('openingMainHtml');
+    if(main) main.value=active.value||'';
+  }else{
+    const idx=getOpeningActiveIndex();
+    openingSubIndex=idx;
+    openingSubParts[idx]=active.value||'';
+    const sub=$('openingSubHtml');
+    if(sub) sub.value=openingSubParts[idx]||'';
+  }
+  updateOpeningPartSelectorOnly();
+}
+function updateOpeningActiveEditorFromPart(){
+  const active=$('openingActiveHtml');
+  if(!active) return;
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingActivePart=normalizeOpeningActivePart(openingActivePart);
+  if(openingActivePart==='main'){
+    active.value=$('openingMainHtml')?.value||'';
+  }else{
+    const idx=getOpeningActiveIndex();
+    openingSubIndex=idx;
+    active.value=openingSubParts[idx]||'';
+    const sub=$('openingSubHtml'); if(sub) sub.value=openingSubParts[idx]||'';
+  }
+}
+function updateOpeningPartSelectorOnly(){
+  const partSelect=$('openingPartSelect');
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingActivePart=normalizeOpeningActivePart(openingActivePart);
+  if(partSelect){
+    const opts=['<option value="main">主开场白</option>'].concat(openingSubParts.map((part,i)=>`<option value="sub-${i}">副开场白 ${i+1}${String(part||'').trim()?'':' · 空'}</option>`));
+    partSelect.innerHTML=opts.join('');
+    partSelect.value=openingActivePart;
+  }
+  const hiddenSelect=$('openingSubSelect');
+  if(hiddenSelect){
+    hiddenSelect.innerHTML=openingSubParts.map((part,i)=>`<option value="${i}" ${i===openingSubIndex?'selected':''}>副开场白 ${i+1}${String(part||'').trim()?'':' · 空'}</option>`).join('');
+  }
+  const tabs=$('openingSubTabs');
+  if(tabs){
+    const mainBtn=`<button type="button" class="opening-sub-tab ${openingActivePart==='main'?'active':''}" onclick="switchOpeningActivePart('main')">主</button>`;
+    const subBtns=openingSubParts.map((part,i)=>`<button type="button" class="opening-sub-tab ${openingActivePart==='sub-'+i?'active':''}" onclick="switchOpeningActivePart('sub-${i}')">副 ${i+1}${String(part||'').trim()?'':' · 空'}</button>`).join('');
+    tabs.innerHTML=mainBtn+subBtns;
+  }
+  const meta=$('openingSubMeta');
+  if(meta){
+    if(openingActivePart==='main') meta.textContent=`当前正在编辑：主开场白。共有 ${openingSubParts.length} 个副开场白，可以在上方下拉框或标签里切换。`;
+    else meta.textContent=`当前正在编辑：副开场白 ${openingSubIndex+1} / ${openingSubParts.length}。预览区可以只看主开场白、当前副开场白或全部副开场白。`;
+  }
+}
+function renderOpeningSubSelector(save=true){
+  if(!openingSubParts.length) openingSubParts=[''];
+  if(openingSubIndex<0 || openingSubIndex>=openingSubParts.length) openingSubIndex=0;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  if(save) saveOpeningLocal();
+}
+function switchOpeningActivePart(value){
+  syncOpeningActiveToParts();
+  openingActivePart=normalizeOpeningActivePart(value);
+  if(openingActivePart!=='main') openingSubIndex=getOpeningActiveIndex();
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  renderOpeningPreview();
+}
+function selectOpeningSub(index){
+  syncOpeningActiveToParts();
+  openingSubIndex=Math.max(0,Math.min(Number(index)||0,openingSubParts.length-1));
+  openingActivePart='sub-'+openingSubIndex;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  renderOpeningPreview();
+}
+function syncCurrentSubToArray(){
+  if(!openingSubParts.length) openingSubParts=[''];
+  if(String(openingActivePart||'').startsWith('sub-')){
+    const active=$('openingActiveHtml');
+    const idx=getOpeningActiveIndex();
+    openingSubIndex=idx;
+    if(active) openingSubParts[idx]=active.value||'';
+  }else{
+    const el=$('openingSubHtml');
+    if(el) openingSubParts[openingSubIndex]=el.value||openingSubParts[openingSubIndex]||'';
+  }
+  const sub=$('openingSubHtml'); if(sub) sub.value=openingSubParts[openingSubIndex]||'';
+  updateOpeningPartSelectorOnly();
+}
+function getOpeningMainHtml(){
+  if(openingActivePart==='main'){
+    const active=$('openingActiveHtml');
+    const main=$('openingMainHtml');
+    if(active && main) main.value=active.value||'';
+  }
+  return $('openingMainHtml')?.value||'';
+}
+function setOpeningSubParts(parts,selected=0){
+  openingSubParts=normalizeSubHtmlParts(parts);
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubIndex=Math.max(0,Math.min(Number(selected)||0,openingSubParts.length-1));
+  const sub=$('openingSubHtml'); if(sub) sub.value=openingSubParts[openingSubIndex]||'';
+  if(String(openingActivePart||'main').startsWith('sub-')) openingActivePart='sub-'+openingSubIndex;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+}
+function addOpeningSub(){
+  syncOpeningActiveToParts();
+  openingSubParts.push('');
+  openingSubIndex=openingSubParts.length-1;
+  openingActivePart='sub-'+openingSubIndex;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  syncOpeningCombinedFromParts(false);
+  renderOpeningPreview();
+  toast('已新增一个副开场白');
+}
+function duplicateOpeningSub(){
+  syncOpeningActiveToParts();
+  if(!openingSubParts.length) openingSubParts=[''];
+  let source='';
+  if(openingActivePart==='main') source=$('openingMainHtml')?.value||'';
+  else source=openingSubParts[getOpeningActiveIndex()]||'';
+  const insertAt=openingActivePart==='main'?openingSubParts.length:getOpeningActiveIndex()+1;
+  openingSubParts.splice(insertAt,0,source);
+  openingSubIndex=insertAt;
+  openingActivePart='sub-'+openingSubIndex;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  syncOpeningCombinedFromParts(false);
+  renderOpeningPreview();
+  toast('已复制成新的副开场白');
+}
+function deleteOpeningSub(){
+  syncOpeningActiveToParts();
+  if(openingActivePart==='main'){
+    toast('主开场白不能在这里删除；可以直接清空主开场白内容。');
+    return;
+  }
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubParts.splice(getOpeningActiveIndex(),1);
+  if(!openingSubParts.length) openingSubParts=[''];
+  openingSubIndex=Math.max(0,Math.min(openingSubIndex,openingSubParts.length-1));
+  openingActivePart='sub-'+openingSubIndex;
+  updateOpeningPartSelectorOnly();
+  updateOpeningActiveEditorFromPart();
+  syncOpeningCombinedFromParts(false);
+  renderOpeningPreview();
+  toast('已删除当前副开场白');
+}
+function loadOpeningHistoryItem(i){
+  const item=getOpeningHistory()[i]; if(!item) return;
+  if($('openingIdea')) $('openingIdea').value=item.idea||'';
+  if($('openingMainHtml')) $('openingMainHtml').value=item.main_html||'';
+  setOpeningSubParts(item.sub_htmls || item.sub_html || '', item.sub_index||0);
+  if($('openingHtml')) $('openingHtml').value=item.html||'';
+  if(item.html && !item.main_html && !item.sub_html && !item.sub_htmls) splitOpeningPartsFromCombined(false);
+  openingMeta=item.meta||{openings:[],explanation:'',jump_notes:''};
+  if(item.opts){ if($('openingUseMainSub')) $('openingUseMainSub').checked=item.opts.mainSub!==false; if($('openingUseJump')) $('openingUseJump').checked=!!item.opts.jump; }
+  openingActivePart='main';
+  updateOpeningPartSelectorOnly(); updateOpeningActiveEditorFromPart();
+  renderOpeningPreview(); renderOpeningList(); goPage('opening'); toast('已载入开场白历史');
+}
+
+// V4.3 开场白预览修复：移除主副一起看，副开场白预览只渲染副内容；全屏按钮复用全屏预览弹窗。
+try{ const __opm=document.getElementById('openingPreviewMode'); if(__opm && __opm.value==='combined') __opm.value='main'; }catch(e){}
+
+setupSeparatedOpeningPages();
+loadWorkspaceMode();
+document.querySelectorAll('details.help').forEach(d=>d.removeAttribute('open'));
+loadSettings();loadCurrentPack();loadOpeningLocal();try{updateOpeningPartSelectorOnly();updateOpeningActiveEditorFromPart();}catch(e){}renderResult();updateStatus();renderHistory();renderProjectState();renderOpeningHistory();goPage((localStorage.getItem('st_workshop_last_page')&&document.getElementById('page-'+localStorage.getItem('st_workshop_last_page')))?localStorage.getItem('st_workshop_last_page'):'home');
+
+
+
+
+/* V4.6 开场白 HTML 放大、荧光选段、局部 AI 补全修改 */
+let modalMode = 'status';
+let openingModalSnapshot = null;
+function getOpeningActiveLabel(){
+  if(String(openingActivePart||'main')==='main') return '主开场白';
+  return '副开场白 '+(getOpeningActiveIndex()+1);
+}
+function openOpeningCodeModal(){
+  try{ syncOpeningActiveToParts(); syncOpeningCombinedFromParts(false); }catch(e){}
+  modalMode='opening';
+  const cm=$('codeModal');
+  if(cm){ cm.classList.add('opening-edit-modal'); cm.classList.remove('status-edit-modal'); }
+  const editBox=$('modalSelectedReviseBox');
+  if(editBox){
+    editBox.style.display='grid';
+    editBox.style.position='static';
+    editBox.style.top='auto';
+    editBox.style.zIndex='auto';
+    editBox.classList.add('force-opening-visible');
+  }
+  modalField='opening-active';
+  activeCodeField='opening-active';
+  openingModalSnapshot={
+    part: String(openingActivePart||'main'),
+    index: getOpeningActiveIndex(),
+    label: getOpeningActiveLabel(),
+    main_html: $('openingMainHtml')?.value||'',
+    sub_htmls: getOpeningSubParts(),
+    combined_html: $('openingHtml')?.value||''
+  };
+  $('codeModalTitle').textContent='放大查看：'+openingModalSnapshot.label+' HTML';
+  $('modalCodeText').value=(openingModalSnapshot.part==='main') ? openingModalSnapshot.main_html : (openingModalSnapshot.sub_htmls[openingModalSnapshot.index]||'');
+  const idea=$('modalSelectionEditIdea'); if(idea) idea.value='';
+  const box=$('selectionAnalysis');
+  if(box){
+    box.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>当前模式</b><p>你正在放大查看 '+esc(openingModalSnapshot.label)+'。可以直接手动改整段 HTML 后保存；也可以选中一小段，点荧光标记，再让 AI 只围绕这段修改，并返回完整可用的 '+esc(openingModalSnapshot.label)+' HTML。</p></div><div class="analysis-section"><b>为什么不会只改碎片</b><p>AI 修改时会收到当前选中段、当前完整 HTML、主开场白、所有副开场白和合并预览上下文。它必须返回完整 HTML，不能只返回选中片段。</p></div></div>';
+  }
+  const snipBox=$('selectedSnippetBox'); if(snipBox){snipBox.classList.remove('show');snipBox.textContent=''}
+  const hp=$('highlightPreview'); if(hp){hp.classList.remove('show');hp.innerHTML=''}
+  lastModalSelection={start:0,end:0,text:''};
+  $('codeModal').classList.add('show');
+  lockModalScroll();
+  setTimeout(()=>$('modalCodeText').focus(),30);
+}
+const __v45_status_openCodeModal = openCodeModal;
+openCodeModal = function(field){
+  modalMode='status';
+  openingModalSnapshot=null;
+  const idea=$('modalSelectionEditIdea'); if(idea) idea.value='';
+  return __v45_status_openCodeModal(field);
+};
+const __v45_status_saveModalCode = saveModalCode;
+saveModalCode = function(){
+  if(modalMode==='opening'){
+    if(!openingModalSnapshot) openingModalSnapshot={part:String(openingActivePart||'main'),index:getOpeningActiveIndex(),label:getOpeningActiveLabel()};
+    const code=$('modalCodeText')?.value||'';
+    if(openingModalSnapshot.part==='main'){
+      if($('openingMainHtml')) $('openingMainHtml').value=code;
+      openingActivePart='main';
+    }else{
+      const idx=Math.max(0,Number(openingModalSnapshot.index)||0);
+      if(!openingSubParts.length) openingSubParts=[''];
+      while(openingSubParts.length<=idx) openingSubParts.push('');
+      openingSubParts[idx]=code;
+      openingSubIndex=idx;
+      openingActivePart='sub-'+idx;
+      if($('openingSubHtml')) $('openingSubHtml').value=code;
+    }
+    updateOpeningPartSelectorOnly();
+    updateOpeningActiveEditorFromPart();
+    syncOpeningCombinedFromParts(false);
+    renderOpeningPreview();
+    saveOpeningLocal();
+    toast('已保存 '+(openingModalSnapshot.label||'当前开场白')+' HTML');
+    return;
+  }
+  return __v45_status_saveModalCode();
+};
+function openingSelectedSegmentLocalInfo(range){
+  const label=openingModalSnapshot?.label || getOpeningActiveLabel();
+  const part=openingModalSnapshot?.part || String(openingActivePart||'main');
+  const idx=openingModalSnapshot?.index ?? getOpeningActiveIndex();
+  const related=[];
+  related.push('当前选中位置：'+label);
+  related.push('选区范围：第 '+range.start+' 到 '+range.end+' 个字符');
+  related.push('修改对象：'+(part==='main'?'主开场白完整 HTML':'副开场白 '+(idx+1)+' 完整 HTML'));
+  related.push('AI 修改时会同时参考：主开场白、所有副开场白、合并 HTML、预览模式和你的修改要求。');
+  return '<div class="analysis-clean"><div class="analysis-section"><b>本地定位</b><p>'+esc(related.join('\n'))+'</p></div><div class="analysis-section"><b>选中片段</b><p>'+esc(range.text.slice(0,1600))+'</p></div></div>';
+}
+async function analyzeOpeningModalSelection(){
+  rememberModalSelection();
+  const range=getModalSelectionRange();
+  if(!range||!range.text.trim()) return toast('先在放大 HTML 里选中一段');
+  renderModalHighlight(range);
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.add('show');snipBox.textContent='本次分析的选中段：\n'+range.text;}
+  const local=openingSelectedSegmentLocalInfo(range);
+  $('selectionAnalysis').innerHTML=local+'<div class="analysis-progress"><div class="row"><span class="dot"></span><b>AI 正在分析这段 HTML 和主副开场白上下文...</b></div><div class="bar"><i></i></div></div>';
+  try{
+    const prompt=`你正在分析一个 SillyTavern 开场白 HTML 工具中的选中片段。\n\n当前对象：${openingModalSnapshot?.label||getOpeningActiveLabel()}\n选中片段：\n${range.text}\n\n当前对象完整 HTML：\n${$('modalCodeText')?.value||''}\n\n主开场白完整 HTML：\n${$('openingMainHtml')?.value||''}\n\n所有副开场白完整 HTML 数组：\n${JSON.stringify(getOpeningSubParts(),null,2)}\n\n合并 HTML：\n${$('openingHtml')?.value||''}\n\n请用中文解释：这段是什么、在页面里负责什么、和主/副开场白哪一部分有关、如果改它会影响哪里、手动改时要注意什么、如果让 AI 改应该怎么提要求。不要 Markdown 星号，不要返回 JSON。`;
+    const ans=await callChat([{role:'system',content:'你是开场白 HTML 讲解助手。回答要清楚、短句、分小标题，不要星号。'},{role:'user',content:prompt}],1600);
+    $('selectionAnalysis').innerHTML=local+'<div class="ai-analysis-result"><h4>AI 详细分析</h4>'+formatClearAnalysis(ans)+'</div>';
+    toast('开场白选中段分析完成');
+  }catch(err){
+    $('selectionAnalysis').innerHTML=local+'<div class="analysis-clean"><div class="analysis-section"><b>AI 分析失败</b><p>'+esc(err.message||err)+'</p></div></div>';
+    toast('分析失败：'+String(err.message||err).slice(0,80));
+  }
+}
+const __v45_status_analyzeModalSelection = analyzeModalSelection;
+analyzeModalSelection = function(){
+  if(modalMode==='opening') return analyzeOpeningModalSelection();
+  return __v45_status_analyzeModalSelection();
+};
+function buildOpeningSelectedRevisePrompt(range,idea){
+  const part=openingModalSnapshot?.part || String(openingActivePart||'main');
+  const idx=openingModalSnapshot?.index ?? getOpeningActiveIndex();
+  const label=openingModalSnapshot?.label || getOpeningActiveLabel();
+  return `你是 SillyTavern 开场白 HTML 修改助手。用户在放大查看中选中了一段 HTML，并提出修改要求。\n\n硬性要求：\n1. 不要只返回选中片段。\n2. 必须返回修改后的完整当前对象 HTML。\n3. 如果为了避免错误，需要补全缺失的 style、闭合标签、按钮 class 或上下文结构，可以补全。\n4. 没有要求修改的主/副开场白必须原样保留。\n5. 如果用户要求会影响所有副开场白或整体样式，可以额外返回 main_html 或 sub_htmls，但不要乱改无关内容。\n6. 只返回严格 JSON，不要 Markdown。\n\n当前对象：${label}\n当前对象类型：${part==='main'?'main':'sub'}\n当前副开场白索引：${idx}\n\n用户修改要求：\n${idea}\n\n选中片段起止：${range.start}-${range.end}\n选中片段原文：\n${range.text}\n\n当前对象完整 HTML：\n${$('modalCodeText')?.value||''}\n\n主开场白完整 HTML：\n${$('openingMainHtml')?.value||''}\n\n所有副开场白完整 HTML 数组：\n${JSON.stringify(getOpeningSubParts(),null,2)}\n\n合并 HTML：\n${$('openingHtml')?.value||''}\n\n返回格式：\n{\n  "active_html":"修改后的当前对象完整 HTML，必须完整可用",\n  "main_html":"如果主开场白也需要同步修改才填写，否则省略",\n  "sub_htmls":["如果副开场白数组需要同步修改才填写，否则省略"],\n  "explanation":"简短说明改了哪里，为什么只改这些地方"\n}`;
+}
+async function reviseModalSelectedSegment(){
+  if(modalMode!=='opening'){
+    const hint=$('modalSelectionEditIdea')?.value||'';
+    if(hint.trim()) toast('状态栏三件套请用“继续修改”或“AI 分析选中段”处理；这个按钮主要给开场白 HTML 使用。');
+    else toast('请先输入想怎么改');
+    return;
+  }
+  rememberModalSelection();
+  const range=getModalSelectionRange();
+  if(!range||!range.text.trim()) return toast('先选中一段 HTML，再点荧光标记或直接让 AI 改');
+  const idea=($('modalSelectionEditIdea')?.value||'').trim();
+  if(!idea) return toast('先在输入框写你想让这段怎么改');
+  renderModalHighlight(range);
+  const snipBox=$('selectedSnippetBox');
+  if(snipBox){snipBox.classList.add('show');snipBox.textContent='准备交给 AI 修改的选中段：\n'+range.text;}
+  $('selectionAnalysis').innerHTML=openingSelectedSegmentLocalInfo(range)+'<div class="analysis-progress"><div class="row"><span class="dot"></span><b>AI 正在根据选中段和完整上下文补全修改...</b></div><div class="bar"><i></i></div></div>';
+  try{
+    const prompt=buildOpeningSelectedRevisePrompt(range,idea);
+    const raw=await callChat([{role:'system',content:'你是开场白 HTML 选段修改助手。必须返回严格 JSON。不要 Markdown。不要只返回片段。必须返回完整 active_html。'},{role:'user',content:prompt}],null);
+    const parsed=tryParseOpeningHtml(raw);
+    const activeHtml=parsed.active_html || parsed.current_html || parsed.html_part || parsed.main_html || (Array.isArray(parsed.sub_htmls)?parsed.sub_htmls[openingModalSnapshot?.index||0]:'');
+    if(!String(activeHtml||'').trim()) throw new Error('AI 没有返回完整 active_html，已拒绝覆盖，避免把代码改坏。');
+    $('modalCodeText').value=activeHtml;
+    if(parsed.main_html && openingModalSnapshot?.part!=='main' && $('openingMainHtml')) $('openingMainHtml').value=parsed.main_html;
+    if(Array.isArray(parsed.sub_htmls) && parsed.sub_htmls.length) setOpeningSubParts(parsed.sub_htmls, openingModalSnapshot?.index||0);
+    saveModalCode();
+    $('selectionAnalysis').innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>修改完成</b><p>'+esc(parsed.explanation||'AI 已根据选中段和完整上下文返回完整 HTML，并已保存到当前开场白。')+'</p></div><div class="analysis-section"><b>安全处理</b><p>这次不是只替换碎片，而是把当前对象完整 HTML 放回编辑器；同时刷新了合并 HTML 和预览，减少缺标签、少样式、按钮断掉的问题。</p></div></div>';
+    toast('AI 已按选中段修改并补全 HTML');
+  }catch(err){
+    $('selectionAnalysis').innerHTML=openingSelectedSegmentLocalInfo(range)+'<div class="analysis-clean"><div class="analysis-section"><b>修改失败</b><p>'+esc(err.message||err)+'</p></div><div class="analysis-section"><b>没有覆盖原代码</b><p>为了避免代码被半截内容覆盖，失败时不会自动保存。你可以把要求写得更短一点再试。</p></div></div>';
+    toast('选段修改失败：'+String(err.message||err).slice(0,80));
+  }
+}
 
 // V2.3 顶部导航兜底：用捕获阶段代理点击，避免旧监听因脚本错误或遮罩导致失效。
 (function navHotfix(){
@@ -2456,6 +4328,1172 @@ loadSettings();loadCurrentPack();renderResult();updateStatus();renderHistory();r
   }, {capture:true, passive:false});
 })();
 
+
+/* V4.7 修复：打开状态栏放大/开场白放大时，给弹窗加模式 class，避免开场白修改框在状态栏页面乱占位；同时不再用 sticky 悬浮。 */
+(function v47ModalLayoutFix(){
+  function setOpeningBoxVisible(visible){
+    const modal=document.getElementById('codeModal');
+    const box=document.getElementById('modalSelectedReviseBox');
+    if(modal){
+      modal.classList.toggle('opening-edit-modal', !!visible);
+      modal.classList.toggle('status-edit-modal', !visible);
+    }
+    if(box){
+      box.style.display = visible ? 'grid' : 'none';
+      box.style.position = 'static';
+      box.style.top = 'auto';
+      box.style.zIndex = 'auto';
+    }
+  }
+  const oldOpenStatus = window.openCodeModal;
+  if(typeof oldOpenStatus === 'function'){
+    window.openCodeModal = function(field){
+      setOpeningBoxVisible(false);
+      return oldOpenStatus.apply(this, arguments);
+    };
+  }
+  const oldOpenOpening = window.openOpeningCodeModal;
+  if(typeof oldOpenOpening === 'function'){
+    window.openOpeningCodeModal = function(){
+      setOpeningBoxVisible(true);
+      const ret = oldOpenOpening.apply(this, arguments);
+      setOpeningBoxVisible(true);
+      const ta=document.getElementById('modalCodeText');
+      if(ta){ ta.scrollTop=0; }
+      const body=document.querySelector('#codeModal .code-modal-body');
+      if(body){ body.scrollTop=0; }
+      return ret;
+    };
+  }
+})();
+
+
+/* V4.9 修复：开场白放大页改成“先让 AI 定位代码段，再对荧光段提修改要求”。
+   重点：用户不知道改哪块时，先描述目标，AI 在完整 HTML 中找相关连续片段并荧光标记；之后再让 AI 按荧光段补全修改。 */
+(function v49OpeningLocateThenEdit(){
+  function ensureLocateStyles(){
+    if(document.getElementById('v49LocateStyles')) return;
+    const st=document.createElement('style');
+    st.id='v49LocateStyles';
+    st.textContent=`
+      #codeModal.opening-edit-modal #modalSelectedReviseBox{gap:12px!important;background:#fffaf0!important;border:1px solid rgba(127,85,57,.28)!important;box-shadow:none!important;}
+      .v49-locate-panel{display:grid;gap:12px;}
+      .v49-step{display:grid;gap:8px;padding:12px;border:1px solid rgba(127,85,57,.22);background:rgba(255,255,255,.68);}
+      .v49-step-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:900;color:#2c2117;font-size:14px;}
+      .v49-step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#2b2118;color:#fff8ec;border-radius:999px;font-size:12px;line-height:1;}
+      .v49-step p{margin:0;color:#5c432f;font-size:12.5px;line-height:1.75;}
+      .v49-step textarea{width:100%;min-height:86px;resize:vertical;border:1px solid rgba(63,45,28,.34);background:#fff;color:#19130e;padding:11px;line-height:1.65;outline:none;font-size:13px;box-sizing:border-box;}
+      .v49-step textarea:focus{border-color:#6e4428;box-shadow:0 0 0 3px rgba(110,68,40,.13);}
+      .v49-locate-tip{font-size:12px;color:#76543b;line-height:1.7;background:#fff7df;border-left:4px solid #2b2118;padding:9px 10px;}
+      .v49-hidden{display:none!important;}
+      @media(max-width:760px){.v49-step{padding:10px}.v49-step textarea{min-height:78px;font-size:12px}.v49-step-title{font-size:13px}.v49-step p,.v49-locate-tip{font-size:12px}}
+    `;
+    document.head.appendChild(st);
+  }
+  function setOpeningLocatePanel(){
+    ensureLocateStyles();
+    const box=document.getElementById('modalSelectedReviseBox');
+    if(!box) return;
+    box.innerHTML=`
+      <div class="modal-edit-title">AI 定位代码段 + 荧光修改</div>
+      <div class="v49-locate-panel">
+        <div class="v49-step">
+          <div class="v49-step-title"><span class="v49-step-num">1</span>不知道是哪一段代码？先让 AI 帮你找</div>
+          <p>你不用先选代码。先描述“我想改哪里/哪个效果”，AI 会阅读当前完整 HTML，在代码框里找到最相关的连续片段，并自动荧光标记。</p>
+          <textarea id="modalLocateIdea" placeholder="例如：帮我找到主开场白里跳转到副开场白的按钮代码；或者：找到控制翻页动画的那段；或者：找到背景图和遮罩那段。"></textarea>
+          <div class="btn-row">
+            <button class="btn small primary" type="button" onmousedown="event.preventDefault()" onclick="locateOpeningSegmentByIdea()">AI 定位并荧光标记</button>
+            <button class="btn small" type="button" onmousedown="event.preventDefault()" onclick="markModalSelection()">我已手动选中，荧光标记</button>
+          </div>
+        </div>
+        <div class="v49-step">
+          <div class="v49-step-title"><span class="v49-step-num">2</span>荧光标记出来后，再说想怎么改</div>
+          <p>AI 定位后会自动选中并荧光标记那段。你确认范围没问题，再在下面写修改要求。AI 会拿完整上下文补全，不会只改碎片。</p>
+          <textarea id="modalSelectionEditIdea" placeholder="例如：把荧光标记这段按钮改小一点，保留跳转功能；或者：让这段翻页动画更柔和，不要影响其他 HTML。"></textarea>
+          <div class="btn-row">
+            <button class="btn small primary" type="button" onmousedown="event.preventDefault()" onclick="reviseModalSelectedSegment()">AI 按荧光段修改</button>
+            <button class="btn small" type="button" onmousedown="event.preventDefault()" onclick="analyzeModalSelection()">分析当前荧光段</button>
+            <button class="btn small" type="button" onmousedown="event.preventDefault()" onclick="saveModalCode()">保存当前放大框</button>
+          </div>
+        </div>
+        <div class="v49-locate-tip">流程：先写“想改什么” → AI 找到相关代码并荧光标记 → 你再写“怎么改” → AI 返回补全后的完整当前开场白 HTML。</div>
+      </div>`;
+  }
+  const previousOpenOpening = window.openOpeningCodeModal;
+  if(typeof previousOpenOpening === 'function'){
+    window.openOpeningCodeModal=function(){
+      const ret=previousOpenOpening.apply(this, arguments);
+      setOpeningLocatePanel();
+      const box=document.getElementById('modalSelectedReviseBox');
+      if(box){box.style.display='grid';box.style.position='static';box.classList.add('force-opening-visible');}
+      const info=document.getElementById('selectionAnalysis');
+      if(info){
+        info.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>新流程</b><p>你可以不懂 HTML，也不用先知道是哪一段代码。先在上面输入“我想改什么”，点“AI 定位并荧光标记”。AI 会从当前完整 HTML 里找出相关片段并标黄。确认范围后，再写“怎么改”，让 AI 按荧光段返回完整补全代码。</p></div></div>';
+      }
+      return ret;
+    };
+  }
+  function safeParseLocate(raw){
+    const text=String(raw||'').trim();
+    try{ return JSON.parse(typeof extractJsonText==='function'?extractJsonText(text):text); }catch(e){}
+    const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if(m){ try{return JSON.parse(m[1].trim())}catch(e){} }
+    return {target_snippet:text};
+  }
+  function findSnippetRange(full, snippet){
+    full=String(full||''); snippet=String(snippet||'').trim();
+    if(!full || !snippet) return null;
+    let idx=full.indexOf(snippet);
+    if(idx>=0) return {start:idx,end:idx+snippet.length,text:full.slice(idx,idx+snippet.length)};
+    const unescaped=snippet.replace(/\\n/g,'\n').replace(/\\t/g,'\t').trim();
+    idx=full.indexOf(unescaped);
+    if(idx>=0) return {start:idx,end:idx+unescaped.length,text:full.slice(idx,idx+unescaped.length)};
+    const lines=unescaped.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length>18).sort((a,b)=>b.length-a.length);
+    for(const line of lines.slice(0,8)){
+      idx=full.indexOf(line);
+      if(idx>=0){
+        const start=Math.max(0, idx-160);
+        const end=Math.min(full.length, idx+line.length+220);
+        return {start,end,text:full.slice(start,end)};
+      }
+    }
+    const words=unescaped.replace(/<[^>]+>/g,' ').split(/\s+/).filter(w=>w.length>=3).slice(0,12);
+    for(const w of words){
+      idx=full.indexOf(w);
+      if(idx>=0){
+        const start=Math.max(0, idx-180);
+        const end=Math.min(full.length, idx+w.length+260);
+        return {start,end,text:full.slice(start,end)};
+      }
+    }
+    return null;
+  }
+  window.locateOpeningSegmentByIdea=async function(){
+    const isOpeningLocateContext = (typeof modalMode !== 'undefined' && modalMode === 'opening') || !!window.openingModalSnapshot || !!openingModalSnapshot || document.getElementById('codeModal')?.classList.contains('opening-edit-modal');
+    if(!isOpeningLocateContext) return toast('这个定位功能只给开场白 HTML 放大页使用');
+    const idea=(document.getElementById('modalLocateIdea')?.value||'').trim();
+    if(!idea) return toast('先写你想找哪一块，比如“跳转按钮”或“翻页动画”');
+    const ta=document.getElementById('modalCodeText');
+    const full=ta?.value||'';
+    if(!full.trim()) return toast('当前 HTML 是空的，没法定位');
+    const localIntro='<div class="analysis-clean"><div class="analysis-section"><b>正在定位</b><p>你描述的是：'+esc(idea)+'\nAI 会在当前完整 HTML 中找最相关的连续代码段。找到后会自动选中并荧光标记，不会修改代码。</p></div></div>';
+    const analysis=document.getElementById('selectionAnalysis');
+    if(analysis){ analysis.innerHTML=localIntro+'<div class="analysis-progress"><div class="row"><span class="dot"></span><b>AI 正在查找对应代码段...</b></div><div class="bar"><i></i></div></div>'; }
+    try{
+      const prompt=`你要帮用户在一段完整的 SillyTavern 开场白 HTML 中定位代码片段。\n\n用户想找/想改的目标：\n${idea}\n\n当前对象：${openingModalSnapshot?.label||getOpeningActiveLabel()}\n\n完整 HTML：\n${full}\n\n任务：\n1. 找出最应该被修改的连续 HTML/CSS/JS 片段。\n2. target_snippet 必须从完整 HTML 原文中逐字复制，不能改写，不能省略。\n3. 如果涉及多个位置，优先返回最核心的一段；related_snippets 可以列出其他相关片段。\n4. 只返回严格 JSON，不要 Markdown。\n\n返回格式：\n{\n  "target_snippet":"从完整 HTML 原文中逐字复制的一段连续代码",\n  "why":"为什么这段和用户目标有关",\n  "confidence":"high/medium/low",\n  "related_snippets":["其他相关原文片段，可省略"]\n}`;
+      const raw=await callChat([{role:'system',content:'你是 HTML 代码定位助手。必须返回严格 JSON。target_snippet 必须逐字复制自用户给出的完整 HTML。'},{role:'user',content:prompt}],1800);
+      const obj=safeParseLocate(raw);
+      let range=null;
+      if(Number.isFinite(Number(obj.start_index)) && Number.isFinite(Number(obj.end_index))){
+        const s=Math.max(0,Number(obj.start_index)), e=Math.min(full.length,Number(obj.end_index));
+        if(e>s) range={start:s,end:e,text:full.slice(s,e)};
+      }
+      if(!range) range=findSnippetRange(full, obj.target_snippet||obj.snippet||obj.code||obj.html||'');
+      if(!range) throw new Error('AI 找到了说明，但返回的片段无法在当前 HTML 原文中定位。可以把目标说得更具体一点，或手动选中后点荧光标记。');
+      ta.focus();
+      ta.setSelectionRange(range.start, range.end);
+      lastModalSelection={start:range.start,end:range.end,text:range.text}; window.lastModalSelection=lastModalSelection;
+      if(typeof renderModalHighlight==='function') renderModalHighlight(range);
+      const snipBox=document.getElementById('selectedSnippetBox');
+      if(snipBox){ snipBox.classList.add('show'); snipBox.textContent='AI 已定位并荧光标记的代码段：\n'+range.text; }
+      if(analysis){
+        const related=Array.isArray(obj.related_snippets)&&obj.related_snippets.length ? '\n\n其他可能相关片段：\n'+obj.related_snippets.slice(0,3).join('\n---\n') : '';
+        analysis.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>已定位到代码段</b><p>'+esc(obj.why||'AI 已根据你的描述找到最相关的代码片段，并在代码框里荧光标记。')+'</p></div><div class="analysis-section"><b>置信度</b><p>'+esc(obj.confidence||'未标明')+'</p></div><div class="analysis-section"><b>下一步</b><p>现在去上面的第二步输入“你想怎么处理这段”，再点“AI 按荧光段修改”。AI 会读取完整 HTML 上下文，返回补全后的完整当前开场白 HTML。</p></div>'+(related?'<div class="analysis-section"><b>其他相关片段</b><p>'+esc(related)+'</p></div>':'')+'</div>';
+      }
+      toast('已定位并荧光标记相关代码段');
+    }catch(err){
+      if(analysis){analysis.innerHTML=localIntro+'<div class="analysis-clean"><div class="analysis-section"><b>定位失败</b><p>'+esc(err.message||err)+'</p></div><div class="analysis-section"><b>怎么处理</b><p>把目标说得更具体一点，比如“找 class=st-opening-jump 的按钮”或“找 @keyframes 翻页动画”。也可以自己拖选一段，然后点“我已手动选中，荧光标记”。</p></div></div>';}
+      toast('定位失败：'+String(err.message||err).slice(0,80));
+    }
+  };
+})();
+
+
+/* V5.1 修复：荧光标记真正锁定范围，不再只靠 textarea 原生选区。
+   逻辑：任何一次荧光标记/AI 定位都会记录 start-end；后续“AI 按荧光段修改”即使选区消失，也使用这个锁定范围。 */
+(function v51StableFluoroMarker(){
+  const style=document.createElement('style');
+  style.id='v51FluoroMarkerStyles';
+  style.textContent=`
+    #codeModal #highlightPreview.show{
+      display:block!important;
+      border:2px solid rgba(255,217,64,.95)!important;
+      background:#17130f!important;
+      color:#fff8e8!important;
+      box-shadow:0 0 0 3px rgba(255,217,64,.18), inset 0 0 0 1px rgba(255,255,255,.06)!important;
+      max-height:260px!important;
+      overflow:auto!important;
+    }
+    #codeModal #highlightPreview:before{content:"已锁定的荧光代码段"!important;color:#ffe45c!important;}
+    #codeModal #highlightPreview mark{
+      background:#fff067!important;
+      color:#16110c!important;
+      border-radius:3px!important;
+      padding:1px 3px!important;
+      box-shadow:0 0 0 2px rgba(255,240,103,.24),0 0 12px rgba(255,235,70,.28)!important;
+    }
+    .fluoro-meta{
+      font-family:var(--sans);
+      font-size:12px;
+      line-height:1.65;
+      color:#ffe98b;
+      border-bottom:1px solid rgba(255,240,103,.22);
+      padding-bottom:8px;
+      margin-bottom:8px;
+      white-space:normal;
+    }
+    .fluoro-meta b{color:#fff5b4;}
+    #codeModal .selected-snippet.show{
+      display:block!important;
+      border:1px solid rgba(255,217,64,.72)!important;
+      background:#211a13!important;
+      color:#fff2bf!important;
+    }
+    #codeModal .modal-code::selection{background:#111!important;color:#fff!important;}
+    #codeModal .modal-code::-moz-selection{background:#111!important;color:#fff!important;}
+  `;
+  if(!document.getElementById(style.id)) document.head.appendChild(style);
+
+  window.v51LockedFluoroRange=null;
+
+  function normalizeRange(range, text){
+    if(!range) return null;
+    const full=String(text ?? (document.getElementById('modalCodeText')?.value||''));
+    let start=Number(range.start), end=Number(range.end);
+    if(!Number.isFinite(start)||!Number.isFinite(end)) return null;
+    start=Math.max(0,Math.min(full.length,start));
+    end=Math.max(0,Math.min(full.length,end));
+    if(end<start){ const t=start; start=end; end=t; }
+    if(end===start) return null;
+    return {start,end,text:full.slice(start,end)};
+  }
+
+  function textareaScrollToRange(ta, range){
+    if(!ta||!range) return;
+    try{
+      const before=ta.value.slice(0, range.start);
+      const lineCount=(before.match(/\n/g)||[]).length;
+      const lineHeight=parseFloat(getComputedStyle(ta).lineHeight)||18;
+      ta.scrollTop=Math.max(0,lineCount*lineHeight-ta.clientHeight*0.38);
+      ta.focus({preventScroll:true});
+      ta.setSelectionRange(range.start, range.end);
+    }catch(e){}
+  }
+
+  function renderContextHighlight(full, range){
+    const pad=700;
+    const a=Math.max(0,range.start-pad), b=Math.min(full.length,range.end+pad);
+    const prefix=a>0?'……前面还有 '+a+' 个字符\n\n':'';
+    const suffix=b<full.length?'\n\n……后面还有 '+(full.length-b)+' 个字符':'';
+    return '<div class="fluoro-meta"><b>已锁定范围：</b>'+range.start+' - '+range.end+'，长度 '+(range.end-range.start)+' 字符。后续“AI 按荧光段修改”会使用这个范围，不会因为手机选区消失而丢失。</div>'+
+      esc(prefix+full.slice(a,range.start))+'<mark>'+esc(full.slice(range.start,range.end))+'</mark>'+esc(full.slice(range.end,b)+suffix);
+  }
+
+  const oldRender=typeof renderModalHighlight==='function' ? renderModalHighlight : null;
+  renderModalHighlight=function(range){
+    const ta=document.getElementById('modalCodeText');
+    const full=ta?.value||'';
+    const r=normalizeRange(range, full);
+    if(!r) return oldRender ? oldRender(range) : undefined;
+    window.v51LockedFluoroRange={...r, field: (typeof modalField!=='undefined'?modalField:null), mode:(typeof modalMode!=='undefined'?modalMode:null), time:Date.now()};
+    try{ lastModalSelection={start:r.start,end:r.end,text:r.text}; window.lastModalSelection=lastModalSelection; }catch(e){ window.lastModalSelection={start:r.start,end:r.end,text:r.text}; }
+    const hp=document.getElementById('highlightPreview');
+    if(hp){ hp.innerHTML=renderContextHighlight(full,r); hp.classList.add('show'); }
+    const snipBox=document.getElementById('selectedSnippetBox');
+    if(snipBox){ snipBox.classList.add('show'); snipBox.textContent='已锁定荧光代码段（后续 AI 修改会使用这段）：\n'+r.text; }
+    textareaScrollToRange(ta,r);
+    setTimeout(()=>textareaScrollToRange(ta,r),60);
+  };
+
+  const oldGet=typeof getModalSelectionRange==='function' ? getModalSelectionRange : null;
+  getModalSelectionRange=function(){
+    const ta=document.getElementById('modalCodeText');
+    const full=ta?.value||'';
+    let r=oldGet ? oldGet() : null;
+    r=normalizeRange(r, full);
+    if(r){
+      window.v51LockedFluoroRange={...r, field:(typeof modalField!=='undefined'?modalField:null), mode:(typeof modalMode!=='undefined'?modalMode:null), time:Date.now()};
+      return r;
+    }
+    const locked=normalizeRange(window.v51LockedFluoroRange, full);
+    if(locked) return locked;
+    try{
+      if(typeof lastModalSelection!=='undefined'){
+        const lr=normalizeRange(lastModalSelection, full);
+        if(lr) return lr;
+      }
+    }catch(e){}
+    return null;
+  };
+
+  const oldMark=typeof markModalSelection==='function' ? markModalSelection : null;
+  markModalSelection=function(){
+    const ta=document.getElementById('modalCodeText');
+    if(!ta) return oldMark ? oldMark() : undefined;
+    let start=ta.selectionStart||0, end=ta.selectionEnd||0;
+    if(start===end){
+      const locked=normalizeRange(window.v51LockedFluoroRange, ta.value);
+      if(locked){ renderModalHighlight(locked); toast('已重新显示上一次荧光锁定范围'); return; }
+      return toast('先在代码框里拖选一段，或先让 AI 定位代码段');
+    }
+    const r=normalizeRange({start,end}, ta.value);
+    if(!r) return toast('选区为空，没法荧光标记');
+    renderModalHighlight(r);
+    toast('已锁定荧光代码段，后续 AI 修改会使用这个范围');
+  };
+})();
+
+
+
+/* V5.2 修复：AI 定位不再只相信一个模糊片段。
+   新逻辑：AI 给“精确原文片段 + 起止锚点”，本地再做多候选定位；如果第一段不对，用户可直接点候选切换荧光范围。 */
+(function v52LocatorCandidatesFix(){
+  if(window.__v52LocatorCandidatesFixInstalled) return;
+  window.__v52LocatorCandidatesFixInstalled = true;
+
+  function addStyle(){
+    if(document.getElementById('v52LocatorStyles')) return;
+    const style=document.createElement('style');
+    style.id='v52LocatorStyles';
+    style.textContent=`
+      .v52-candidate-list{display:grid;gap:10px;margin-top:10px;}
+      .v52-candidate-card{border:1px solid rgba(127,85,57,.24);background:#fffaf0;padding:10px;display:grid;gap:8px;}
+      .v52-candidate-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#2c2117;font-weight:900;font-size:13px;}
+      .v52-candidate-head span{color:#74513a;font-weight:800;font-size:12px;}
+      .v52-candidate-code{max-height:130px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#17130f;color:#fff4d8;border:1px solid rgba(255,226,135,.28);padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.55;}
+      .v52-candidate-card .btn{width:max-content;}
+      .v52-locate-note{border-left:4px solid #0f6a4e;background:#f2fff9;color:#234236;padding:10px;font-size:12.5px;line-height:1.7;}
+      @media(max-width:760px){.v52-candidate-head{font-size:12.5px}.v52-candidate-code{font-size:11.5px;max-height:110px}.v52-candidate-card .btn{width:100%;}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function safeEsc(s){
+    if(typeof esc === 'function') return esc(s);
+    return String(s ?? '').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function cleanSnippet(s){
+    return String(s||'')
+      .replace(/^```[a-zA-Z]*\s*/,'')
+      .replace(/```$/,'')
+      .replace(/\\n/g,'\n')
+      .replace(/\\t/g,'\t')
+      .trim();
+  }
+  function parseJsonLoose(raw){
+    const text=String(raw||'').trim();
+    try{return JSON.parse(typeof extractJsonText==='function'?extractJsonText(text):text)}catch(e){}
+    const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if(m){try{return JSON.parse(m[1].trim())}catch(e){}}
+    const b=text.indexOf('{'), e=text.lastIndexOf('}');
+    if(b>=0 && e>b){try{return JSON.parse(text.slice(b,e+1))}catch(err){}}
+    return {target_snippet:text};
+  }
+  function openingContextOk(){
+    try{
+      return (typeof modalMode !== 'undefined' && modalMode === 'opening') ||
+        !!window.openingModalSnapshot ||
+        (typeof openingModalSnapshot !== 'undefined' && !!openingModalSnapshot) ||
+        document.getElementById('codeModal')?.classList.contains('opening-edit-modal');
+    }catch(e){
+      return document.getElementById('codeModal')?.classList.contains('opening-edit-modal');
+    }
+  }
+  function getActiveLabel(){
+    try{return (window.openingModalSnapshot && window.openingModalSnapshot.label) || (typeof openingModalSnapshot!=='undefined' && openingModalSnapshot?.label) || (typeof getOpeningActiveLabel==='function'?getOpeningActiveLabel():'当前开场白 HTML')}catch(e){return '当前开场白 HTML'}
+  }
+  function addCandidate(list, full, start, end, reason, score){
+    start=Math.max(0, Math.min(full.length, Number(start)||0));
+    end=Math.max(0, Math.min(full.length, Number(end)||0));
+    if(end<start){const t=start;start=end;end=t;}
+    if(end-start<8) return;
+    const text=full.slice(start,end);
+    const key=text.replace(/\s+/g,' ').slice(0,160);
+    if(list.some(c=>c.key===key || (Math.abs(c.start-start)<8 && Math.abs(c.end-end)<8))) return;
+    list.push({start,end,text,reason:reason||'候选片段',score:Number(score)||0,key});
+  }
+  function findExact(full, snippet, list, reason, score){
+    snippet=cleanSnippet(snippet);
+    if(!snippet) return;
+    let idx=full.indexOf(snippet);
+    if(idx>=0){addCandidate(list, full, idx, idx+snippet.length, reason||'AI 返回的精确片段', score||100);return;}
+    const squashed=snippet.replace(/\s+/g,' ').trim();
+    if(squashed.length>20){
+      const piece=snippet.split(/\s+/).filter(x=>x.length>8).sort((a,b)=>b.length-a.length)[0];
+      if(piece){
+        const j=full.indexOf(piece);
+        if(j>=0){addCandidate(list, full, Math.max(0,j-180), Math.min(full.length,j+piece.length+260), reason||'AI 片段的近似位置', score||65);}
+      }
+    }
+  }
+  function findByMarkers(full, obj, list){
+    const pairs=[['start_marker','end_marker'], ['before_marker','after_marker'], ['start_anchor','end_anchor'], ['anchor_before','anchor_after']];
+    for(const [a,b] of pairs){
+      const startM=cleanSnippet(obj?.[a]);
+      const endM=cleanSnippet(obj?.[b]);
+      if(startM && endM){
+        const s=full.indexOf(startM);
+        if(s>=0){
+          const e0=full.indexOf(endM, s+startM.length);
+          if(e0>=0){addCandidate(list, full, s, e0+endM.length, 'AI 起止锚点定位', 120);}
+        }
+      }
+    }
+  }
+  function extractKeywords(idea, obj){
+    const fixed=['按钮','跳转','副开场白','主开场白','开场白','swipe','swipe_id','st-opening-jump','data-swipe-index','翻页','动画','keyframes','transition','transform','背景','背景图','遮罩','background','url','字体','字号','颜色','color','font','边框','圆角','border','radius','输入框','textarea','全屏','预览','关闭','返回','复制','音乐','音频','audio','点击','展开','折叠'];
+    const bag=new Set();
+    const src=String(idea||'')+' '+JSON.stringify(obj||{});
+    fixed.forEach(k=>{ if(src.toLowerCase().includes(k.toLowerCase())) bag.add(k); });
+    (src.match(/[A-Za-z_][A-Za-z0-9_-]{2,}/g)||[]).forEach(w=>bag.add(w));
+    (src.match(/[\u4e00-\u9fa5]{2,8}/g)||[]).slice(0,20).forEach(w=>bag.add(w));
+    return [...bag].filter(Boolean);
+  }
+  function blockAround(full, idx){
+    const tagNames=['button','a','style','script','section','article','main','div','span','li'];
+    for(const tag of tagNames){
+      const open=full.lastIndexOf('<'+tag, idx);
+      const close=full.indexOf('</'+tag+'>', idx);
+      if(open>=0 && close>=idx && idx-open<1600){
+        return {start:open,end:Math.min(full.length, close+tag.length+3)};
+      }
+    }
+    const braceOpen=full.lastIndexOf('{', idx);
+    const braceClose=full.indexOf('}', idx);
+    const prevClose=full.lastIndexOf('}', idx-1);
+    if(braceOpen>=0 && braceClose>=idx && braceOpen>prevClose){
+      let selectorStart=Math.max(full.lastIndexOf('\n', braceOpen-1), full.lastIndexOf('}', braceOpen-1));
+      selectorStart=selectorStart<0?0:selectorStart+1;
+      return {start:selectorStart,end:braceClose+1};
+    }
+    let start=Math.max(0, idx-420), end=Math.min(full.length, idx+620);
+    const lineStart=full.lastIndexOf('\n', start); if(lineStart>=0) start=lineStart+1;
+    const lineEnd=full.indexOf('\n', end); if(lineEnd>=0) end=lineEnd;
+    return {start,end};
+  }
+  function localCandidates(full, idea, obj){
+    const list=[];
+    const keys=extractKeywords(idea, obj);
+    keys.forEach((kw,ki)=>{
+      if(!kw || kw.length<2) return;
+      let from=0, guard=0;
+      const lowerFull=full.toLowerCase(), lowerKw=kw.toLowerCase();
+      while(guard++<20){
+        const idx=lowerFull.indexOf(lowerKw, from);
+        if(idx<0) break;
+        const b=blockAround(full, idx);
+        const bonus = /跳转|swipe|st-opening-jump|data-swipe|按钮/.test(kw) ? 25 : /动画|keyframes|transition|transform/.test(kw) ? 20 : /背景|background|url|遮罩/.test(kw) ? 18 : 0;
+        addCandidate(list, full, b.start, b.end, '本地关键词定位：'+kw, 58 + bonus - ki);
+        from=idx+kw.length;
+      }
+    });
+    if(/跳转|副开场白|swipe|按钮/.test(String(idea))) {
+      ['st-opening-jump','data-swipe-index','swipe_id','setChatMessages'].forEach((kw,i)=>{
+        let idx=full.indexOf(kw);
+        while(idx>=0){const b=blockAround(full, idx); addCandidate(list, full, b.start,b.end,'跳转相关固定线索：'+kw,95-i); idx=full.indexOf(kw,idx+kw.length);}
+      });
+    }
+    if(/动画|翻页/.test(String(idea))) {
+      ['@keyframes','animation','transition','transform'].forEach((kw,i)=>{
+        let idx=full.indexOf(kw);
+        while(idx>=0){const b=blockAround(full, idx); addCandidate(list, full, b.start,b.end,'动画相关固定线索：'+kw,92-i); idx=full.indexOf(kw,idx+kw.length);}
+      });
+    }
+    if(/背景|遮罩|图片/.test(String(idea))) {
+      ['background','background-image','url(','mask','overlay'].forEach((kw,i)=>{
+        let idx=full.indexOf(kw);
+        while(idx>=0){const b=blockAround(full, idx); addCandidate(list, full, b.start,b.end,'背景相关固定线索：'+kw,90-i); idx=full.indexOf(kw,idx+kw.length);}
+      });
+    }
+    return list;
+  }
+  function collectCandidates(full, idea, obj){
+    const list=[];
+    findByMarkers(full,obj,list);
+    findExact(full,obj?.target_snippet,list,'AI 返回的 target_snippet',110);
+    findExact(full,obj?.snippet,list,'AI 返回的 snippet',100);
+    findExact(full,obj?.code,list,'AI 返回的 code',92);
+    if(Array.isArray(obj?.related_snippets)) obj.related_snippets.forEach((s,i)=>findExact(full,s,list,'AI 返回的相关片段 '+(i+1),75-i));
+    if(Array.isArray(obj?.alternative_targets)) obj.alternative_targets.forEach((item,i)=>{
+      if(typeof item==='string') findExact(full,item,list,'AI 候选 '+(i+1),85-i);
+      else { findByMarkers(full,item,list); findExact(full,item?.target_snippet||item?.snippet||item?.code,list,'AI 候选 '+(i+1),85-i); }
+    });
+    localCandidates(full,idea,obj).forEach(c=>addCandidate(list, full, c.start,c.end,c.reason,c.score));
+    return list.sort((a,b)=>b.score-a.score).slice(0,8);
+  }
+  function lockCandidate(c){
+    const ta=document.getElementById('modalCodeText');
+    if(!ta||!c) return;
+    const range={start:c.start,end:c.end,text:ta.value.slice(c.start,c.end)};
+    try{ lastModalSelection=range; window.lastModalSelection=range; }catch(e){ window.lastModalSelection=range; }
+    window.v51LockedFluoroRange={...range, time:Date.now(), reason:c.reason||''};
+    if(typeof renderModalHighlight==='function') renderModalHighlight(range);
+    else { ta.focus(); ta.setSelectionRange(range.start,range.end); }
+    const snipBox=document.getElementById('selectedSnippetBox');
+    if(snipBox){snipBox.classList.add('show');snipBox.textContent='已锁定荧光代码段：\n'+range.text;}
+  }
+  window.chooseV52LocateCandidate=function(index){
+    const c=window.v52LocatorCandidates?.[Number(index)];
+    if(!c) return toast('这个候选不存在');
+    lockCandidate(c);
+    toast('已切换到候选 '+(Number(index)+1));
+  };
+  function renderCandidateHtml(cands){
+    if(!cands.length) return '';
+    return '<div class="v52-candidate-list">'+cands.map((c,i)=>
+      '<div class="v52-candidate-card"><div class="v52-candidate-head"><b>候选 '+(i+1)+'</b><span>'+safeEsc(c.reason)+' · '+c.start+'-'+c.end+'</span></div><div class="v52-candidate-code">'+safeEsc(c.text.slice(0,900))+(c.text.length>900?'\n……':'')+'</div><button class="btn small" type="button" onclick="chooseV52LocateCandidate('+i+')">用这一段荧光标记</button></div>'
+    ).join('')+'</div>';
+  }
+
+  window.locateOpeningSegmentByIdea=async function(){
+    addStyle();
+    if(!openingContextOk()) return toast('这个定位功能只给开场白 HTML 放大页使用');
+    const idea=(document.getElementById('modalLocateIdea')?.value||'').trim();
+    if(!idea) return toast('先写你想找哪一块，比如“跳转按钮”或“翻页动画”');
+    const ta=document.getElementById('modalCodeText');
+    const full=ta?.value||'';
+    if(!full.trim()) return toast('当前 HTML 是空的，没法定位');
+    const analysis=document.getElementById('selectionAnalysis');
+    const intro='<div class="analysis-clean"><div class="analysis-section"><b>正在重新定位</b><p>这版不会只相信 AI 的一个片段。AI 会给原文片段和起止锚点；网页还会按关键词列出多个候选。第一段不对，就点下面候选换一段。</p></div></div>';
+    if(analysis){analysis.innerHTML=intro+'<div class="analysis-progress"><div class="row"><span class="dot"></span><b>AI 正在查找，并生成候选范围...</b></div><div class="bar"><i></i></div></div>';}
+    try{
+      const prompt=`你要在完整 HTML 中帮用户定位“应该修改的代码段”。\n\n用户目标：\n${idea}\n\n当前对象：${getActiveLabel()}\n\n完整 HTML：\n${full}\n\n要求非常重要：\n1. target_snippet 必须逐字复制完整 HTML 中的一段连续原文，不允许改写，不允许省略。\n2. 同时给 start_marker 和 end_marker：它们也必须逐字复制原文，分别位于目标片段开头和结尾附近。\n3. 如果可能有多个位置，alternative_targets 给 2-5 个候选。\n4. 如果目标是“跳转副开场白”，优先找按钮、data-swipe-index、st-opening-jump、setChatMessages、swipe_id 相关代码。\n5. 如果目标是“动画/翻页”，优先找 @keyframes、animation、transition、transform。\n6. 如果目标是“背景/遮罩”，优先找 background、url、overlay、mask。\n7. 只返回严格 JSON。\n\n返回格式：\n{\n  "target_snippet":"逐字复制的一段连续代码",\n  "start_marker":"目标片段开头附近逐字复制的短原文",\n  "end_marker":"目标片段结尾附近逐字复制的短原文",\n  "why":"为什么这段对应用户目标",\n  "confidence":"high/medium/low",\n  "alternative_targets":[{"target_snippet":"其他候选原文片段","why":"原因"}],\n  "related_keywords":["关键词"]\n}`;
+      const raw=await callChat([{role:'system',content:'你是 HTML 精确定位助手。必须返回严格 JSON。所有 snippet/marker 必须逐字来自用户给出的完整 HTML 原文。'},{role:'user',content:prompt}],2200);
+      const obj=parseJsonLoose(raw);
+      const cands=collectCandidates(full,idea,obj);
+      if(!cands.length) throw new Error('没有找到可用候选。请把目标说得更具体，比如写按钮文字、class 名、颜色、背景图链接或动画名。');
+      window.v52LocatorCandidates=cands;
+      lockCandidate(cands[0]);
+      if(analysis){
+        analysis.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>已定位，但请确认范围</b><p>'+safeEsc(obj.why||'已根据你的描述找出最可能相关的代码段。')+'</p></div><div class="analysis-section"><b>为什么之前会不准</b><p>因为 AI 有时会返回不完整片段，旧版只能模糊匹配，容易跳到相似但不对的位置。现在会显示多个候选，你可以手动切换到真正那段。</p></div><div class="analysis-section"><b>下一步</b><p>如果当前荧光段不对，在下面候选里点“用这一段荧光标记”。确认后，再在上方第二步输入你想怎么改，点“AI 按荧光段修改”。</p></div></div>'+renderCandidateHtml(cands);
+      }
+      toast('已定位并列出候选；如果不对，点下面候选切换');
+    }catch(err){
+      const local=localCandidates(full,idea,{}).sort((a,b)=>b.score-a.score).slice(0,8);
+      window.v52LocatorCandidates=local;
+      if(local.length){ lockCandidate(local[0]); }
+      if(analysis){analysis.innerHTML=intro+'<div class="analysis-clean"><div class="analysis-section"><b>AI 定位失败，已改用本地候选</b><p>'+safeEsc(err.message||err)+'</p></div><div class="analysis-section"><b>怎么让定位更准</b><p>写具体一点：按钮文字、class 名、背景图链接、颜色值、动画名、要改的是主开场白还是第几个副开场白。</p></div></div>'+renderCandidateHtml(local);}
+      toast(local.length?'AI 定位失败，已给本地候选':'定位失败，请把目标说得更具体');
+    }
+  };
+})();
+
 </script>
+<script>
+/* V5.3 定位逻辑重做：不再自动锁定第一段，改为“AI 给检索线索 + 本地列出可选候选 + 用户确认后才荧光”。 */
+(function v53ConfirmLocatorFix(){
+  if(window.__v53ConfirmLocatorFixInstalled) return;
+  window.__v53ConfirmLocatorFixInstalled = true;
+
+  function $(id){ return document.getElementById(id); }
+  function safeEsc(s){
+    if(typeof esc === 'function') return esc(s);
+    return String(s ?? '').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function showToast(msg){ if(typeof toast==='function') toast(msg); else console.log(msg); }
+  function addStyle(){
+    if($('v53LocatorStyles')) return;
+    const style=document.createElement('style');
+    style.id='v53LocatorStyles';
+    style.textContent=`
+      .v53-locator-head{border:1px solid rgba(16,104,79,.24);background:#f2fff9;color:#243d33;padding:10px 12px;line-height:1.75;font-size:13px;margin:10px 0;}
+      .v53-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center;}
+      .v53-toolbar input{min-width:220px;flex:1;border:1px solid rgba(92,72,55,.28);background:#fffdf5;color:#241d17;padding:9px 10px;font-weight:800;font-family:inherit;}
+      .v53-list{display:grid;gap:12px;margin-top:12px;}
+      .v53-card{border:1px solid rgba(116,78,52,.25);background:#fffaf0;padding:10px;display:grid;gap:8px;}
+      .v53-card.active{outline:3px solid rgba(255,226,77,.75);background:#fff7c9;}
+      .v53-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;color:#241d17;font-weight:900;font-size:13px;}
+      .v53-head span{color:#76543b;font-size:12px;font-weight:800;}
+      .v53-reason{font-size:12.5px;line-height:1.65;color:#5f4938;}
+      .v53-code{max-height:170px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#17130f;color:#fff4d8;border:1px solid rgba(255,226,135,.28);padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.55;}
+      .v53-code mark{background:#fff05a;color:#18120d;padding:0 2px;}
+      .v53-actions{display:flex;gap:8px;flex-wrap:wrap;}
+      .v53-empty{border:1px dashed rgba(116,78,52,.35);background:#fffdf6;padding:12px;color:#6b5341;line-height:1.75;font-size:13px;}
+      @media(max-width:760px){.v53-toolbar input{min-width:100%;}.v53-card .btn,.v53-actions .btn{width:100%;}.v53-code{font-size:11.5px;max-height:145px}.v53-head{font-size:12.5px}}
+    `;
+    document.head.appendChild(style);
+  }
+  function contextOk(){
+    try{
+      return (typeof modalMode !== 'undefined' && modalMode === 'opening') ||
+        !!window.openingModalSnapshot ||
+        (typeof openingModalSnapshot !== 'undefined' && !!openingModalSnapshot) ||
+        $('codeModal')?.classList.contains('opening-edit-modal');
+    }catch(e){ return $('codeModal')?.classList.contains('opening-edit-modal'); }
+  }
+  function activeLabel(){
+    try{return (window.openingModalSnapshot && window.openingModalSnapshot.label) || (typeof openingModalSnapshot!=='undefined' && openingModalSnapshot?.label) || (typeof getOpeningActiveLabel==='function' ? getOpeningActiveLabel() : '当前开场白');}
+    catch(e){return '当前开场白';}
+  }
+  function parseJsonLoose(raw){
+    const text=String(raw||'').trim();
+    try{return JSON.parse(typeof extractJsonText==='function'?extractJsonText(text):text)}catch(e){}
+    const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if(m){try{return JSON.parse(m[1].trim())}catch(e){}}
+    const b=text.indexOf('{'), e=text.lastIndexOf('}');
+    if(b>=0 && e>b){try{return JSON.parse(text.slice(b,e+1))}catch(err){}}
+    return {};
+  }
+  function uniq(arr){return [...new Set(arr.map(x=>String(x||'').trim()).filter(Boolean))];}
+  function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+  function extractUserTerms(idea){
+    const fixed=['主开场白','副开场白','跳转','按钮','点击','swipe_id','swipe','data-swipe-index','st-opening-jump','setChatMessages','first_messages','动画','翻页','@keyframes','animation','transition','transform','背景','背景图','遮罩','overlay','mask','background','url','颜色','字体','字号','color','font','边框','圆角','border','radius','卡片','标题','关闭','复制','预览','全屏','音乐','音频','audio'];
+    const src=String(idea||'');
+    const out=[];
+    fixed.forEach(k=>{ if(src.toLowerCase().includes(k.toLowerCase())) out.push(k); });
+    (src.match(/[A-Za-z_][A-Za-z0-9_-]{2,}/g)||[]).forEach(w=>out.push(w));
+    (src.match(/[\u4e00-\u9fa5]{2,10}/g)||[]).forEach(w=>out.push(w));
+    return uniq(out).slice(0,24);
+  }
+  function inferTerms(idea,obj){
+    const list=[];
+    if(obj){
+      ['search_terms','must_include','related_keywords','keywords','selectors','classes','ids','button_texts'].forEach(k=>{
+        const v=obj[k];
+        if(Array.isArray(v)) v.forEach(x=>list.push(x));
+        else if(typeof v==='string') list.push(v);
+      });
+      ['target_snippet','start_marker','end_marker'].forEach(k=>{ if(obj[k]) String(obj[k]).split(/\s+/).filter(x=>x.length>3).slice(0,8).forEach(x=>list.push(x)); });
+    }
+    extractUserTerms(idea).forEach(x=>list.push(x));
+    const lower=String(idea||'').toLowerCase();
+    if(/跳转|副开场白|按钮|swipe/.test(idea)||/jump|swipe/.test(lower)) list.push('st-opening-jump','data-swipe-index','swipe_id','setChatMessages','button','onclick','first_messages');
+    if(/翻页|动画|动效/.test(idea)||/animation|transition|flip/.test(lower)) list.push('@keyframes','animation','transition','transform','rotate','flip');
+    if(/背景|遮罩|图片/.test(idea)||/background|overlay|mask/.test(lower)) list.push('background','background-image','url(','overlay','mask','filter','opacity');
+    if(/颜色|字体|字号/.test(idea)||/color|font/.test(lower)) list.push('color','font-size','font-family','font-weight','line-height');
+    return uniq(list).filter(x=>String(x).length>=2).slice(0,40);
+  }
+  function lineNo(full, idx){ return (full.slice(0, Math.max(0,idx)).match(/\n/g)||[]).length + 1; }
+  function lineRange(full,start,end){ return lineNo(full,start)+'-'+lineNo(full,end); }
+  function lineStart(full, idx){ const n=full.lastIndexOf('\n', Math.max(0,idx-1)); return n<0?0:n+1; }
+  function lineEnd(full, idx){ const n=full.indexOf('\n', idx); return n<0?full.length:n; }
+  function findMatchingClose(full, tag, from){
+    const close='</'+tag+'>';
+    const p=full.indexOf(close, from);
+    return p<0 ? -1 : p + close.length;
+  }
+  function htmlBlockAround(full, idx){
+    const tags=['button','a','style','script','section','article','main','ul','li','details','summary','div','span','p','h1','h2','h3'];
+    let best=null;
+    for(const tag of tags){
+      const re=new RegExp('<'+tag+'(?:\\s|>|$)','ig');
+      let m,last=-1;
+      while((m=re.exec(full)) && m.index<=idx){ last=m.index; }
+      if(last>=0){
+        const close=findMatchingClose(full, tag, idx);
+        if(close>idx && close-last<2600){
+          const cand={start:last,end:close,kind:'完整 <'+tag+'> 块'};
+          if(!best || (cand.end-cand.start)<(best.end-best.start)) best=cand;
+        }
+      }
+    }
+    if(best) return best;
+    const braceOpen=full.lastIndexOf('{', idx);
+    const braceClose=full.indexOf('}', idx);
+    if(braceOpen>=0 && braceClose>=idx && braceClose-braceOpen<1800){
+      let st=Math.max(full.lastIndexOf('\n', braceOpen-1), full.lastIndexOf('}', braceOpen-1));
+      st=st<0?0:st+1;
+      return {start:st,end:braceClose+1,kind:'CSS 规则块'};
+    }
+    const st=lineStart(full, Math.max(0,idx-240));
+    const en=lineEnd(full, Math.min(full.length,idx+420));
+    return {start:st,end:en,kind:'上下文片段'};
+  }
+  function addCandidate(list, full, start, end, reason, score, terms){
+    start=Math.max(0,Math.min(full.length,Number(start)||0));
+    end=Math.max(0,Math.min(full.length,Number(end)||0));
+    if(end<start){const t=start;start=end;end=t;}
+    if(end<=start) return;
+    const text=full.slice(start,end);
+    const key=start+'-'+end;
+    const old=list.find(x=>x.key===key);
+    if(old){ old.score=Math.max(old.score,score||0); old.reason += '；'+reason; return; }
+    list.push({key,start,end,text,reason,score:score||0,terms:terms||[],lines:lineRange(full,start,end)});
+  }
+  function scoreNear(block, terms, idea){
+    const text=block.text.toLowerCase();
+    let score=0;
+    terms.forEach((t,i)=>{ if(text.includes(String(t).toLowerCase())) score += Math.max(3, 18-i*0.5); });
+    const ide=String(idea||'');
+    if(/跳转|副开场白|swipe|按钮/.test(ide) && /(st-opening-jump|data-swipe-index|swipe_id|setChatMessages|button|onclick)/i.test(block.text)) score+=80;
+    if(/动画|翻页/.test(ide) && /(@keyframes|animation|transition|transform|rotate|flip)/i.test(block.text)) score+=70;
+    if(/背景|遮罩|图片/.test(ide) && /(background|url\(|overlay|mask|opacity|filter)/i.test(block.text)) score+=60;
+    if(/颜色|字体|字号/.test(ide) && /(color|font-size|font-family|line-height|font-weight)/i.test(block.text)) score+=45;
+    const len=block.end-block.start;
+    if(len<80) score-=10;
+    if(len>2600) score-=20;
+    return score;
+  }
+  function exactSnippetCandidates(full,obj,list){
+    const snippets=[];
+    if(obj){
+      ['target_snippet','snippet','code','start_marker','end_marker'].forEach(k=>{ if(obj[k]) snippets.push([String(obj[k]),'AI 原文线索：'+k]); });
+      if(Array.isArray(obj.alternative_targets)) obj.alternative_targets.forEach((x,i)=>snippets.push([typeof x==='string'?x:(x?.target_snippet||x?.snippet||x?.code||''),'AI 候选 '+(i+1)]));
+    }
+    snippets.forEach(([raw,reason])=>{
+      const s=String(raw||'').trim();
+      if(s.length<4) return;
+      const idx=full.indexOf(s);
+      if(idx>=0){ const b=htmlBlockAround(full,idx); addCandidate(list,full,b.start,b.end,reason,105,[s]); }
+      else{
+        const parts=s.split(/\s+/).filter(p=>p.length>8).sort((a,b)=>b.length-a.length).slice(0,3);
+        parts.forEach(p=>{ const j=full.indexOf(p); if(j>=0){const b=htmlBlockAround(full,j); addCandidate(list,full,b.start,b.end,reason+' 近似匹配：'+p,70,[p]);} });
+      }
+    });
+  }
+  function buildCandidates(full, idea, obj){
+    const list=[];
+    exactSnippetCandidates(full,obj,list);
+    const terms=inferTerms(idea,obj);
+    terms.forEach((term,ti)=>{
+      const q=String(term||'');
+      if(q.length<2) return;
+      const lower=full.toLowerCase();
+      const needle=q.toLowerCase();
+      let from=0, guard=0;
+      while(guard++<80){
+        const idx=lower.indexOf(needle,from);
+        if(idx<0) break;
+        const b=htmlBlockAround(full,idx);
+        const block={...b,text:full.slice(b.start,b.end)};
+        addCandidate(list,full,b.start,b.end,'命中关键词：'+q, scoreNear(block,terms,idea)-ti, [q]);
+        from=idx+Math.max(1,q.length);
+      }
+    });
+    const important=[];
+    if(/跳转|副开场白|swipe|按钮/i.test(idea)) important.push('st-opening-jump','data-swipe-index','swipe_id','setChatMessages','first_messages');
+    if(/动画|翻页/i.test(idea)) important.push('@keyframes','animation','transition','transform');
+    if(/背景|遮罩|图片/i.test(idea)) important.push('background','url(','overlay','mask');
+    important.forEach((kw,i)=>{
+      let from=0;
+      while(true){ const idx=full.indexOf(kw,from); if(idx<0) break; const b=htmlBlockAround(full,idx); addCandidate(list,full,b.start,b.end,'固定线索：'+kw,120-i,[kw]); from=idx+kw.length; }
+    });
+    return list.sort((a,b)=>b.score-a.score).slice(0,16);
+  }
+  function highlightTerms(text, terms){
+    let out=safeEsc(text);
+    uniq(terms||[]).filter(x=>x.length>=2).slice(0,8).forEach(t=>{
+      const re=new RegExp(escapeRegExp(safeEsc(t)),'gi');
+      out=out.replace(re,m=>'<mark>'+m+'</mark>');
+    });
+    return out;
+  }
+  function candidateCard(c,i){
+    return '<div class="v53-card" data-v53-index="'+i+'" data-v53-search="'+safeEsc((c.text+' '+c.reason+' '+(c.terms||[]).join(' ')).toLowerCase())+'">'+
+      '<div class="v53-head"><b>候选 '+(i+1)+' · 第 '+safeEsc(c.lines)+' 行</b><span>'+safeEsc(c.reason)+' · '+c.start+'-'+c.end+'</span></div>'+
+      '<div class="v53-reason">长度 '+(c.end-c.start)+' 字符。先预览定位，确认对了再荧光。</div>'+
+      '<div class="v53-code">'+highlightTerms(c.text.slice(0,1300)+(c.text.length>1300?'\n……':''),c.terms)+'</div>'+
+      '<div class="v53-actions"><button class="btn small" type="button" onclick="previewV53LocateCandidate('+i+')">预览定位</button><button class="btn small primary" type="button" onclick="chooseV53LocateCandidate('+i+')">用这一段荧光标记</button></div>'+
+    '</div>';
+  }
+  function renderCandidates(cands, note){
+    if(!cands.length){
+      return '<div class="v53-empty">没有找到候选。把目标说具体一点，比如按钮文字、class 名、颜色值、背景图链接、动画名，或者直接在代码框里搜索关键词后手动选中。</div>';
+    }
+    return '<div class="v53-locator-head"><b>这次不会自动替你决定。</b><br>下面是候选代码段。请先点“预览定位”看它跳到哪里；确认是对的，再点“用这一段荧光标记”。这样不会再因为第一候选错了就改错代码。</div>'+
+      '<div class="v53-toolbar"><input id="v53FilterInput" placeholder="在候选里过滤，比如：button / background / animation / data-swipe-index" oninput="filterV53Candidates()"><button class="btn small" type="button" onclick="filterV53Candidates()">过滤</button></div>'+
+      '<div class="v53-list" id="v53CandidateList">'+cands.map((c,i)=>candidateCard(c,i)).join('')+'</div>'+
+      (note?'<div class="v53-empty">'+safeEsc(note)+'</div>':'');
+  }
+  function setSelectionRange(c, lock){
+    const ta=$('modalCodeText'); if(!ta||!c) return;
+    ta.focus({preventScroll:true});
+    try{ ta.setSelectionRange(c.start,c.end); }catch(e){}
+    const before=ta.value.slice(0,c.start);
+    const line=(before.match(/\n/g)||[]).length;
+    const lh=parseFloat(getComputedStyle(ta).lineHeight)||18;
+    ta.scrollTop=Math.max(0,line*lh-ta.clientHeight*0.34);
+    if(lock){
+      const range={start:c.start,end:c.end,text:ta.value.slice(c.start,c.end)};
+      try{ if(typeof renderModalHighlight==='function') renderModalHighlight(range); }catch(e){}
+      window.v51LockedFluoroRange={...range,time:Date.now(),reason:c.reason||''};
+      const snip=$('selectedSnippetBox');
+      if(snip){snip.classList.add('show');snip.textContent='已锁定荧光代码段：\n'+range.text;}
+    }
+  }
+  window.previewV53LocateCandidate=function(index){
+    const c=window.v53LocatorCandidates?.[Number(index)];
+    if(!c) return showToast('这个候选不存在');
+    setSelectionRange(c,false);
+    document.querySelectorAll('.v53-card').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.v53-card[data-v53-index="'+Number(index)+'"]')?.classList.add('active');
+    showToast('已跳到候选 '+(Number(index)+1)+'，还没锁定；确认对了再点荧光');
+  };
+  window.chooseV53LocateCandidate=function(index){
+    const c=window.v53LocatorCandidates?.[Number(index)];
+    if(!c) return showToast('这个候选不存在');
+    setSelectionRange(c,true);
+    document.querySelectorAll('.v53-card').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.v53-card[data-v53-index="'+Number(index)+'"]')?.classList.add('active');
+    showToast('已锁定候选 '+(Number(index)+1)+' 为荧光段');
+  };
+  window.filterV53Candidates=function(){
+    const q=String($('v53FilterInput')?.value||'').toLowerCase().trim();
+    document.querySelectorAll('.v53-card[data-v53-search]').forEach(card=>{
+      card.style.display=!q || card.getAttribute('data-v53-search').includes(q) ? '' : 'none';
+    });
+  };
+  window.chooseV52LocateCandidate=function(index){ window.chooseV53LocateCandidate(index); };
+  window.locateOpeningSegmentByIdea=async function(){
+    addStyle();
+    if(!contextOk()) return showToast('这个定位功能只给开场白 HTML 放大页使用');
+    const idea=($('modalLocateIdea')?.value||'').trim();
+    if(!idea) return showToast('先写你想找哪一块，比如“跳转按钮”或“翻页动画”');
+    const ta=$('modalCodeText');
+    const full=ta?.value||'';
+    if(!full.trim()) return showToast('当前 HTML 是空的，没法定位');
+    const analysis=$('selectionAnalysis');
+    if(analysis){analysis.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>正在定位</b><p>先让 AI 提取检索线索，再由网页在完整 HTML 原文里列候选。不会自动锁定第一段，避免定位错了就直接改错。</p></div></div><div class="analysis-progress"><div class="row"><span class="dot"></span><b>正在分析关键词和候选代码段...</b></div><div class="bar"><i></i></div></div>';}
+    let obj={}, aiNote='';
+    try{
+      const prompt='你要帮用户从一段完整 HTML 中定位“可能需要修改的代码区域”。不要返回整段改好代码，只返回检索线索。\n\n用户想找/想改：\n'+idea+'\n\n当前对象：'+activeLabel()+'\n\n完整 HTML：\n'+full+'\n\n返回严格 JSON：{ "search_terms":["应该在原文里搜索的关键词、class、id、属性名、按钮文字、CSS属性"], "must_include":["最关键线索"], "avoid":["不相关线索"], "explain":"为什么用这些线索", "candidate_hint":"用户应该优先看哪类代码" }';
+      const raw=await callChat([{role:'system',content:'你是 HTML 定位线索提取助手。只返回严格 JSON，不要 Markdown。不要改代码。'},{role:'user',content:prompt}],1500);
+      obj=parseJsonLoose(raw);
+      aiNote=obj.explain||obj.candidate_hint||'';
+    }catch(err){
+      aiNote='AI 线索提取失败，已改用本地关键词定位。原因：'+String(err.message||err).slice(0,120);
+    }
+    const cands=buildCandidates(full,idea,obj);
+    window.v53LocatorCandidates=cands;
+    window.v52LocatorCandidates=cands;
+    if(analysis){analysis.innerHTML=renderCandidates(cands,aiNote);}
+    if(cands.length){
+      setSelectionRange(cands[0],false);
+      document.querySelector('.v53-card[data-v53-index="0"]')?.classList.add('active');
+      showToast('已列出候选，先确认再点“用这一段荧光标记”');
+    }else{
+      showToast('没找到候选，请把目标说得更具体');
+    }
+  };
+})();
+</script>
+
+
+<script>
+/* V5.4 定位返工：不再让 AI 决定“完整片段”。
+   AI 只负责给搜索线索；网页本地按线索列出完整 HTML/CSS/JS 块，并提供扩展/手动锁定。
+   解决：定位错、片段不完整、选到一半就拿去修改的问题。 */
+(function v54CompleteBlockLocator(){
+  if(window.__v54CompleteBlockLocatorInstalled) return;
+  window.__v54CompleteBlockLocatorInstalled = true;
+  function el(id){ return document.getElementById(id); }
+  function toast2(msg){ if(typeof toast==='function') toast(msg); else console.log(msg); }
+  function esc2(s){
+    if(typeof esc==='function') return esc(s);
+    return String(s ?? '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+  }
+  function uniq(arr){ return Array.from(new Set((arr||[]).map(function(x){return String(x||'').trim();}).filter(Boolean))); }
+  function reEsc(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function isOpeningCtx(){
+    try{
+      return (typeof modalMode!=='undefined' && modalMode==='opening') ||
+        !!window.openingModalSnapshot ||
+        (typeof openingModalSnapshot!=='undefined' && !!openingModalSnapshot) ||
+        el('codeModal')?.classList.contains('opening-edit-modal');
+    }catch(e){ return el('codeModal')?.classList.contains('opening-edit-modal'); }
+  }
+  function activeLabel(){
+    try{return (window.openingModalSnapshot && window.openingModalSnapshot.label) || (typeof openingModalSnapshot!=='undefined' && openingModalSnapshot?.label) || (typeof getOpeningActiveLabel==='function'?getOpeningActiveLabel():'当前开场白 HTML');}
+    catch(e){return '当前开场白 HTML';}
+  }
+  function addStyle(){
+    if(el('v54LocatorStyle')) return;
+    var st=document.createElement('style');
+    st.id='v54LocatorStyle';
+    st.textContent = ''+
+      '.v54-head{border:1px solid rgba(34,99,74,.28);background:#f1fff8;color:#263f34;padding:11px 12px;line-height:1.75;font-size:13px;margin:10px 0;}'+
+      '.v54-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center;}'+
+      '.v54-tools input{min-width:220px;flex:1;border:1px solid rgba(92,72,55,.28);background:#fffdf5;color:#241d17;padding:9px 10px;font-weight:800;font-family:inherit;}'+
+      '.v54-list{display:grid;gap:12px;margin-top:12px;}'+
+      '.v54-card{border:1px solid rgba(116,78,52,.25);background:#fffaf0;padding:10px;display:grid;gap:8px;}'+
+      '.v54-card.active{outline:3px solid rgba(255,226,77,.8);background:#fff7c9;}'+
+      '.v54-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;color:#241d17;font-weight:900;font-size:13px;}'+
+      '.v54-title span{color:#76543b;font-size:12px;font-weight:800;}'+
+      '.v54-reason{font-size:12.5px;line-height:1.7;color:#5f4938;}'+
+      '.v54-code{max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#17130f;color:#fff4d8;border:1px solid rgba(255,226,135,.28);padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.58;}'+
+      '.v54-code mark{background:#fff05a;color:#18120d;padding:0 2px;}'+
+      '.v54-actions{display:flex;gap:8px;flex-wrap:wrap;}'+
+      '.v54-empty{border:1px dashed rgba(116,78,52,.35);background:#fffdf6;padding:12px;color:#6b5341;line-height:1.75;font-size:13px;}'+
+      '.v54-mode{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(116,78,52,.22);background:#fff;padding:2px 6px;font-size:11px;color:#6b4b35;}'+
+      '@media(max-width:760px){.v54-tools input{min-width:100%;}.v54-card .btn,.v54-actions .btn{width:100%;}.v54-code{font-size:11.5px;max-height:175px}.v54-title{font-size:12.5px}}';
+    document.head.appendChild(st);
+  }
+  function lineNo(full, idx){ return (full.slice(0, Math.max(0,idx)).match(/\n/g)||[]).length + 1; }
+  function lineRange(full,start,end){ return lineNo(full,start)+'-'+lineNo(full,end); }
+  function lineStart(full, idx){ var n=full.lastIndexOf('\n', Math.max(0,idx-1)); return n<0?0:n+1; }
+  function lineEnd(full, idx){ var n=full.indexOf('\n', Math.max(0,idx)); return n<0?full.length:n; }
+  function expandLines(full,start,end,before,after){
+    var s=start,e=end;
+    for(var i=0;i<before;i++) s=lineStart(full, Math.max(0,s-1));
+    for(var j=0;j<after;j++) e=lineEnd(full, Math.min(full.length,e+1));
+    return {start:s,end:e,kind:'上下文扩展 '+before+'/'+after+' 行'};
+  }
+  function findStyleOrScriptWrapper(full, idx, tag){
+    var lower=full.toLowerCase();
+    var open=lower.lastIndexOf('<'+tag, idx);
+    var close=lower.indexOf('</'+tag+'>', idx);
+    if(open>=0 && close>=idx){ return {start:open,end:close+tag.length+3,kind:'完整 <'+tag+'> 块'}; }
+    return null;
+  }
+  function findBraceClose(full, open){
+    var depth=0, quote=null, escp=false;
+    for(var i=open;i<full.length;i++){
+      var ch=full[i];
+      if(escp){escp=false;continue;}
+      if(ch==='\\'){escp=true;continue;}
+      if(quote){ if(ch===quote) quote=null; continue; }
+      if(ch==='"' || ch==="'" || ch==='`'){ quote=ch; continue; }
+      if(ch==='{') depth++;
+      if(ch==='}'){
+        depth--;
+        if(depth===0) return i+1;
+      }
+    }
+    return -1;
+  }
+  function cssRuleAround(full, idx){
+    var style=findStyleOrScriptWrapper(full,idx,'style');
+    var limitStart=style?style.start:0, limitEnd=style?style.end:full.length;
+    var open=full.lastIndexOf('{', idx);
+    if(open<limitStart) return null;
+    var close=findBraceClose(full,open);
+    if(close<0 || close<idx || close>limitEnd) return null;
+    var selectorStart=Math.max(full.lastIndexOf('}',open-1), full.lastIndexOf('\n\n',open-1), limitStart);
+    selectorStart = selectorStart===limitStart ? full.indexOf('>',limitStart)+1 || limitStart : selectorStart+1;
+    return {start:Math.max(limitStart,selectorStart),end:close,kind:'完整 CSS 规则'};
+  }
+  function keyframesAround(full, idx){
+    var before=full.slice(0,idx);
+    var m=[...before.matchAll(/@keyframes\s+[\w-]+\s*\{/gi)].pop();
+    if(!m) return null;
+    var open=m.index + m[0].lastIndexOf('{');
+    var close=findBraceClose(full,open);
+    if(close>idx) return {start:m.index,end:close,kind:'完整 @keyframes 动画'};
+    return null;
+  }
+  function matchingHtmlClose(full, tag, openIndex){
+    var re=new RegExp('<\\/?'+tag+'(?:\\s[^>]*)?>','ig');
+    re.lastIndex=openIndex;
+    var depth=0,m;
+    while((m=re.exec(full))){
+      var token=m[0];
+      var isClose=/^<\//.test(token);
+      var selfClose=/\/>$/.test(token);
+      if(!isClose && !selfClose) depth++;
+      if(isClose) depth--;
+      if(depth===0) return re.lastIndex;
+    }
+    return -1;
+  }
+  function enclosingHtmlBlocks(full, idx){
+    var tags=['button','a','summary','details','li','article','section','main','div','span','p','h1','h2','h3','ul','ol','form'];
+    var blocks=[];
+    tags.forEach(function(tag){
+      var re=new RegExp('<\\/?'+tag+'(?:\\s[^>]*)?>','ig');
+      var stack=[],m;
+      while((m=re.exec(full)) && m.index<=idx){
+        var token=m[0];
+        if(/^<\//.test(token)) stack.pop();
+        else if(!/\/>$/.test(token)) stack.push(m.index);
+      }
+      if(!stack.length) return;
+      var open=stack[stack.length-1];
+      var close=matchingHtmlClose(full,tag,open);
+      if(close>idx){ blocks.push({start:open,end:close,kind:'完整 <'+tag+'> 外层块'}); }
+    });
+    blocks.sort(function(a,b){ return (a.end-a.start)-(b.end-b.start); });
+    return blocks;
+  }
+  function scriptBlockAround(full, idx){
+    var script=findStyleOrScriptWrapper(full,idx,'script');
+    if(!script) return null;
+    var before=full.slice(script.start,idx);
+    var candidates=[];
+    var patterns=[/function\s+[\w$]+\s*\([^)]*\)\s*\{/g, /(?:const|let|var)\s+[\w$]+\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g, /addEventListener\s*\([^)]*\)\s*=>\s*\{/g];
+    patterns.forEach(function(p){ var arr=[...before.matchAll(p)]; if(arr.length) candidates.push(script.start+arr[arr.length-1].index); });
+    candidates.sort(function(a,b){ return b-a; });
+    for(var i=0;i<candidates.length;i++){
+      var open=full.indexOf('{',candidates[i]);
+      var close=findBraceClose(full,open);
+      if(close>idx && close-candidates[i]<4000) return {start:candidates[i],end:close,kind:'完整 JS 函数/事件块'};
+    }
+    return script;
+  }
+  function completeBlocksAround(full, idx){
+    var out=[];
+    var kf=keyframesAround(full,idx); if(kf) out.push(kf);
+    var css=cssRuleAround(full,idx); if(css) out.push(css);
+    var js=scriptBlockAround(full,idx); if(js) out.push(js);
+    enclosingHtmlBlocks(full,idx).slice(0,5).forEach(function(x){out.push(x);});
+    var tiny=expandLines(full,lineStart(full,idx),lineEnd(full,idx),2,3); out.push(tiny);
+    var bigger=expandLines(full,lineStart(full,idx),lineEnd(full,idx),8,10); out.push(bigger);
+    return out;
+  }
+  function addCandidate(list, full, range, reason, score, terms){
+    if(!range) return;
+    var start=Math.max(0,Math.min(full.length,Number(range.start)||0));
+    var end=Math.max(0,Math.min(full.length,Number(range.end)||0));
+    if(end<start){var t=start;start=end;end=t;}
+    if(end<=start || end-start<5) return;
+    var key=start+'-'+end;
+    var old=list.find(function(x){return x.key===key;});
+    if(old){ old.score=Math.max(old.score,score||0); old.reason=old.reason+'；'+reason; return; }
+    list.push({key:key,start:start,end:end,text:full.slice(start,end),kind:range.kind||'完整代码块',reason:reason||'候选',score:score||0,terms:terms||[],lines:lineRange(full,start,end)});
+  }
+  function parseJsonLoose(raw){
+    var text=String(raw||'').trim();
+    try{return JSON.parse(typeof extractJsonText==='function'?extractJsonText(text):text);}catch(e){}
+    var m=text.match(/```(?:json)?\s*([\s\S]*?)```/i); if(m){try{return JSON.parse(m[1].trim());}catch(e){}}
+    var b=text.indexOf('{'), e=text.lastIndexOf('}'); if(b>=0&&e>b){try{return JSON.parse(text.slice(b,e+1));}catch(err){}}
+    return {};
+  }
+  function localTerms(idea,obj){
+    var fixed=['主开场白','副开场白','跳转','按钮','点击','swipe_id','swipe','data-swipe-index','st-opening-jump','setChatMessages','first_messages','动画','翻页','@keyframes','animation','transition','transform','背景','背景图','遮罩','overlay','mask','background','url','颜色','字体','字号','color','font','边框','圆角','border','radius','卡片','标题','关闭','复制','预览','全屏','音乐','音频','audio','展开','折叠','input','textarea'];
+    var src=String(idea||'')+' '+JSON.stringify(obj||{});
+    var out=[];
+    fixed.forEach(function(k){ if(src.toLowerCase().indexOf(k.toLowerCase())>=0) out.push(k); });
+    (src.match(/[A-Za-z_][A-Za-z0-9_-]{2,}/g)||[]).forEach(function(w){out.push(w);});
+    (src.match(/[\u4e00-\u9fa5]{2,10}/g)||[]).forEach(function(w){out.push(w);});
+    if(/跳转|副开场白|按钮|swipe/i.test(src)) out.push('st-opening-jump','data-swipe-index','swipe_id','setChatMessages','button','onclick');
+    if(/动画|翻页|动效|animation|transition|flip/i.test(src)) out.push('@keyframes','animation','transition','transform','rotate','flip');
+    if(/背景|遮罩|图片|background|overlay|mask/i.test(src)) out.push('background','background-image','url(','overlay','mask','opacity','filter');
+    return uniq(out).slice(0,50);
+  }
+  function scoreRange(c, idea, terms){
+    var text=c.text.toLowerCase(), s=0;
+    terms.forEach(function(t,i){ if(text.indexOf(String(t).toLowerCase())>=0) s += Math.max(3,18-i*0.35); });
+    var ide=String(idea||'');
+    if(/跳转|副开场白|swipe|按钮/.test(ide) && /(st-opening-jump|data-swipe-index|swipe_id|setChatMessages|button|onclick)/i.test(c.text)) s+=110;
+    if(/动画|翻页/.test(ide) && /(@keyframes|animation|transition|transform|rotate|flip)/i.test(c.text)) s+=90;
+    if(/背景|遮罩|图片/.test(ide) && /(background|url\(|overlay|mask|opacity|filter)/i.test(c.text)) s+=75;
+    if(/颜色|字体|字号/.test(ide) && /(color|font-size|font-family|line-height|font-weight)/i.test(c.text)) s+=55;
+    var len=c.end-c.start;
+    if(/完整 <(section|article|details|div|script|style)/.test(c.kind)) s+=22;
+    if(len<50) s-=30;
+    if(len>6500) s-=25;
+    return s;
+  }
+  function buildLocalCandidates(full,idea,obj){
+    var terms=localTerms(idea,obj), list=[];
+    terms.forEach(function(term,ti){
+      var q=String(term||''); if(q.length<2) return;
+      var lower=full.toLowerCase(), needle=q.toLowerCase(), from=0, guard=0;
+      while(guard++<80){
+        var idx=lower.indexOf(needle,from); if(idx<0) break;
+        completeBlocksAround(full,idx).forEach(function(r,ri){
+          var temp={start:r.start,end:r.end,text:full.slice(r.start,r.end),kind:r.kind};
+          addCandidate(list,full,r,'命中关键词：'+q,scoreRange(temp,idea,terms)-ti-ri, [q]);
+        });
+        from=idx+Math.max(1,q.length);
+      }
+    });
+    list.sort(function(a,b){return b.score-a.score;});
+    return list.slice(0,24);
+  }
+  function highlightTerms(text, terms){
+    var out=esc2(text);
+    uniq(terms||[]).filter(function(x){return x.length>=2;}).slice(0,8).forEach(function(t){
+      try{out=out.replace(new RegExp(reEsc(esc2(t)),'gi'), function(m){return '<mark>'+m+'</mark>';});}catch(e){}
+    });
+    return out;
+  }
+  function displayText(c){
+    if(c.text.length<=2600) return c.text;
+    return c.text.slice(0,1300)+'\n\n……中间已折叠，实际锁定会使用完整 '+c.text.length+' 字符……\n\n'+c.text.slice(-900);
+  }
+  function candidateCard(c,i){
+    return '<div class="v54-card" data-v54-index="'+i+'" data-v54-search="'+esc2((c.text+' '+c.reason+' '+c.kind+' '+(c.terms||[]).join(' ')).toLowerCase())+'">'+
+      '<div class="v54-title"><b>候选 '+(i+1)+' · 第 '+esc2(c.lines)+' 行</b><span>'+esc2(c.start+'-'+c.end)+' · '+esc2(c.text.length)+' 字符</span></div>'+
+      '<div class="v54-reason"><span class="v54-mode">'+esc2(c.kind)+'</span> '+esc2(c.reason)+'。如果觉得还是少，先点“扩大上下 20 行”或“扩大到更外层”。</div>'+
+      '<div class="v54-code">'+highlightTerms(displayText(c),c.terms)+'</div>'+
+      '<div class="v54-actions"><button class="btn small" type="button" onclick="previewV54Candidate('+i+')">预览定位</button><button class="btn small primary" type="button" onclick="chooseV54Candidate('+i+')">锁定这段荧光</button><button class="btn small" type="button" onclick="expandV54CandidateLines('+i+',20)">扩大上下 20 行</button><button class="btn small" type="button" onclick="expandV54CandidateOuter('+i+')">扩大到更外层</button></div>'+
+      '</div>';
+  }
+  function renderCandidates(cands,note){
+    if(!cands.length) return '<div class="v54-empty">没有找到候选。你可以换一种说法，或者在代码框里手动搜索关键词后拖选，再点“用当前选区锁定”。</div>';
+    return '<div class="v54-head"><b>定位规则已改：</b>AI 不再直接决定最终片段，只提供关键词；网页会列出完整 HTML/CSS/JS 块。你确认哪段对，就锁定哪段。觉得少，就点扩大；觉得都不对，就手动拖选后点“用当前选区锁定”。</div>'+
+      '<div class="v54-tools"><input id="v54FilterInput" placeholder="过滤候选：button / background / animation / data-swipe-index / 标题文字" oninput="filterV54Candidates()"><button class="btn small" onclick="filterV54Candidates()">过滤</button><button class="btn small primary" onclick="lockV54CurrentSelection()">用当前选区锁定</button></div>'+
+      '<div class="v54-list">'+cands.map(function(c,i){return candidateCard(c,i);}).join('')+'</div>'+
+      (note?'<div class="v54-empty">'+esc2(note)+'</div>':'');
+  }
+  function setRange(c,lock){
+    var ta=el('modalCodeText'); if(!ta||!c) return;
+    ta.focus({preventScroll:true});
+    try{ta.setSelectionRange(c.start,c.end);}catch(e){}
+    var line=(ta.value.slice(0,c.start).match(/\n/g)||[]).length;
+    var lh=parseFloat(getComputedStyle(ta).lineHeight)||18;
+    ta.scrollTop=Math.max(0,line*lh-ta.clientHeight*0.34);
+    document.querySelectorAll('.v54-card').forEach(function(x){x.classList.remove('active');});
+    var card=document.querySelector('.v54-card[data-v54-index="'+window.v54LocatorCandidates.indexOf(c)+'"]'); if(card) card.classList.add('active');
+    if(lock){
+      var range={start:c.start,end:c.end,text:ta.value.slice(c.start,c.end)};
+      try{ if(typeof renderModalHighlight==='function') renderModalHighlight(range); }catch(e){}
+      try{ lastModalSelection=range; window.lastModalSelection=range; }catch(e){ window.lastModalSelection=range; }
+      window.v51LockedFluoroRange={start:range.start,end:range.end,text:range.text,time:Date.now(),reason:c.reason||'',kind:c.kind||''};
+      var snip=el('selectedSnippetBox'); if(snip){snip.classList.add('show');snip.textContent='已锁定荧光代码段：\n'+range.text;}
+    }
+  }
+  window.previewV54Candidate=function(i){ var c=window.v54LocatorCandidates?.[Number(i)]; if(!c)return toast2('这个候选不存在'); setRange(c,false); toast2('已跳到候选 '+(Number(i)+1)+'，还没锁定'); };
+  window.chooseV54Candidate=function(i){ var c=window.v54LocatorCandidates?.[Number(i)]; if(!c)return toast2('这个候选不存在'); setRange(c,true); toast2('已锁定候选 '+(Number(i)+1)+'，后续 AI 会按这段改'); };
+  window.expandV54CandidateLines=function(i,n){
+    var ta=el('modalCodeText'), c=window.v54LocatorCandidates?.[Number(i)]; if(!ta||!c)return;
+    var r=expandLines(ta.value,c.start,c.end,n,n); r.kind='扩大上下 '+n+' 行后的范围';
+    var nc={key:'expanded-'+Date.now(),start:r.start,end:r.end,text:ta.value.slice(r.start,r.end),kind:r.kind,reason:'从候选 '+(Number(i)+1)+' 扩大上下 '+n+' 行',score:(c.score||0)+5,terms:c.terms||[],lines:lineRange(ta.value,r.start,r.end)};
+    window.v54LocatorCandidates.unshift(nc);
+    var analysis=el('selectionAnalysis'); if(analysis) analysis.innerHTML=renderCandidates(window.v54LocatorCandidates,'已新增一个扩大后的候选，排在最前面。');
+    setRange(nc,false);
+  };
+  window.expandV54CandidateOuter=function(i){
+    var ta=el('modalCodeText'), c=window.v54LocatorCandidates?.[Number(i)]; if(!ta||!c)return;
+    var center=Math.floor((c.start+c.end)/2);
+    var blocks=completeBlocksAround(ta.value,center).sort(function(a,b){return (b.end-b.start)-(a.end-a.start);});
+    var bigger=blocks.find(function(b){return b.start<=c.start && b.end>=c.end && (b.end-b.start)>(c.end-c.start)+20;}) || expandLines(ta.value,c.start,c.end,30,30);
+    var nc={key:'outer-'+Date.now(),start:bigger.start,end:bigger.end,text:ta.value.slice(bigger.start,bigger.end),kind:bigger.kind||'更外层代码块',reason:'从候选 '+(Number(i)+1)+' 扩大到更外层',score:(c.score||0)+10,terms:c.terms||[],lines:lineRange(ta.value,bigger.start,bigger.end)};
+    window.v54LocatorCandidates.unshift(nc);
+    var analysis=el('selectionAnalysis'); if(analysis) analysis.innerHTML=renderCandidates(window.v54LocatorCandidates,'已新增一个更外层候选，排在最前面。');
+    setRange(nc,false);
+  };
+  window.lockV54CurrentSelection=function(){
+    var ta=el('modalCodeText'); if(!ta)return;
+    var s=ta.selectionStart||0,e=ta.selectionEnd||0;
+    if(s===e) return toast2('先在代码框里拖选一段');
+    var start=Math.min(s,e), end=Math.max(s,e);
+    var c={start:start,end:end,text:ta.value.slice(start,end),kind:'用户手动选区',reason:'用户手动确认的范围',score:999,terms:[],lines:lineRange(ta.value,start,end)};
+    if(!window.v54LocatorCandidates) window.v54LocatorCandidates=[];
+    window.v54LocatorCandidates.unshift(c);
+    var analysis=el('selectionAnalysis'); if(analysis) analysis.innerHTML=renderCandidates(window.v54LocatorCandidates,'已把你手动选中的范围加入候选并排在最前。');
+    setRange(c,true);
+  };
+  window.filterV54Candidates=function(){
+    var q=String(el('v54FilterInput')?.value||'').toLowerCase().trim();
+    document.querySelectorAll('.v54-card[data-v54-search]').forEach(function(card){card.style.display=!q||card.getAttribute('data-v54-search').indexOf(q)>=0?'':'none';});
+  };
+  window.locateOpeningSegmentByIdea=async function(){
+    addStyle();
+    if(!isOpeningCtx()) return toast2('这个定位功能只给开场白 HTML 放大页使用');
+    var idea=String(el('modalLocateIdea')?.value||'').trim();
+    if(!idea) return toast2('先写你想找哪一块，比如“跳转按钮”或“翻页动画”');
+    var ta=el('modalCodeText'), full=ta?.value||'';
+    if(!full.trim()) return toast2('当前 HTML 是空的，没法定位');
+    var analysis=el('selectionAnalysis');
+    if(analysis){analysis.innerHTML='<div class="analysis-clean"><div class="analysis-section"><b>正在定位</b><p>这版不会让 AI 直接返回代码片段。AI 只提取搜索线索，网页本地从当前完整 HTML 中找完整块，避免少选半截。</p></div></div><div class="analysis-progress"><div class="row"><span class="dot"></span><b>正在获取关键词并生成完整候选...</b></div><div class="bar"><i></i></div></div>';}
+    var obj={}, note='';
+    try{
+      var prompt='你要帮用户从完整 HTML 中定位需要修改的区域。不要返回代码片段，不要改代码，只返回搜索线索。\n\n用户想找/想改：\n'+idea+'\n\n当前对象：'+activeLabel()+'\n\n完整 HTML：\n'+full+'\n\n返回严格 JSON：{ "search_terms":["在原文里能搜到的关键词、class、id、属性、按钮文字、CSS属性、动画名"], "must_include":["最关键关键词"], "module_hint":"应该优先看按钮/CSS规则/完整div/style/script哪一种", "explain":"为什么这些词能定位" }';
+      var raw=await callChat([{role:'system',content:'你是 HTML 搜索线索提取助手。只返回严格 JSON。不要返回 HTML 片段。不要改代码。'},{role:'user',content:prompt}],1400);
+      obj=parseJsonLoose(raw);
+      note=obj.explain||obj.module_hint||'';
+    }catch(err){ note='AI 线索提取失败，已用本地关键词定位。原因：'+String(err.message||err).slice(0,140); }
+    var cands=buildLocalCandidates(full,idea,obj);
+    window.v54LocatorCandidates=cands;
+    window.v53LocatorCandidates=cands;
+    window.v52LocatorCandidates=cands;
+    if(analysis) analysis.innerHTML=renderCandidates(cands,note);
+    if(cands.length){ setRange(cands[0],false); toast2('已列出完整候选，请确认后锁定；如果少，就点扩大'); }
+    else toast2('没找到候选，把目标说具体一点，或手动拖选后锁定');
+  };
+})();
+</script>
+
 </body>
 </html>
